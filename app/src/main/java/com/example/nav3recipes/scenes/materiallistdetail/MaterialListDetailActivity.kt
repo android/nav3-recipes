@@ -19,7 +19,6 @@ package com.example.nav3recipes.scenes.materiallistdetail
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -36,6 +35,7 @@ import com.example.nav3recipes.content.ContentBlue
 import com.example.nav3recipes.content.ContentGreen
 import com.example.nav3recipes.content.ContentRed
 import com.example.nav3recipes.content.ContentYellow
+import com.example.nav3recipes.ui.enableEdgeToEdgeCompat
 import kotlinx.serialization.Serializable
 
 /**
@@ -56,7 +56,7 @@ class MaterialListDetailActivity : ComponentActivity() {
 
     @OptIn(ExperimentalMaterial3AdaptiveApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
+        enableEdgeToEdgeCompat()
         super.onCreate(savedInstanceState)
 
         setContent {

@@ -19,7 +19,6 @@ package com.example.nav3recipes.basicdsl
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.navigation3.runtime.NavKey
@@ -29,6 +28,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.example.nav3recipes.content.ContentBlue
 import com.example.nav3recipes.content.ContentGreen
+import com.example.nav3recipes.ui.enableEdgeToEdgeCompat
 import kotlinx.serialization.Serializable
 
 /**
@@ -44,7 +44,7 @@ data class RouteB(val id: String) : NavKey
 class BasicDslActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
+        enableEdgeToEdgeCompat()
         super.onCreate(savedInstanceState)
         setContent {
             val backStack = rememberNavBackStack(RouteA)

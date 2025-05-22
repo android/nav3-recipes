@@ -4,7 +4,6 @@ package com.example.nav3recipes.animations
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
@@ -23,6 +22,7 @@ import androidx.navigation3.ui.NavDisplay
 import com.example.nav3recipes.content.ContentGreen
 import com.example.nav3recipes.content.ContentMauve
 import com.example.nav3recipes.content.ContentOrange
+import com.example.nav3recipes.ui.enableEdgeToEdgeCompat
 import kotlinx.serialization.Serializable
 
 
@@ -44,7 +44,7 @@ data object ScreenC : NavKey
 class AnimatedActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
+        enableEdgeToEdgeCompat()
         super.onCreate(savedInstanceState)
         setContent {
 
