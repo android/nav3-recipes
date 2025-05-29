@@ -1,4 +1,4 @@
-package com.example.nav3recipes.catalog
+package com.example.nav3recipes
 
 import android.content.Intent
 import android.os.Bundle
