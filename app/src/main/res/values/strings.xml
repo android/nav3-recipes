@@ -16,12 +16,12 @@
 
 <resources>
     <string name="app_name">Nav3Recipes</string>
-    <string name="title_activity_launcher">Activity Catalog</string>
-    <string name="basic_activity_label">BasicActivity</string>
-    <string name="basic_dsl_activity_label">BasicDslActivity</string>
-    <string name="basic_saveable_activity_label">BasicSaveableActivity</string>
-    <string name="common_ui_activity_label">CommonUiActivity</string>
-    <string name="conditional_activity_label">ConditionalActivity</string>
-    <string name="two_pane_activity_label">TwoPaneActivity</string>
-    <string name="animated_activity_label">AnimatedActivity</string>
+    <string name="title_activity_launcher">Nav3 Recipes Catalog</string>
+    <string name="basic_activity_label">Basic Activity</string>
+    <string name="basic_dsl_activity_label">Basic DSL Activity</string>
+    <string name="basic_saveable_activity_label">Basic Saveable Activity</string>
+    <string name="common_ui_activity_label">Common UI Activity</string>
+    <string name="conditional_activity_label">Conditional Activity</string>
+    <string name="two_pane_activity_label">TwoPane Activity</string>
+    <string name="animated_activity_label">Animated Activity</string>
 </resources>
