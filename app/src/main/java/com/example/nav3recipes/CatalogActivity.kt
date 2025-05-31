@@ -35,18 +35,18 @@ class CatalogActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             Nav3RecipesTheme {
-                Scaffold (modifier = Modifier.fillMaxSize(),
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
                     topBar = {
                         TopAppBar(
                             title = { Text(stringResource(R.string.title_activity_launcher)) },
-                            colors =  TopAppBarDefaults.topAppBarColors(
+                            colors = TopAppBarDefaults.topAppBarColors(
                                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                                 titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         )
-                    }) {
-                    padding ->
-                    RecipeListView(padding = padding)
+                    }) { innerPadding ->
+                    RecipeListView(padding = innerPadding)
                 }
             }
         }
@@ -55,29 +55,51 @@ class CatalogActivity : ComponentActivity() {
 
 private data class RecipeInfo(val label: String, val className: String)
 
-private fun buildRecipeInfoList(context : Context) : Array<RecipeInfo> {
-    val list = mutableListOf<RecipeInfo>()
-    list.add(RecipeInfo(context.getString(R.string.basic_activity_label), BasicActivity::class.java.name))
-    list.add(RecipeInfo(context.getString(R.string.basic_dsl_activity_label), BasicDslActivity::class.java.name))
-    list.add(RecipeInfo(context.getString(R.string.basic_saveable_activity_label), BasicSaveableActivity::class.java.name))
-    list.add(RecipeInfo(context.getString(R.string.common_ui_activity_label), CommonUiActivity::class.java.name))
-    list.add(RecipeInfo(context.getString(R.string.conditional_activity_label),ConditionalActivity::class.java.name))
-    list.add(RecipeInfo(context.getString(R.string.two_pane_activity_label), TwoPaneActivity::class.java.name))
-    list.add(RecipeInfo(context.getString(R.string.animated_activity_label), AnimatedActivity::class.java.name))
-    return list.toTypedArray()
+private fun buildRecipeInfoList(context: Context): List<RecipeInfo> {
+    return listOf(
+        RecipeInfo(
+            context.getString(R.string.basic_activity_label),
+            BasicActivity::class.java.name
+        ),
+        RecipeInfo(
+            context.getString(R.string.basic_dsl_activity_label),
+            BasicDslActivity::class.java.name
+        ),
+        RecipeInfo(
+            context.getString(R.string.basic_saveable_activity_label),
+            BasicSaveableActivity::class.java.name
+        ),
+        RecipeInfo(
+            context.getString(R.string.common_ui_activity_label),
+            CommonUiActivity::class.java.name
+        ),
+        RecipeInfo(
+            context.getString(R.string.conditional_activity_label),
+            ConditionalActivity::class.java.name
+        ),
+        RecipeInfo(
+            context.getString(R.string.two_pane_activity_label),
+            TwoPaneActivity::class.java.name
+        ),
+        RecipeInfo(
+            context.getString(R.string.animated_activity_label),
+            AnimatedActivity::class.java.name
+        )
+    )
 }
 
 @Composable
 fun RecipeListView(padding: PaddingValues) {
     val context = LocalContext.current
-    val recipes = remember{ buildRecipeInfoList(context) }
+    val recipes = remember { buildRecipeInfoList(context) }
 
-    LazyColumn (
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(padding),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)){
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         items(recipes) { recipe ->
             ListItem(
                 headlineContent = { Text(recipe.label) },
