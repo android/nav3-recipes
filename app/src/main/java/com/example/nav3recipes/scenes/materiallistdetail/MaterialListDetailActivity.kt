@@ -55,12 +55,6 @@ data object Profile : NavKey
 class MaterialListDetailActivity : ComponentActivity() {
 
     @OptIn(ExperimentalMaterial3AdaptiveApi::class)
-    /**
-     * This activity demonstrates the use of Navigation 3 with Material Design 3 adaptive layouts.
-     * It utilizes `ListDetailSceneStrategy` to create a two-pane layout for list-detail flows
-     * when the window size is sufficient. The navigation is handled by `NavDisplay`, which
-     * manages the back stack and displays content based on the current `NavKey`.
-     */
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
@@ -68,19 +62,10 @@ class MaterialListDetailActivity : ComponentActivity() {
         setContent {
 
             val backStack = rememberNavBackStack(ConversationList)
-            // `rememberNavBackStack` creates and remembers a mutable back stack for navigation.
-            // It is initialized with the starting destination `ConversationList`.
-
             val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
-            // `rememberListDetailSceneStrategy` provides a strategy for arranging destinations
-            // within a list-detail layout, adapting to different window sizes.
-
 
             NavDisplay(
                 backStack = backStack,
-                // `NavDisplay` is the main composable for handling Navigation 3.
-                // It takes the `backStack` to determine the current destination.
-
                 onBack = { keysToRemove -> repeat(keysToRemove) { backStack.removeLastOrNull() } },
                 sceneStrategy = listDetailStrategy,
                 entryProvider = entryProvider {
@@ -92,10 +77,6 @@ class MaterialListDetailActivity : ComponentActivity() {
                         )
                     ) {
                         ContentRed("Welcome to Nav3") {
-                            // `entryProvider` defines the content for each destination (`NavKey`).
-                            // `entry<NavKey>` associates a Composable content with a specific `NavKey`.
-                            // Here, `entry<ConversationList>` defines the content for the ConversationList destination.
-                            // `metadata = ListDetailSceneStrategy.listPane(...)` indicates this content should be displayed in the list pane.
                             Button(onClick = {
                                 backStack.add(ConversationDetail("ABC"))
                             }) {
@@ -106,8 +87,6 @@ class MaterialListDetailActivity : ComponentActivity() {
                     entry<ConversationDetail>(
                         metadata = ListDetailSceneStrategy.detailPane()
                     ) { conversation ->
-                        // `entry<ConversationDetail>` defines the content for the ConversationDetail destination.
-                        // `metadata = ListDetailSceneStrategy.detailPane()` indicates this content should be displayed in the detail pane.
                         ContentBlue("Conversation ${conversation.id} ") {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Button(onClick = {
@@ -120,8 +99,6 @@ class MaterialListDetailActivity : ComponentActivity() {
                     }
                     entry<Profile>(
                         metadata = ListDetailSceneStrategy.extraPane()
-                        // `entry<Profile>` defines the content for the Profile destination.
-                        // `metadata = ListDetailSceneStrategy.extraPane()` indicates this content should be displayed in an extra pane (if available).
                     ) {
                         ContentGreen("Profile")
                     }

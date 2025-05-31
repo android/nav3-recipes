@@ -102,14 +102,10 @@ class CommonUiActivity : ComponentActivity() {
                 }
             ) { contentPadding ->
                 NavDisplay(
- // NavDisplay는 Navigation 3 라이브러리의 핵심 Composable입니다.
- // 이 Composable은 현재 백 스택을 기반으로 적절한 UI를 표시합니다.
-                    backStack = topLevelBackStack.backStack, // backStack은 NavDisplay가 어떤 화면을 보여줄지 결정하는 데 사용되는 상태 리스트입니다.
-                    onBack = { topLevelBackStack.removeLast() }, // onBack은 뒤로가기 버튼이 눌렸을 때 호출되는 람다 함수입니다. 여기서는 사용자 정의 백 스택 관리 로직을 호출합니다.
- // entryProvider는 각 라우트(화면)에 해당하는 Composable을 정의하는 람다 함수입니다.
- // entry 함수를 사용하여 특정 라우트에 대한 Composable을 매핑합니다.
+                    backStack = topLevelBackStack.backStack,
+                    onBack = { topLevelBackStack.removeLast() },
                     entryProvider = entryProvider {
-                        entry<Home>{ // Home 라우트에 해당하는 Composable을 정의합니다.
+                        entry<Home>{
                             ContentRed("Home screen")
                         }
                         entry<ChatList>{
@@ -120,7 +116,7 @@ class CommonUiActivity : ComponentActivity() {
                             }
                         }
                         entry<ChatDetail>{
-                            ContentBlue("Chat detail screen") // ChatDetail 라우트에 해당하는 Composable을 정의합니다.
+                            ContentBlue("Chat detail screen")
                         }
                         entry<Camera>{
                             ContentPurple("Camera screen")

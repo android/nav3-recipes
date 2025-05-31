@@ -55,17 +55,11 @@ class ConditionalActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            // Create and remember an instance of our custom AppBackStack.
-            // This back stack manages the navigation state for the application.
-            // It takes a start route and a login route as parameters.
+
+
             val appBackStack = remember {
                 AppBackStack(startRoute = Home, loginRoute = Login)
             }
-
-            // NavDisplay is the core composable for displaying content based on the current navigation state.
-            // It requires a backStack (which holds the history of visited destinations),
-            // an onBack lambda (to handle back button presses),
-            // and an entryProvider (which defines the composable content for each destination).
 
             NavDisplay(
                 backStack = appBackStack.backStack,
