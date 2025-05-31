@@ -32,23 +32,22 @@ class LauncherActivity : ComponentActivity() {
 
 data class ActivityInfo(val label: String, val className: String)
 
+@Composable
 fun buildActivityInfoList() : Array<ActivityInfo> {
-
+    val context = LocalContext.current
     val list = mutableListOf<ActivityInfo>()
-    list.add(ActivityInfo("BasicActivity", "com.example.nav3recipes.basic.BasicActivity"))
-    list.add(ActivityInfo("BasicDslActivity", "com.example.nav3recipes.basicdsl.BasicDslActivity"))
-    list.add(ActivityInfo("BasicSaveableActivity", "com.example.nav3recipes.basicsaveable.BasicSaveableActivity"))
-    list.add(ActivityInfo("CommonUiActivity", "com.example.nav3recipes.commonui.CommonUiActivity"))
-    list.add(ActivityInfo("ConditionalActivity", "com.example.nav3recipes.conditional.ConditionalActivity"))
-    list.add(ActivityInfo("TwoPaneActivity", "com.example.nav3recipes.scenes.twopane.TwoPaneActivity"))
-    list.add(ActivityInfo("AnimatedActivity", "com.example.nav3recipes.animations.AnimatedActivity"))
+    list.add(ActivityInfo(context.getString(R.string.basic_activity_label), "com.example.nav3recipes.basic.BasicActivity"))
+    list.add(ActivityInfo(context.getString(R.string.basic_dsl_activity_label), "com.example.nav3recipes.basicdsl.BasicDslActivity"))
+    list.add(ActivityInfo(context.getString(R.string.basic_saveable_activity_label), "com.example.nav3recipes.basicsaveable.BasicSaveableActivity"))
+    list.add(ActivityInfo(context.getString(R.string.common_ui_activity_label), "com.example.nav3recipes.commonui.CommonUiActivity"))
+    list.add(ActivityInfo(context.getString(R.string.conditional_activity_label), "com.example.nav3recipes.conditional.ConditionalActivity"))
+    list.add(ActivityInfo(context.getString(R.string.two_pane_activity_label), "com.example.nav3recipes.scenes.twopane.TwoPaneActivity"))
+    list.add(ActivityInfo(context.getString(R.string.animated_activity_label), "com.example.nav3recipes.animations.AnimatedActivity"))
     return list.toTypedArray()
 }
 
 @Composable
 fun ActivityListView(padding: PaddingValues) {
-    val context = LocalContext.current
-
     val activities = buildActivityInfoList()
 
     LazyColumn (Modifier.padding(padding)){
@@ -56,8 +55,8 @@ fun ActivityListView(padding: PaddingValues) {
             ListItem(
                 headlineContent = { Text(activity.label) },
                 modifier = Modifier.clickable {
-                    val intent = Intent().setClassName(context, activity.className)
-                    context.startActivity(intent)
+                    val intent = Intent().setClassName(LocalContext.current, activity.className)
+                    LocalContext.current.startActivity(intent)
                 }
             )
         }
