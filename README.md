@@ -16,7 +16,7 @@ These are the recipes and what they demonstrate.
 - **[Animations](app/src/main/java/com/example/nav3recipes/animations)**: Override the default animations for all destinations and a single destination.
 
 **Common use cases**
-- **[Common navigation UI](app/src/main/java/com/example/nav3recipes/commonui)**: A common navigation toolbar where each item in the toolbar navigates to a top level destination.
+- **[Common navigation UI](app/src/main/java/com/example/nav3recipes/commonui)**: A common bottom navigation where each item navigates to a top-level destination.This example uses Material3's NavigationBar, with each destination preserving its own back stack using a TopLevelBackStack manager.
 - **[Conditional navigation](app/src/main/java/com/example/nav3recipes/conditional)**: Switch to a different navigation flow when a condition is met. For example, for authentication or first-time user onboarding.
 
 **Planned**
