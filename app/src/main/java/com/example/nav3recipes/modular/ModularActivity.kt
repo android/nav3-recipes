@@ -14,6 +14,16 @@ import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
+/**
+ * This recipe demonstrates how to use a modular approach with Navigation 3,
+ * where different parts of the application are defined in separate modules.
+ * 
+ * Features (Conversation and Profile) are split into two modules: 
+ * - api: defines the public facing routes for this feature
+ * - impl: defines the entryProviders for this feature, these are injected into the app's main activity
+ * The common module defines how the back stack should be created.
+ * The app module creates the back stack by supplying a start destination and provides this back stack to the rest of the app module (i.e. MainActivity) and the feature modules. 
+ */
 @AndroidEntryPoint
 class ModularActivity : ComponentActivity() {
 
