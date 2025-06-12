@@ -13,11 +13,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -27,9 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.EntryProviderBuilder
 import androidx.navigation3.runtime.entry
-import com.example.nav3recipes.content.ContentBase
-import com.example.nav3recipes.content.ContentBlue
-import com.example.nav3recipes.content.ContentGreen
+import androidx.compose.ui.graphics.Color
 import com.example.nav3recipes.ui.theme.colors
 import dagger.Module
 import dagger.Provides
@@ -37,11 +33,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
 
-
-
 // API
 object ConversationList
-data class ConversationDetail(val id: Int)
+data class ConversationDetail(val id: Int) {
+    val color: Color
+        get() = colors[id % colors.size]
+}
 
 // IMPL
 @Module
@@ -52,15 +49,10 @@ object ConversationModule {
     @Provides
     fun provideEntryProviderBuilder(backStack: SnapshotStateList<Any>): EntryProviderBuilder<Any>.() -> Unit =
         {
-            entry<ConversationList> { key ->
+            entry<ConversationList> {
                 ConversationListScreen(
-                    key = key,
-                    onConversationClicked = { conversationId ->
-                        backStack.add(
-                            ConversationDetail(
-                                conversationId
-                            )
-                        )
+                    onConversationClicked = { conversationDetail ->
+                        backStack.add(conversationDetail)
                     },
                     onProfileClicked = { backStack.add(Profile) }
                 )
@@ -73,46 +65,66 @@ object ConversationModule {
 
 @Composable
 fun ConversationListScreen(
-    key: Any,
-    onConversationClicked: (Int) -> Unit,
+    onConversationClicked: (ConversationDetail) -> Unit,
     onProfileClicked: () -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
     ) {
         items(10) { index ->
-            val conversation = ConversationDetail(index + 1)
-
+            val conversationId = index + 1
+            val conversationDetail = ConversationDetail(conversationId)
+            val backgroundColor = conversationDetail.color
             ListItem(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable(onClick = { onConversationClicked(conversation.id) }),
+                    .clickable(onClick = { onConversationClicked(conversationDetail) }),
                 headlineContent = {
                     Text(
-                        text = "Conversation ${conversation.id}",
+                        text = "Conversation $conversationId",
                         style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 },
                 colors = ListItemDefaults.colors(
-                    containerColor = conversation.color()
+                    containerColor = backgroundColor // Set container color directly
                 )
             )
         }
         item {
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = onProfileClicked) {
-                Text("Go to Profile")
-            }
+            ListItem(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onProfileClicked),
+                headlineContent = {
+                    Text(
+                        text = "Go to Profile",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
+                colors = ListItemDefaults.colors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            )
         }
     }
 }
 
 @Composable
-fun ConversationDetailScreen(key: ConversationDetail) {
-    ContentBase(
-        title = "Conversation Detail Screen: ${key.id}",
-        modifier = Modifier.background(key.color())
-    )
+fun ConversationDetailScreen(conversationDetail: ConversationDetail) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(conversationDetail.color)
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Conversation Detail Screen: ${conversationDetail.id}",
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+    }
 }
-private fun ConversationDetail.color() = colors[this.id % colors.size]

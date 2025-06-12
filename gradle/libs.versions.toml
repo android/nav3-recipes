@@ -31,10 +31,16 @@ nav3Material = "1.0.0-SNAPSHOT"
 ksp = "2.2.0-RC2-2.0.1"
 hilt = "2.56.2"
 hiltNavigationCompose = "1.2.0"
+kotlinxCoroutinesAndroid = "1.8.1" # Added for coroutines
+lifecycleRuntimeCompose = "2.9.1" # Added for snapshotFlow context
+kotlinReflect = "2.2.0-RC2" # Added for kotlin-reflect
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlinReflect" } # Added
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" } # Added
+androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" } # Added
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }

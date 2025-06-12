@@ -52,9 +52,11 @@ private val recipes = listOf(
     Recipe("Common UI", CommonUiActivity::class.java),
     Recipe("Material list-detail layout", MaterialListDetailActivity::class.java),
     Recipe("Two pane layout", TwoPaneActivity::class.java),
+    Recipe("Three pane layout", com.example.nav3recipes.scenes.threepane.ThreePaneActivity::class.java),
     Recipe("Argument passing to basic ViewModel", BasicViewModelsActivity::class.java),
     Recipe("Argument passing to injected ViewModel", InjectedViewModelsActivity::class.java),
-    Recipe("Modular Navigation", ModularActivity::class.java)
+    Recipe("Modular Navigation", ModularActivity::class.java),
+    Recipe("Returning Result", com.example.nav3recipes.returningresult.ReturningResultActivity::class.java)
 )
 
 class RecipePickerActivity : ComponentActivity() {

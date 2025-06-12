@@ -72,6 +72,9 @@ dependencies {
     implementation(libs.androidx.adaptive.layout)
     implementation(libs.androidx.material3.navigation3)
 
+    // Added for coroutines and snapshotFlow
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidx.lifecycle.runtime.compose)
 
     implementation(libs.kotlinx.serialization.core)
     implementation(libs.kotlinx.serialization.json)
@@ -80,6 +83,7 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.kotlin.reflect) // Added for kotlin-reflect
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
