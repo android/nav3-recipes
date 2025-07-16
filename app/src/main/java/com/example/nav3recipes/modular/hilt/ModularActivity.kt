@@ -39,7 +39,9 @@ class ModularActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         // Add the start destination
-        navigator.goTo(ConversationList)
+        if (navigator.backStack.isEmpty()){
+            navigator.goTo(ConversationList)
+        }
 
         setEdgeToEdgeConfig()
         setContent {
