@@ -90,6 +90,14 @@
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Nav3Recipes"/>
+        <activity
+            android:name=".migration.start.MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Nav3Recipes"/>
+        <activity
+            android:name=".migration.step1.MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Nav3Recipes"/>
     </application>
 
 </manifest>
