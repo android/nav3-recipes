@@ -37,6 +37,10 @@ class ModularActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Add the start destination
+        navigator.goTo(ConversationList)
+
         setEdgeToEdgeConfig()
         setContent {
             Scaffold { paddingValues ->
