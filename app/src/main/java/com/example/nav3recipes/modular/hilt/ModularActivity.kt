@@ -38,8 +38,7 @@ class ModularActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Add the start destination
-        if (navigator.backStack.isEmpty()){
+        if (savedInstanceState == null){
             navigator.goTo(ConversationList)
         }
 
