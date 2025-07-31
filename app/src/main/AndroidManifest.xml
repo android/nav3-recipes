@@ -70,6 +70,10 @@
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes"/>
         <activity
+            android:name=".scenes.threepanes.ThreePanesActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Nav3Recipes"/>
+        <activity
             android:name=".animations.AnimatedActivity"
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes"/>

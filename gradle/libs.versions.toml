@@ -14,23 +14,24 @@
 
 [versions]
 agp = "8.10.1"
-kotlin = "2.2.0-RC2"
-kotlinSerialization = "2.1.21"
+kotlin = "2.2.0"
+kotlinSerialization = "2.2.0"
 coreKtx = "1.16.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
-kotlinxSerializationCore = "1.8.1"
-lifecycleRuntimeKtx = "2.9.1"
+kotlinxSerializationCore = "1.9.0"
+lifecycleRuntimeKtx = "2.9.2"
 lifecycleViewmodel = "1.0.0-SNAPSHOT"
-activityCompose = "1.12.0-alpha02"
-composeBom = "2025.06.00"
-navigation3 = "1.0.0-alpha04"
-material3 = "1.4.0-alpha15"
+activityCompose = "1.12.0-alpha04"
+composeBom = "2025.07.00"
+navigation3 = "1.0.0-alpha05"
+material3 = "1.4.0-alpha18"
 nav3Material = "1.0.0-SNAPSHOT"
-ksp = "2.2.0-RC2-2.0.1"
-hilt = "2.56.2"
+ksp = "2.2.0-2.0.2"
+hilt = "2.57"
 hiltNavigationCompose = "1.2.0"
+window = "1.5.0-beta01"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -59,6 +60,8 @@ kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationCore" }
 androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 androidx-material3-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version.ref = "nav3Material" }
+androidx-window = { group = "androidx.window", name = "window", version.ref = "window" }
+androidx-window-core = { group = "androidx.window", name = "window-core", version.ref = "window" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
