@@ -42,5 +42,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Nav3Recipes"
-include(":app", ":conversation", ":profile", ":navigator")
+include(":app", ":conversation", ":profile")
  

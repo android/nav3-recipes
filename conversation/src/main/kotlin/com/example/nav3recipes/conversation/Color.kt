@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.nav3recipes.modular.hilt
+package com.example.nav3recipes.conversation
 
 import androidx.compose.ui.graphics.Color
 

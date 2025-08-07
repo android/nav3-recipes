@@ -5,4 +5,3 @@ object Route {
     object ConversationList
     data class ConversationDetail(val id: Int)
 }
-
