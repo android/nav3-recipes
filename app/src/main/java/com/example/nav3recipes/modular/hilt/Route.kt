@@ -1,8 +1,18 @@
 package com.example.nav3recipes.modular.hilt
 
-object Route {
-    object Profile
-    object ConversationList
-    data class ConversationDetail(val id: Int)
-    data class ConversationDetailFragment(val id: Int)
+import androidx.navigation3.runtime.NavKey
+import kotlinx.serialization.Serializable
+
+sealed class Route : NavKey {
+    @Serializable
+    data object Profile : Route()
+
+    @Serializable
+    data object ConversationList : Route()
+
+    @Serializable
+    data class ConversationDetail(val id: Int) : Route()
+
+    @Serializable
+    data class ConversationDetailFragment(val id: Int) : Route()
 }

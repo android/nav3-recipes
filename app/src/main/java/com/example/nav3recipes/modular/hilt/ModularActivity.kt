@@ -1,7 +1,6 @@
 package com.example.nav3recipes.modular.hilt
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation3.runtime.entry
@@ -34,8 +33,8 @@ class ModularActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setEdgeToEdgeConfig()
-        val navigator = Navigator(startDestination = Route.ConversationList)
         setContent {
+            val navigator = rememberNavigator(Route.ConversationList)
             NavDisplay(
                 backStack = navigator.backStack,
                 onBack = { navigator.goBack() },

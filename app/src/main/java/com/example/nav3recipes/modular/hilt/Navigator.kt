@@ -1,14 +1,17 @@
 package com.example.nav3recipes.modular.hilt
 
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import dagger.hilt.android.scopes.ActivityRetainedScoped
+import androidx.compose.runtime.Composable
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.rememberNavBackStack
 
-@ActivityRetainedScoped
-class Navigator(startDestination: Any) {
-    val backStack: SnapshotStateList<Any> = mutableStateListOf(startDestination)
+@Composable
+fun rememberNavigator(startDestination: Route): Navigator {
+    val backStack = rememberNavBackStack(startDestination)
+    return Navigator(backStack)
+}
 
-    fun goTo(destination: Any) {
+class Navigator(val backStack: NavBackStack) {
+    fun goTo(destination: Route) {
         backStack.add(destination)
     }
 
