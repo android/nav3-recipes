@@ -20,19 +20,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation3.runtime.EntryProviderBuilder
 import androidx.navigation3.runtime.entry
-import com.example.nav3recipes.ui.theme.colors
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityRetainedComponent
 import dagger.multibindings.IntoSet
 
-// API
-object ConversationList
-data class ConversationDetail(val id: Int) {
-    val color: Color
-        get() = colors[id % colors.size]
+val Route.ConversationDetail.color: Color get() {
+    return colors[id % colors.size]
 }
 
 // IMPL
@@ -42,31 +39,31 @@ object ConversationModule {
 
     @IntoSet
     @Provides
-    fun provideEntryProviderInstaller(navigator: Navigator): EntryProviderInstaller =
+    fun provideEntryProviderInstaller(navigator: INavigator): EntryProviderBuilder<Any>.() -> Unit =
         {
-            entry<ConversationList> {
+            entry<Route.ConversationList> {
                 ConversationListScreen(
                     onConversationClicked = { conversationDetail ->
                         navigator.goTo(conversationDetail)
                     }
                 )
             }
-            entry<ConversationDetail> { key ->
-                ConversationDetailScreen(key) { navigator.goTo(Profile) }
+            entry<Route.ConversationDetail> { key ->
+                ConversationDetailScreen(key) { navigator.goTo(Route.Profile) }
             }
         }
 }
 
 @Composable
 private fun ConversationListScreen(
-    onConversationClicked: (ConversationDetail) -> Unit
+    onConversationClicked: (Route.ConversationDetail) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
     ) {
         items(10) { index ->
             val conversationId = index + 1
-            val conversationDetail = ConversationDetail(conversationId)
+            val conversationDetail = Route.ConversationDetail(conversationId)
             val backgroundColor = conversationDetail.color
             ListItem(
                 modifier = Modifier
@@ -89,7 +86,7 @@ private fun ConversationListScreen(
 
 @Composable
 private fun ConversationDetailScreen(
-    conversationDetail: ConversationDetail,
+    conversationDetail: Route.ConversationDetail,
     onProfileClicked: () -> Unit
 ) {
     Column(

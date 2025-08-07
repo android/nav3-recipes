@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
+import androidx.navigation3.runtime.EntryProviderBuilder
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.runtime.entryProvider
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
@@ -30,10 +31,10 @@ import javax.inject.Inject
 class ModularActivity : ComponentActivity() {
 
     @Inject
-    lateinit var navigator: Navigator
+    lateinit var navigator: INavigatorImpl
 
     @Inject
-    lateinit var entryProviderBuilders: Set<@JvmSuppressWildcards EntryProviderInstaller>
+    lateinit var entryProviderBuilders: Set<@JvmSuppressWildcards EntryProviderBuilder<Any>.() -> Unit>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

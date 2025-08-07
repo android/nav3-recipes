@@ -1,5 +1,6 @@
 package com.example.nav3recipes.modular.hilt
 
+import android.provider.ContactsContract
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,15 +12,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation3.runtime.EntryProviderBuilder
 import androidx.navigation3.runtime.entry
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityRetainedComponent
 import dagger.multibindings.IntoSet
-
-// API
-object Profile
 
 // IMPLEMENTATION
 @Module
@@ -28,8 +27,8 @@ object ProfileModule {
 
     @IntoSet
     @Provides
-    fun provideEntryProviderInstaller() : EntryProviderInstaller = {
-        entry<Profile>{
+    fun provideEntryProviderInstaller() : EntryProviderBuilder<Any>.() -> Unit = {
+        entry<Route.Profile>{
             ProfileScreen()
         }
     }
