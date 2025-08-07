@@ -3,9 +3,11 @@ package com.example.nav3recipes.modular.hilt
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.fragment.app.FragmentActivity
 import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
+import com.example.nav3recipes.conversation.ConversationDetailFragmentScreen
 import com.example.nav3recipes.conversation.ConversationDetailScreen
 import com.example.nav3recipes.conversation.ConversationId
 import com.example.nav3recipes.conversation.ConversationListScreen
@@ -28,7 +30,7 @@ import dagger.hilt.android.AndroidEntryPoint
  * to the rest of the app module (i.e. MainActivity) and the feature modules.
  */
 @AndroidEntryPoint
-class ModularActivity : ComponentActivity() {
+class ModularActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setEdgeToEdgeConfig()
@@ -42,11 +44,22 @@ class ModularActivity : ComponentActivity() {
                         ConversationListScreen(
                             onConversationClicked = { conversationId ->
                                 navigator.goTo(Route.ConversationDetail(conversationId.value))
-                            }
+                            },
+                            onConversationFragmentClicked = { conversationId ->
+                                navigator.goTo(Route.ConversationDetailFragment(conversationId.value))
+                            },
                         )
                     }
                     entry<Route.ConversationDetail> { key ->
                         ConversationDetailScreen(
+                            conversationId = ConversationId(key.id),
+                            onProfileClicked = {
+                                navigator.goTo(Route.Profile)
+                            }
+                        )
+                    }
+                    entry<Route.ConversationDetailFragment> { key ->
+                        ConversationDetailFragmentScreen(
                             conversationId = ConversationId(key.id),
                             onProfileClicked = {
                                 navigator.goTo(Route.Profile)

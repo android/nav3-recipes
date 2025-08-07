@@ -16,7 +16,8 @@ import androidx.compose.ui.Modifier
 
 @Composable
 fun ConversationListScreen(
-    onConversationClicked: (ConversationId) -> Unit
+    onConversationClicked: (ConversationId) -> Unit,
+    onConversationFragmentClicked: (ConversationId) -> Unit
 ) {
     Scaffold { paddingValues ->
         LazyColumn(
@@ -34,6 +35,7 @@ fun ConversationListScreen(
                         .clickable(onClick = { onConversationClicked(conversationDetail) }),
                     headlineContent = {
                         Text(
+                            modifier = Modifier.clickable(onClick = { onConversationFragmentClicked(conversationDetail) }),
                             text = "Conversation $conversationId",
                             style = MaterialTheme.typography.headlineSmall,
                             color = MaterialTheme.colorScheme.onSurface

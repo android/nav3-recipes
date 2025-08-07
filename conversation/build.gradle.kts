@@ -67,6 +67,7 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
 
     implementation(libs.hilt.android)
+    implementation(libs.androidx.fragment.compose)
     ksp(libs.hilt.compiler)
 
     testImplementation(libs.junit)

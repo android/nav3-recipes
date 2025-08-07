@@ -4,4 +4,5 @@ object Route {
     object Profile
     object ConversationList
     data class ConversationDetail(val id: Int)
+    data class ConversationDetailFragment(val id: Int)
 }
