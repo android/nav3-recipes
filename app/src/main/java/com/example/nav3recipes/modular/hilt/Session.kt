@@ -3,6 +3,7 @@ package com.example.nav3recipes.modular.hilt
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.core.content.edit
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -60,30 +61,16 @@ internal class SessionImpl @Inject constructor(
         emit(initialAccount)
 
         // If authenticated, start timer-based checking
-        if (initialAccount.isAuthenticated) {
-            Log.d(TAG, "Starting timer-based session checking")
+        Log.d(TAG, "Starting timer-based session checking")
 
-            try {
-                while (true) {
-                    delay(SESSION_CHECK_INTERVAL_MS)
+        while (true) {
+            delay(SESSION_CHECK_INTERVAL_MS)
 
-                    val currentAccount = withContext(Dispatchers.IO) {
-                        checkSessionValidity()
-                    }
-
-                    emit(currentAccount)
-
-                    // Stop timer if session expired
-                    if (!currentAccount.isAuthenticated) {
-                        Log.d(TAG, "Session expired, stopping timer")
-                        break
-                    }
-                }
-            } catch (e: Exception) {
-                Log.d(TAG, "Session checking cancelled: ${e.message}")
+            val currentAccount = withContext(Dispatchers.IO) {
+                checkSessionValidity()
             }
-        } else {
-            Log.d(TAG, "No active session, no timer needed")
+
+            emit(currentAccount)
         }
     }.distinctUntilChanged()
 
@@ -97,32 +84,34 @@ internal class SessionImpl @Inject constructor(
                 sessionUid != null &&
                 (now - sessionStart < SESSION_TIMEOUT_MS)
 
-        if (isActive && !isValid) {
+        return if (isActive && !isValid) {
             Log.d(TAG, "Session expired, clearing saved state")
             clearSession()
-            return Account.ANONYMOUS
+            Account.ANONYMOUS
+        } else {
+            val account = if (isValid) Account(sessionUid) else Account.ANONYMOUS
+            Log.d(TAG, "Session isValid=$isValid, account=$account")
+            account
         }
-
-        return if (isValid) Account(sessionUid!!) else Account.ANONYMOUS
     }
 
     private fun clearSession() {
-        sharedPreferences.edit()
-            .putBoolean(SESSION_KEY, false)
-            .remove(SESSION_UID_KEY)
-            .remove(SESSION_TIMESTAMP_KEY)
-            .apply()
+        sharedPreferences.edit {
+            putBoolean(SESSION_KEY, false)
+                .remove(SESSION_UID_KEY)
+                .remove(SESSION_TIMESTAMP_KEY)
+        }
     }
 
     override suspend fun login(uid: String) = withContext(Dispatchers.IO) {
         Log.d(TAG, "User logged in: $uid")
         val now = System.currentTimeMillis()
 
-        sharedPreferences.edit()
-            .putBoolean(SESSION_KEY, true)
-            .putString(SESSION_UID_KEY, uid)
-            .putLong(SESSION_TIMESTAMP_KEY, now)
-            .apply()
+        sharedPreferences.edit {
+            putBoolean(SESSION_KEY, true)
+                .putString(SESSION_UID_KEY, uid)
+                .putLong(SESSION_TIMESTAMP_KEY, now)
+        }
     }
 
     override suspend fun logout() = withContext(Dispatchers.IO) {

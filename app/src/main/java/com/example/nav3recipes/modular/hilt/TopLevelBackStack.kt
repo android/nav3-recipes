@@ -3,6 +3,7 @@ package com.example.nav3recipes.modular.hilt
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
@@ -74,7 +75,7 @@ class TopLevelBackStack<T : NavKey>(
         return backStack.apply {
             clear()
             addAll(topLevelStacks.values.flatten())
-            Log.d(TAG, "updateBackStack: New back stack size: ${this.size}")
+            Log.d(TAG, "updateBackStack: $backStack")
         }
     }
 
@@ -87,9 +88,7 @@ class TopLevelBackStack<T : NavKey>(
         // If the top level doesn't exist, create it
         if (topLevelStacks[key] == null) {
             Log.d(TAG, "addTopLevel: Creating new stack for $key")
-            val newStack: SnapshotStateList<NavKey> =
-                mutableListOf<NavKey>(key).toMutableStateList()
-            topLevelStacks[key] = newStack
+            topLevelStacks.put(key, mutableStateListOf(key))
         } else {
             Log.d(TAG, "addTopLevel: Moving existing stack for $key to end")
             // Move existing stack to end (most recently used)
@@ -127,8 +126,9 @@ class TopLevelBackStack<T : NavKey>(
         } else {
             // Current stack only has one item (the top-level key itself), remove entire stack
             val removedStack = topLevelStacks.remove(topLevelKey)
-            Log.d(TAG, "removeLast: Removed entire stack for: $topLevelKey")
-
+            if (removedStack != null) {
+                Log.d(TAG, "removeLast: Removed entire stack for: $topLevelKey")
+            }
             // Switch to the last remaining top-level key
             if (topLevelStacks.isNotEmpty()) {
                 topLevelKey = topLevelStacks.keys.last()

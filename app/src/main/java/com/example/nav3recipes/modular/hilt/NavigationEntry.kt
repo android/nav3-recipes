@@ -13,10 +13,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed interface NavigationEntry : NavKey
 
-// Anonymous user routes
-@Serializable
-data object Anonymous : NavigationEntry
-
 @Serializable
 data object Login : NavigationEntry
 

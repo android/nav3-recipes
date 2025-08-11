@@ -23,7 +23,6 @@ import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.example.nav3recipes.content.ContentBlue
-import com.example.nav3recipes.content.ContentGreen
 import com.example.nav3recipes.content.ContentPurple
 import com.example.nav3recipes.content.ContentRed
 import com.example.nav3recipes.content.ContentYellow
@@ -46,80 +45,51 @@ class ModularActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         setEdgeToEdgeConfig()
         setContent {
-            val topLevelBackStack = rememberTopLevelBackStack<NavigationEntry>(Anonymous)
+            val viewModel = hiltViewModel<AuthViewModel>()
+            val sessionState = viewModel.sessionState.collectAsState().value
 
-            // Initialize with Login screen in the Anonymous stack
-            if (topLevelBackStack.getCurrentStack().size == 1) {
-                topLevelBackStack.add(Login)
-            }
+            when (sessionState) {
+                is SessionState.Initialized -> {
+                    val topLevelBackStack = rememberTopLevelBackStack(sessionState.startKey)
+                    val backStack = topLevelBackStack.backStack
+                    sessionState.mutate(topLevelBackStack)
 
-            val viewModel =
-                hiltViewModel<NavigationViewModel, NavigationViewModel.Factory> { factory ->
-                    factory.create(topLevelBackStack)
-                }
-            val navigationState = viewModel.navigationState.collectAsState().value
-            val backStack: List<NavigationEntry> = when (navigationState) {
-                is NavigationState.Anonymous -> {
-                    navigationState.backStack
-                }
-
-                is NavigationState.Authenticated -> {
-                    navigationState.backStack
+                    NavDisplay(
+                        backStack = backStack,
+                        onBack = {
+                            Log.d(TAG, "Back pressed")
+                            topLevelBackStack.removeLast()
+                        },
+                        entryProvider = navGraph(topLevelBackStack, viewModel)
+                    )
                 }
 
-                NavigationState.Initializing -> {
-                    emptyList()
-                }
-            }
-
-            if (backStack.isEmpty()) {
-                WelcomeScreen()
-            } else {
-                NavDisplay(
-                    backStack = backStack,
-                    onBack = {
-                        Log.d(TAG, "Back pressed")
-                        if (!viewModel.navigateBack()) {
-                            // If ViewModel can't handle back, let the system handle it
-                            finish()
-                        }
-                    },
-                    entryProvider = navGraph(navigationState, viewModel)
-                )
+                SessionState.Initializing -> Unit
             }
         }
     }
 
     @Composable
     private fun <T : Any> navGraph(
-        navigationState: NavigationState,
-        viewModel: NavigationViewModel
+        topLevelBackStack: TopLevelBackStack<NavigationEntry>,
+        viewModel: AuthViewModel
     ): (T) -> NavEntry<T> {
         // Create movable bottom navigation wrapper that persists across tab changes
         val withNavigationBar = remember {
             movableContentOf { content: @Composable () -> Unit ->
                 NavigationBarScaffold(
                     isTabSelected = { tab ->
-                        val currentTab = if (navigationState is NavigationState.Authenticated) {
-                            navigationState.currentTab
-                        } else {
-                            ConversationTab
-                        }
-                        currentTab == tab
+                        topLevelBackStack.topLevelKey == tab
                     },
-                    onTabSelected = viewModel::navigateToTab,
+                    onTabSelected = { tab ->
+                        topLevelBackStack.addTopLevel(tab)
+                    },
                     content = content
                 )
             }
         }
 
         return entryProvider {
-            // Anonymous top-level entry (should not normally be displayed)
-            entry<Anonymous> {
-                WelcomeScreen()
-            }
-
-            // Anonymous screens
             entry<Login> {
                 ContentBlue("Login Screen") {
                     Column {
@@ -131,13 +101,13 @@ class ModularActivity : FragmentActivity() {
                         }
                         Button(onClick = {
                             Log.d(TAG, "Navigate to register")
-                            viewModel.navigateToEntry(Register)
+                            topLevelBackStack.add(Register)
                         }) {
                             Text("Don't have account? Register")
                         }
                         Button(onClick = {
                             Log.d(TAG, "Navigate to forgot password")
-                            viewModel.navigateToEntry(ForgotPassword)
+                            topLevelBackStack.add(ForgotPassword)
                         }) {
                             Text("Forgot Password?")
                         }
@@ -156,7 +126,7 @@ class ModularActivity : FragmentActivity() {
                         }
                         Button(onClick = {
                             Log.d(TAG, "Navigate back to login")
-                            viewModel.navigateToEntry(Login)
+                            topLevelBackStack.add(Login)
                         }) {
                             Text("Already have account? Login")
                         }
@@ -169,13 +139,13 @@ class ModularActivity : FragmentActivity() {
                     Column {
                         Button(onClick = {
                             Log.d(TAG, "Password reset requested")
-                            viewModel.navigateToEntry(Login)
+                            topLevelBackStack.add(Login)
                         }) {
                             Text("Send Reset Email")
                         }
                         Button(onClick = {
                             Log.d(TAG, "Navigate back to login from forgot password")
-                            viewModel.navigateToEntry(Login)
+                            topLevelBackStack.add(Login)
                         }) {
                             Text("Back to Login")
                         }
@@ -189,11 +159,11 @@ class ModularActivity : FragmentActivity() {
                     ConversationListScreen(
                         onConversationClicked = { conversationId ->
                             Log.d(TAG, "Conversation clicked: $conversationId")
-                            viewModel.navigateToEntry(ConversationDetail(conversationId.value))
+                            topLevelBackStack.add(ConversationDetail(conversationId.value))
                         },
                         onConversationFragmentClicked = { conversationId ->
                             Log.d(TAG, "Conversation fragment clicked: $conversationId")
-                            viewModel.navigateToEntry(
+                            topLevelBackStack.add(
                                 ConversationDetailFragment(
                                     conversationId.value
                                 )
@@ -209,7 +179,7 @@ class ModularActivity : FragmentActivity() {
                         conversationId = ConversationId(key.id),
                         onProfileClicked = {
                             Log.d(TAG, "Profile clicked from conversation detail")
-                            viewModel.navigateToEntry(UserProfile)
+                            topLevelBackStack.add(UserProfile)
                         }
                     )
                 }
@@ -221,7 +191,7 @@ class ModularActivity : FragmentActivity() {
                     conversationId = ConversationId(key.id),
                     onProfileClicked = {
                         Log.d(TAG, "Profile clicked from conversation fragment")
-                        viewModel.navigateToEntry(UserProfile)
+                        topLevelBackStack.add(UserProfile)
                     }
                 )
             }
@@ -258,13 +228,6 @@ class ModularActivity : FragmentActivity() {
     }
 }
 
-
-@Composable
-private fun WelcomeScreen(modifier: Modifier = Modifier) {
-    ContentGreen(title = "Loading...", modifier = modifier) {
-        Text("Checking session...")
-    }
-}
 
 @Composable
 private fun NavigationBarScaffold(
