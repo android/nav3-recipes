@@ -1,6 +1,7 @@
 package com.example.nav3recipes.modular.hilt
 
 import android.util.Log
+import com.example.nav3recipes.navigator.Route
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -13,18 +14,19 @@ sealed class SessionState {
 
     @Serializable
     data class Initialized(val account: Account) : SessionState() {
-        val startKey: NavigationEntry get() = when (account.isAuthenticated) {
-            true -> ConversationTab
-            false -> Login
+        val startKey: Route
+            get() = when (account.isAuthenticated) {
+            true -> Route.ConversationTab
+            false -> Route.Login
         }
 
-        fun mutate(topLevelBackStack: TopLevelBackStack<NavigationEntry>) {
+        fun mutate(topLevelBackStack: TopLevelBackStack<Route>) {
             when (account.isAuthenticated) {
                 true -> {
-                    when (topLevelBackStack.topLevelKey == Login) {
+                    when (topLevelBackStack.topLevelKey == Route.Login) {
                         true -> {
                             Log.d(TAG, "User authenticated, switching to ConversationTab")
-                            topLevelBackStack.clearAndSet(ConversationTab)
+                            topLevelBackStack.clearAndSet(Route.ConversationTab)
                         }
 
                         false -> {
@@ -35,7 +37,7 @@ sealed class SessionState {
 
                 false -> {
                     Log.d(TAG, "User logged out, switching to Anonymous")
-                    topLevelBackStack.clearAndSet(Login)
+                    topLevelBackStack.clearAndSet(Route.Login)
                 }
             }
         }

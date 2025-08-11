@@ -61,6 +61,7 @@ android {
 dependencies {
     implementation(project(":conversation"))
     implementation(project(":profile"))
+    implementation(project(":navigator"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

@@ -25,6 +25,7 @@ lifecycleRuntimeKtx = "2.9.1"
 lifecycleViewmodel = "1.0.0-SNAPSHOT"
 activityCompose = "1.12.0-alpha02"
 composeBom = "2025.06.00"
+composeRuntime = "1.8.3"
 navigation3 = "1.0.0-alpha04"
 material3 = "1.4.0-alpha15"
 nav3Material = "1.0.0-SNAPSHOT"
@@ -61,7 +62,8 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 androidx-material3-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version.ref = "nav3Material" }
 androidx-fragment-compose = { group = "androidx.fragment", name = "fragment-compose", version.ref = "fragmentCompose" }
-androidx-compose-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version = { require = "1.8.3" } }
+androidx-compose-runtime = { module = "androidx.compose.runtime:runtime", version.ref = "composeRuntime" }
+androidx-compose-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "composeRuntime" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

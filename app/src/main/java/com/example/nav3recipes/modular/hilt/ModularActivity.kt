@@ -30,6 +30,9 @@ import com.example.nav3recipes.conversation.ConversationDetailFragmentScreen
 import com.example.nav3recipes.conversation.ConversationDetailScreen
 import com.example.nav3recipes.conversation.ConversationId
 import com.example.nav3recipes.conversation.ConversationListScreen
+import com.example.nav3recipes.navigator.LocalNavBackStack
+import com.example.nav3recipes.navigator.ProvideNavBackStack
+import com.example.nav3recipes.navigator.Route
 import com.example.nav3recipes.profile.ProfileScreen
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 import dagger.hilt.android.AndroidEntryPoint
@@ -51,17 +54,29 @@ class ModularActivity : FragmentActivity() {
             when (sessionState) {
                 is SessionState.Initialized -> {
                     val topLevelBackStack = rememberTopLevelBackStack(sessionState.startKey)
-                    val backStack = topLevelBackStack.backStack
-                    sessionState.mutate(topLevelBackStack)
+                    val navBackStack =  remember { NavBackStackImpl(topLevelBackStack) }
+                    
+                    ProvideNavBackStack(navBackStack) {
+                        val backStack = topLevelBackStack.backStack
+                        sessionState.mutate(topLevelBackStack)
 
-                    NavDisplay(
-                        backStack = backStack,
-                        onBack = {
-                            Log.d(TAG, "Back pressed")
-                            topLevelBackStack.removeLast()
-                        },
-                        entryProvider = navGraph(topLevelBackStack, viewModel)
-                    )
+                        NavDisplay(
+                            backStack = backStack,
+                            onBack = {
+                                Log.d(TAG, "Back pressed")
+                                topLevelBackStack.removeLast()
+                            },
+                            entryProvider = navGraph(
+                                isTabSelected = { tab ->
+                                    topLevelBackStack.topLevelKey == tab
+                                },
+                                onTabSelected = { tab ->
+                                    topLevelBackStack.addTopLevel(tab)
+                                },
+                                viewModel = viewModel,
+                            )
+                        )
+                    }
                 }
 
                 SessionState.Initializing -> Unit
@@ -71,26 +86,24 @@ class ModularActivity : FragmentActivity() {
 
     @Composable
     private fun <T : Any> navGraph(
-        topLevelBackStack: TopLevelBackStack<NavigationEntry>,
+        isTabSelected: (Route.Tab) -> Boolean,
+        onTabSelected: (Route.Tab) -> Unit,
         viewModel: AuthViewModel
     ): (T) -> NavEntry<T> {
+        val navBackStack = LocalNavBackStack.current
         // Create movable bottom navigation wrapper that persists across tab changes
         val withNavigationBar = remember {
             movableContentOf { content: @Composable () -> Unit ->
                 NavigationBarScaffold(
-                    isTabSelected = { tab ->
-                        topLevelBackStack.topLevelKey == tab
-                    },
-                    onTabSelected = { tab ->
-                        topLevelBackStack.addTopLevel(tab)
-                    },
+                    isTabSelected = isTabSelected,
+                    onTabSelected = onTabSelected,
                     content = content
                 )
             }
         }
 
         return entryProvider {
-            entry<Login> {
+            entry<Route.Login> {
                 ContentBlue("Login Screen") {
                     Column {
                         Button(onClick = {
@@ -101,13 +114,13 @@ class ModularActivity : FragmentActivity() {
                         }
                         Button(onClick = {
                             Log.d(TAG, "Navigate to register")
-                            topLevelBackStack.add(Register)
+                            navBackStack.add(Route.Register)
                         }) {
                             Text("Don't have account? Register")
                         }
                         Button(onClick = {
                             Log.d(TAG, "Navigate to forgot password")
-                            topLevelBackStack.add(ForgotPassword)
+                            navBackStack.add(Route.ForgotPassword)
                         }) {
                             Text("Forgot Password?")
                         }
@@ -115,7 +128,7 @@ class ModularActivity : FragmentActivity() {
                 }
             }
 
-            entry<Register> {
+            entry<Route.Register> {
                 ContentYellow("Register Screen") {
                     Column {
                         Button(onClick = {
@@ -126,7 +139,7 @@ class ModularActivity : FragmentActivity() {
                         }
                         Button(onClick = {
                             Log.d(TAG, "Navigate back to login")
-                            topLevelBackStack.add(Login)
+                            navBackStack.add(Route.Login)
                         }) {
                             Text("Already have account? Login")
                         }
@@ -134,18 +147,18 @@ class ModularActivity : FragmentActivity() {
                 }
             }
 
-            entry<ForgotPassword> {
+            entry<Route.ForgotPassword> {
                 ContentPurple("Forgot Password Screen") {
                     Column {
                         Button(onClick = {
                             Log.d(TAG, "Password reset requested")
-                            topLevelBackStack.add(Login)
+                            navBackStack.add(Route.Login)
                         }) {
                             Text("Send Reset Email")
                         }
                         Button(onClick = {
                             Log.d(TAG, "Navigate back to login from forgot password")
-                            topLevelBackStack.add(Login)
+                            navBackStack.add(Route.Login)
                         }) {
                             Text("Back to Login")
                         }
@@ -154,16 +167,16 @@ class ModularActivity : FragmentActivity() {
             }
 
             // Authenticated screens with movable bottom navigation
-            entry<ConversationTab> {
+            entry<Route.ConversationTab> {
                 withNavigationBar {
                     ConversationListScreen(
                         onConversationClicked = { conversationId ->
                             Log.d(TAG, "Conversation clicked: $conversationId")
-                            topLevelBackStack.add(ConversationDetail(conversationId.value))
+                            navBackStack.add(Route.ConversationDetail(conversationId.value))
                         },
                         onConversationFragmentClicked = { conversationId ->
                             Log.d(TAG, "Conversation fragment clicked: $conversationId")
-                            topLevelBackStack.add(
+                            navBackStack.add(Route.
                                 ConversationDetailFragment(
                                     conversationId.value
                                 )
@@ -173,30 +186,30 @@ class ModularActivity : FragmentActivity() {
                 }
             }
 
-            entry<ConversationDetail> { key ->
+            entry<Route.ConversationDetail> { key ->
                 withNavigationBar {
                     ConversationDetailScreen(
                         conversationId = ConversationId(key.id),
                         onProfileClicked = {
                             Log.d(TAG, "Profile clicked from conversation detail")
-                            topLevelBackStack.add(UserProfile)
+                            navBackStack.add(Route.UserProfile)
                         }
                     )
                 }
             }
 
-            entry<ConversationDetailFragment> { key ->
+            entry<Route.ConversationDetailFragment> { key ->
                 // We do omit withNavigationBar {} on purpose to show case that we can show UI without using tabs
                 ConversationDetailFragmentScreen(
                     conversationId = ConversationId(key.id),
                     onProfileClicked = {
                         Log.d(TAG, "Profile clicked from conversation fragment")
-                        topLevelBackStack.add(UserProfile)
+                        navBackStack.add(Route.UserProfile)
                     }
                 )
             }
 
-            entry<MyProfileTab> {
+            entry<Route.MyProfileTab> {
                 withNavigationBar {
                     ContentPurple("My Profile") {
                         Text("My Profile")
@@ -204,13 +217,13 @@ class ModularActivity : FragmentActivity() {
                 }
             }
 
-            entry<UserProfile> {
+            entry<Route.UserProfile> {
                 withNavigationBar {
                     ProfileScreen()
                 }
             }
 
-            entry<SettingsTab> {
+            entry<Route.SettingsTab> {
                 withNavigationBar {
                     ContentRed("Settings Screen") {
                         Column {
@@ -231,11 +244,11 @@ class ModularActivity : FragmentActivity() {
 
 @Composable
 private fun NavigationBarScaffold(
-    isTabSelected: (AuthenticatedTab) -> Boolean,
-    onTabSelected: (AuthenticatedTab) -> Unit,
+    isTabSelected: (Route.Tab) -> Boolean,
+    onTabSelected: (Route.Tab) -> Unit,
     content: @Composable () -> Unit
 ) {
-    val authenticatedTabs = listOf(ConversationTab, MyProfileTab, SettingsTab)
+    val authenticatedTabs = listOf(Route.ConversationTab, Route.MyProfileTab, Route.SettingsTab)
     Scaffold(
         bottomBar = {
             NavigationBar {
