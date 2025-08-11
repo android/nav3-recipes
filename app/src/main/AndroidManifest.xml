@@ -31,7 +31,7 @@
         android:name=".content.Nav3RecipesApplication"
         tools:targetApi="31">
         <activity
-            android:name=".RecipePickerActivity"
+            android:name=".modular.hilt.ModularActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Nav3Recipes">
@@ -86,7 +86,7 @@
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes"/>
         <activity
-            android:name=".modular.hilt.ModularActivity"
+            android:name=".RecipePickerActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Nav3Recipes"/>
