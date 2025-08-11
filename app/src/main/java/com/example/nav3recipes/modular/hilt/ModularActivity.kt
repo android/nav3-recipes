@@ -20,7 +20,6 @@ import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.example.nav3recipes.content.ContentBlue
 import com.example.nav3recipes.content.ContentGreen
@@ -46,10 +45,9 @@ class ModularActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         setEdgeToEdgeConfig()
         setContent {
-            val backStack = rememberNavBackStack(Welcome)
-            val viewModel =
-                hiltViewModel<NavigationViewModel, NavigationViewModel.Factory> { factory ->
-                    factory.create(backStack)
+            val topLevelBackStack = rememberTopLevelBackStack<NavigationEntry>(Welcome)
+            val viewModel = hiltViewModel<NavigationViewModel, NavigationViewModel.Factory> { factory ->
+                    factory.create(topLevelBackStack)
                 }
             val navigationState = viewModel.navigationState.collectAsState().value
             // Create movable bottom navigation wrapper that persists across tab changes
@@ -72,12 +70,12 @@ class ModularActivity : FragmentActivity() {
 
             // Always use NavDisplay with the actual backStack from Navigation 3
             NavDisplay(
-                backStack = backStack,
+                backStack = topLevelBackStack.backStack,
                 onBack = {
                     Log.d(TAG, "Back pressed")
                     if (!viewModel.navigateBack()) {
                         // If ViewModel can't handle back, let the system handle it
-                        backStack.removeLastOrNull()
+                        finish()
                     }
                 },
                 entryProvider = entryProvider {

@@ -1,7 +1,7 @@
 package com.example.nav3recipes.modular.hilt
 
 import android.util.Log
-import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavKey
@@ -9,11 +9,8 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -22,93 +19,85 @@ import kotlinx.coroutines.launch
  * NavigationViewModel manages the navigation state for the modular navigation system.
  *
  * The navigation is managed through a combination of:
- * - Android Navigation 3 runtime for back stack persistence and restoration
+ * - TopLevelBackStack for managing separate stacks per tab/section
  * - Session management for authentication state via reactive Flow
- * - Tab-based navigation for authenticated users
+ * - Navigation 3 runtime for automatic serialization and restoration
  *
  * ## Navigation Architecture:
  *
  * ### Initialization Flow:
  * - Always starts with Welcome screen to check session state
- * - Combines Session.account flow with backStack to determine navigation state
- * - If account is authenticated and restored stack contains authenticated entries: restore authenticated state
- * - If account is authenticated but no authenticated entries: start fresh authenticated state
- * - If account is anonymous: show anonymous flow starting with Welcome
+ * - Combines Session.account flow with TopLevelBackStack state to determine navigation state
+ * - Uses TopLevelBackStack to maintain separate stacks for different sections (anonymous vs authenticated tabs)
  *
  * ### Anonymous State:
- * - Single back stack for unauthenticated users
+ * - Single stack managed by TopLevelBackStack with Welcome as the top-level key
  * - Contains welcome, login, register, and forgot password screens
  *
  * ### Authenticated State:
- * - Tab-based navigation with separate stacks per tab
+ * - Multiple stacks managed by TopLevelBackStack, one per authenticated tab
  * - Conversation Tab: List and detail screens
  * - Profile Tab: User profile management
  * - Settings Tab: App configuration and logout
  *
  * ## Session Management:
  * - Reactively observes [Session.account] Flow for authentication changes
- * - Restores authenticated state on app restart if session is still valid
+ * - Automatically manages TopLevelBackStack based on authentication state
  * - Explicit login/logout only - no automatic session refresh or activity tracking
  *
- * ## Back Stack Restoration:
- * - Leverages `rememberNavBackStack` for automatic serialization
- * - On restoration, validates current account to determine if authenticated stack should be used
- * - Falls back to anonymous state if session expired
+ * ## Back Stack Management:
+ * - Uses TopLevelBackStack which internally uses Navigation 3's rememberNavBackStack
+ * - All modifications are automatically serialized by Navigation 3 runtime
+ * - State changes trigger UI updates and proper persistence
  *
- * @param backStack The back stack managed by Navigation 3 runtime
+ * @param topLevelBackStack The TopLevelBackStack managing navigation state
  * @param session The session manager for authentication state
  */
 @HiltViewModel(assistedFactory = NavigationViewModel.Factory::class)
 class NavigationViewModel @AssistedInject constructor(
-    @Assisted private val backStack: SnapshotStateList<NavKey>,
+    @Assisted private val topLevelBackStack: TopLevelBackStack<NavigationEntry>,
     private val session: Session
 ) : ViewModel() {
 
     @AssistedFactory
     interface Factory {
-        fun create(backStack: SnapshotStateList<NavKey>): NavigationViewModel
+        fun create(topLevelBackStack: TopLevelBackStack<NavigationEntry>): NavigationViewModel
     }
 
     companion object {
         private const val TAG = "NavigationViewModel"
     }
 
-    private val _backStackState = MutableStateFlow(backStack.toList())
+    private val backStackStateFlow = snapshotFlow { topLevelBackStack.backStack.toList() }
     private var currentTab: AuthenticatedTab = ConversationTab
 
-    // Process account changes and update backstack accordingly
+    // Process account changes and update TopLevelBackStack accordingly
     private val processedAccountFlow = session.account
         .onEach { account ->
-            val hasAuthenticatedEntries = backStack.any {
+            val hasAuthenticatedEntries = topLevelBackStack.backStack.any {
                 it is AuthenticatedTab || isAuthenticatedEntry(it)
             }
 
             when {
                 account.isAuthenticated && !hasAuthenticatedEntries -> {
                     Log.d(TAG, "User authenticated but no authenticated entries, starting fresh")
-                    // Start fresh authenticated state
-                    updateBackStack {
-                        clear()
-                        add(ConversationTab)
-                        currentTab = ConversationTab
-                    }
+                    // Start fresh authenticated state with conversation tab
+                    topLevelBackStack.clearAndSet(ConversationTab)
+                    currentTab = ConversationTab
                 }
 
                 !account.isAuthenticated && hasAuthenticatedEntries -> {
                     Log.d(TAG, "User not authenticated but has authenticated entries, clearing")
                     // Session expired or user logged out, clear authenticated entries
-                    updateBackStack {
-                        clear()
-                        add(Welcome)
-                    }
+                    topLevelBackStack.clearAndSet(Welcome)
                 }
             }
         }
 
-    // Combine processed account flow with backstack to determine navigation state
+    // Combine processed account flow with TopLevelBackStack state to determine navigation state  
     val navigationState: StateFlow<NavigationState> = combine(
         processedAccountFlow,
-        _backStackState.asStateFlow()
+        backStackStateFlow
     ) { account, backStackEntries ->
         when {
             account.isAuthenticated -> {
@@ -146,10 +135,6 @@ class NavigationViewModel @AssistedInject constructor(
         initialValue = NavigationState.Initializing
     )
 
-    private inline fun updateBackStack(action: SnapshotStateList<NavKey>.() -> Unit) {
-        backStack.action()
-        _backStackState.value = backStack.toList()
-    }
 
     private fun isAuthenticatedEntry(entry: NavKey): Boolean {
         return when (entry) {
@@ -164,12 +149,9 @@ class NavigationViewModel @AssistedInject constructor(
             Log.d(TAG, "User authenticating")
             session.login()
 
-            // Clear current stack and start with conversation tab
-            updateBackStack {
-                clear()
-                add(ConversationTab)
-                currentTab = ConversationTab
-            }
+            // Start fresh authenticated state with conversation tab
+            topLevelBackStack.clearAndSet(ConversationTab)
+            currentTab = ConversationTab
         }
     }
 
@@ -178,11 +160,8 @@ class NavigationViewModel @AssistedInject constructor(
             Log.d(TAG, "User logging out")
             session.logout()
 
-            // Clear stack and return to welcome
-            updateBackStack {
-                clear()
-                add(Welcome)
-            }
+            // Clear all stacks and return to welcome
+            topLevelBackStack.clearAndSet(Welcome)
         }
     }
 
@@ -190,42 +169,37 @@ class NavigationViewModel @AssistedInject constructor(
         viewModelScope.launch {
             Log.d(TAG, "Switching to tab: $tab")
 
-            // Update current tab and replace current stack with just the tab root
-            updateBackStack {
-                clear()
-                add(tab)
-                currentTab = tab
-            }
+            // Switch to the specified tab (creates new stack if needed)
+            topLevelBackStack.addTopLevel(tab)
+            currentTab = tab
         }
     }
 
     fun navigateToEntry(entry: NavigationEntry) {
         viewModelScope.launch {
-            Log.d(TAG, "Adding $entry to stack")
-            // Add to back stack
-            updateBackStack {
-                add(entry)
-            }
+            Log.d(TAG, "Adding $entry to current stack")
+
+            // Add to current stack
+            topLevelBackStack.add(entry)
         }
     }
 
     fun navigateBack(): Boolean {
-        if (backStack.size > 1) {
-            viewModelScope.launch {
-                val removedEntry = backStack.removeLastOrNull()
-                Log.d(TAG, "Removed $removedEntry from back stack")
+        return if (topLevelBackStack.backStack.size > 1) {
+            Log.d(TAG, "Navigating back")
 
-                // Update current tab if we're back to a tab
-                val lastTab = backStack.reversed()
-                    .firstOrNull { it is AuthenticatedTab } as? AuthenticatedTab
-                if (lastTab != null) {
-                    currentTab = lastTab
-                }
+            topLevelBackStack.removeLast()
 
-                _backStackState.value = backStack.toList()
+            // Update current tab if we're back to a tab
+            val lastTab = topLevelBackStack.backStack.reversed()
+                .firstOrNull { it is AuthenticatedTab } as? AuthenticatedTab
+            if (lastTab != null) {
+                currentTab = lastTab
             }
-            return true
+
+            true
+        } else {
+            false
         }
-        return false
     }
 }
