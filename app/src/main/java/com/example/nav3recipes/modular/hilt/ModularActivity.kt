@@ -14,12 +14,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.toMutableStateList
-import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.compose.ui.Modifier
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
@@ -35,7 +33,6 @@ import com.example.nav3recipes.conversation.ConversationListScreen
 import com.example.nav3recipes.profile.ProfileScreen
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.EntryPointAccessors
 
 @AndroidEntryPoint
 class ModularActivity : FragmentActivity() {
@@ -49,44 +46,235 @@ class ModularActivity : FragmentActivity() {
         setEdgeToEdgeConfig()
         setContent {
             val backStack = rememberNavBackStack(Welcome)
-            val viewModel = hiltViewModel<NavigationViewModel, NavigationViewModel.Factory>(creationCallback = { factory ->
-                factory.create(backStack.mapNotNull { it as? NavigationEntry }.toMutableStateList())
-            })
+            val viewModel =
+                hiltViewModel<NavigationViewModel, NavigationViewModel.Factory> { factory ->
+                    factory.create(backStack)
+                }
             val navigationState by viewModel.navigationState.collectAsState()
 
-            when (val state = navigationState) {
-                is NavigationState.Authenticated -> {
-                    Log.d(TAG, "Showing authenticated UI")
-                    AuthenticatedUI(
-                        navigationState = state,
-                        onTabSelected = viewModel::navigateToTab,
-                        onNavigate = viewModel::navigateToEntry,
-                        onBack = { viewModel.navigateBack() },
-                        onLogout = viewModel::logout
-                    )
-                }
+            // Always use NavDisplay with the actual backStack from Navigation 3
+            NavDisplay(
+                backStack = backStack,
+                onBack = {
+                    Log.d(TAG, "Back pressed")
+                    if (!viewModel.navigateBack()) {
+                        // If ViewModel can't handle back, let the system handle it
+                        backStack.removeLastOrNull()
+                    }
+                },
+                entryProvider = entryProvider {
+                    // Welcome screen - shown during initialization
+                    entry<Welcome> {
+                        WelcomeScreen(
+                            navigationState = navigationState,
+                            onNavigate = viewModel::navigateToEntry
+                        )
+                    }
 
-                is NavigationState.Anonymous -> {
-                    Log.d(TAG, "Showing anonymous UI")
-                    AnonymousUI(
-                        navigationState = state,
-                        onNavigate = viewModel::navigateToEntry,
-                        onBack = { viewModel.navigateBack() },
-                        onAuthenticate = viewModel::authenticate
-                    )
+                    // Anonymous screens
+                    entry<Login> {
+                        ContentBlue("Login Screen") {
+                            Column {
+                                Button(onClick = {
+                                    Log.d(TAG, "User authenticated")
+                                    viewModel.authenticate()
+                                }) {
+                                    Text("Sign In")
+                                }
+                                Button(onClick = {
+                                    Log.d(TAG, "Navigate to register")
+                                    viewModel.navigateToEntry(Register)
+                                }) {
+                                    Text("Don't have account? Register")
+                                }
+                                Button(onClick = {
+                                    Log.d(TAG, "Navigate to forgot password")
+                                    viewModel.navigateToEntry(ForgotPassword)
+                                }) {
+                                    Text("Forgot Password?")
+                                }
+                            }
+                        }
+                    }
+
+                    entry<Register> {
+                        ContentYellow("Register Screen") {
+                            Column {
+                                Button(onClick = {
+                                    Log.d(TAG, "Registration completed")
+                                    viewModel.authenticate()
+                                }) {
+                                    Text("Create Account")
+                                }
+                                Button(onClick = {
+                                    Log.d(TAG, "Navigate back to login")
+                                    viewModel.navigateToEntry(Login)
+                                }) {
+                                    Text("Already have account? Login")
+                                }
+                            }
+                        }
+                    }
+
+                    entry<ForgotPassword> {
+                        ContentPurple("Forgot Password Screen") {
+                            Column {
+                                Button(onClick = {
+                                    Log.d(TAG, "Password reset requested")
+                                    viewModel.navigateToEntry(Login)
+                                }) {
+                                    Text("Send Reset Email")
+                                }
+                                Button(onClick = {
+                                    Log.d(TAG, "Navigate back to login from forgot password")
+                                    viewModel.navigateToEntry(Login)
+                                }) {
+                                    Text("Back to Login")
+                                }
+                            }
+                        }
+                    }
+
+                    // Authenticated screens with bottom navigation
+                    entry<ConversationTab> {
+                        AuthenticatedWrapper(
+                            currentTab = ConversationTab,
+                            onTabSelected = viewModel::navigateToTab
+                        ) {
+                            ConversationListScreen(
+                                onConversationClicked = { conversationId ->
+                                    Log.d(TAG, "Conversation clicked: $conversationId")
+                                    viewModel.navigateToEntry(ConversationDetail(conversationId.value))
+                                },
+                                onConversationFragmentClicked = { conversationId ->
+                                    Log.d(TAG, "Conversation fragment clicked: $conversationId")
+                                    viewModel.navigateToEntry(
+                                        ConversationDetailFragment(
+                                            conversationId.value
+                                        )
+                                    )
+                                },
+                            )
+                        }
+                    }
+
+                    entry<ConversationDetail> { key ->
+                        AuthenticatedWrapper(
+                            currentTab = ConversationTab,
+                            onTabSelected = viewModel::navigateToTab
+                        ) {
+                            ConversationDetailScreen(
+                                conversationId = ConversationId(key.id),
+                                onProfileClicked = {
+                                    Log.d(TAG, "Profile clicked from conversation detail")
+                                    viewModel.navigateToEntry(UserProfile)
+                                }
+                            )
+                        }
+                    }
+
+                    entry<ConversationDetailFragment> { key ->
+                        AuthenticatedWrapper(
+                            currentTab = ConversationTab,
+                            onTabSelected = viewModel::navigateToTab
+                        ) {
+                            ConversationDetailFragmentScreen(
+                                conversationId = ConversationId(key.id),
+                                onProfileClicked = {
+                                    Log.d(TAG, "Profile clicked from conversation fragment")
+                                    viewModel.navigateToEntry(UserProfile)
+                                }
+                            )
+                        }
+                    }
+
+                    entry<MyProfileTab> {
+                        AuthenticatedWrapper(
+                            currentTab = MyProfileTab,
+                            onTabSelected = viewModel::navigateToTab
+                        ) {
+                            ContentPurple("My Profile") {
+                                Text("My Profile")
+                            }
+                        }
+                    }
+
+                    entry<UserProfile> {
+                        AuthenticatedWrapper(
+                            currentTab = determineCurrentTab(navigationState, backStack),
+                            onTabSelected = viewModel::navigateToTab
+                        ) {
+                            ProfileScreen()
+                        }
+                    }
+
+                    entry<SettingsTab> {
+                        AuthenticatedWrapper(
+                            currentTab = SettingsTab,
+                            onTabSelected = viewModel::navigateToTab
+                        ) {
+                            ContentRed("Settings Screen") {
+                                Column {
+                                    Button(onClick = {
+                                        Log.d(TAG, "User logged out")
+                                        viewModel.logout()
+                                    }) {
+                                        Text("Logout")
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
+            )
+        }
+    }
+}
+
+@Composable
+private fun WelcomeScreen(
+    navigationState: NavigationState,
+    onNavigate: (NavigationEntry) -> Unit
+) {
+    when (navigationState) {
+        is NavigationState.Initializing -> {
+            ContentGreen("Loading...") {
+                Text("Checking session...")
+            }
+        }
+
+        is NavigationState.Anonymous -> {
+            ContentGreen("Welcome to Nav3 Recipes") {
+                Column {
+                    Button(onClick = {
+                        Log.d("ModularActivity", "Login button clicked")
+                        onNavigate(Login)
+                    }) {
+                        Text("Login")
+                    }
+                    Button(onClick = {
+                        Log.d("ModularActivity", "Register button clicked")
+                        onNavigate(Register)
+                    }) {
+                        Text("Register")
+                    }
+                }
+            }
+        }
+        is NavigationState.Authenticated -> {
+            // This shouldn't happen on Welcome screen, but handle gracefully
+            ContentGreen("Redirecting...") {
+                Text("Loading authenticated content...")
             }
         }
     }
 }
 
 @Composable
-private fun AuthenticatedUI(
-    navigationState: NavigationState.Authenticated,
+private fun AuthenticatedWrapper(
+    currentTab: AuthenticatedTab,
     onTabSelected: (AuthenticatedTab) -> Unit,
-    onNavigate: (NavigationEntry) -> Unit,
-    onBack: () -> Unit,
-    onLogout: () -> Unit
+    content: @Composable () -> Unit
 ) {
     val authenticatedTabs = listOf(ConversationTab, MyProfileTab, SettingsTab)
 
@@ -94,7 +282,7 @@ private fun AuthenticatedUI(
         bottomBar = {
             NavigationBar {
                 authenticatedTabs.forEach { tab ->
-                    val isSelected = tab == navigationState.currentTab
+                    val isSelected = tab == currentTab
                     NavigationBarItem(
                         selected = isSelected,
                         onClick = {
@@ -112,179 +300,24 @@ private fun AuthenticatedUI(
             }
         }
     ) { contentPadding ->
-        NavDisplay(
-            backStack = navigationState.backStack,
-            onBack = {
-                Log.d("ModularActivity", "Back pressed in authenticated UI")
-                onBack()
-            },
-            entryProvider = entryProvider {
-                entry<ConversationTab> {
-                    ConversationListScreen(
-                        onConversationClicked = { conversationId ->
-                            Log.d("ModularActivity", "Conversation clicked: $conversationId")
-                            onNavigate(ConversationDetail(conversationId.value))
-                        },
-                        onConversationFragmentClicked = { conversationId ->
-                            Log.d(
-                                "ModularActivity",
-                                "Conversation fragment clicked: $conversationId"
-                            )
-                            onNavigate(ConversationDetailFragment(conversationId.value))
-                        },
-                    )
-                }
-
-                entry<ConversationDetail> { key ->
-                    ConversationDetailScreen(
-                        conversationId = ConversationId(key.id),
-                        onProfileClicked = {
-                            Log.d("ModularActivity", "Profile clicked from conversation detail")
-                            onNavigate(UserProfile)
-                        }
-                    )
-                }
-
-                entry<ConversationDetailFragment> { key ->
-                    ConversationDetailFragmentScreen(
-                        conversationId = ConversationId(key.id),
-                        onProfileClicked = {
-                            Log.d("ModularActivity", "Profile clicked from conversation fragment")
-                            onNavigate(UserProfile)
-                        }
-                    )
-                }
-
-                entry<MyProfileTab> {
-                    ContentPurple("My Profile") {
-                        Text("My Profile")
-                    }
-                }
-
-                entry<UserProfile> {
-                    ProfileScreen()
-                }
-
-                entry<SettingsTab> {
-                    SettingsScreen(
-                        onLogout = {
-                            Log.d("ModularActivity", "User logged out")
-                            onLogout()
-                        }
-                    )
-                }
-            },
+        Column(
             modifier = Modifier.padding(contentPadding)
-        )
+        ) {
+            content()
+        }
     }
 }
 
 @Composable
-private fun AnonymousUI(
-    navigationState: NavigationState.Anonymous,
-    onNavigate: (NavigationEntry) -> Unit,
-    onBack: () -> Unit,
-    onAuthenticate: () -> Unit
-) {
-    NavDisplay(
-        backStack = navigationState.backStack,
-        onBack = {
-            Log.d("ModularActivity", "Back pressed in anonymous UI")
-            onBack()
-        },
-        entryProvider = entryProvider {
-            entry<Welcome> {
-                ContentGreen("Welcome to Nav3 Recipes") {
-                    Column {
-                        Button(onClick = {
-                            Log.d("ModularActivity", "Login button clicked")
-                            onNavigate(Login)
-                        }) {
-                            Text("Login")
-                        }
-                        Button(onClick = {
-                            Log.d("ModularActivity", "Register button clicked")
-                            onNavigate(Register)
-                        }) {
-                            Text("Register")
-                        }
-                    }
-                }
-            }
-
-            entry<Login> {
-                ContentBlue("Login Screen") {
-                    Column {
-                        Button(onClick = {
-                            Log.d("ModularActivity", "User authenticated")
-                            onAuthenticate()
-                        }) {
-                            Text("Sign In")
-                        }
-                        Button(onClick = {
-                            Log.d("ModularActivity", "Navigate to register")
-                            onNavigate(Register)
-                        }) {
-                            Text("Don't have account? Register")
-                        }
-                        Button(onClick = {
-                            Log.d("ModularActivity", "Navigate to forgot password")
-                            onNavigate(ForgotPassword)
-                        }) {
-                            Text("Forgot Password?")
-                        }
-                    }
-                }
-            }
-
-            entry<Register> {
-                ContentYellow("Register Screen") {
-                    Column {
-                        Button(onClick = {
-                            Log.d("ModularActivity", "Registration completed")
-                            onAuthenticate()
-                        }) {
-                            Text("Create Account")
-                        }
-                        Button(onClick = {
-                            Log.d("ModularActivity", "Navigate back to login")
-                            onNavigate(Login)
-                        }) {
-                            Text("Already have account? Login")
-                        }
-                    }
-                }
-            }
-
-            entry<ForgotPassword> {
-                ContentPurple("Forgot Password Screen") {
-                    Column {
-                        Button(onClick = {
-                            Log.d("ModularActivity", "Password reset requested")
-                            onNavigate(Login)
-                        }) {
-                            Text("Send Reset Email")
-                        }
-                        Button(onClick = {
-                            Log.d("ModularActivity", "Navigate back to login from forgot password")
-                            onNavigate(Login)
-                        }) {
-                            Text("Back to Login")
-                        }
-                    }
-                }
-            }
-        }
-    )
-}
-
-@Composable
-private fun SettingsScreen(onLogout: () -> Unit) {
-    ContentRed("Settings Screen") {
-        Column {
-            Button(onClick = onLogout) {
-                Text("Logout")
-            }
-        }
+private fun determineCurrentTab(
+    navigationState: NavigationState,
+    backStack: androidx.compose.runtime.snapshots.SnapshotStateList<androidx.navigation3.runtime.NavKey>
+): AuthenticatedTab {
+    if (navigationState is NavigationState.Authenticated) {
+        return navigationState.currentTab
     }
+
+    // Fall back to determining from backStack
+    val lastTab = backStack.reversed().firstOrNull { it is AuthenticatedTab } as? AuthenticatedTab
+    return lastTab ?: ConversationTab
 }

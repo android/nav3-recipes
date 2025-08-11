@@ -5,6 +5,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed class NavigationState {
     @Serializable
+    data object Initializing : NavigationState()
+
+    @Serializable
     data class Anonymous(
         val backStack: List<NavigationEntry> = listOf(Welcome)
     ) : NavigationState()

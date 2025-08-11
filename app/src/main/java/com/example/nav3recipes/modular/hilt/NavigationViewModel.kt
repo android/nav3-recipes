@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation3.runtime.NavKey
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -22,6 +23,12 @@ import kotlinx.coroutines.launch
  * - Tab-based navigation for authenticated users
  *
  * ## Navigation Architecture:
+ *
+ * ### Initialization Flow:
+ * - Always starts with Welcome screen to check session state
+ * - If session is active and restored stack contains authenticated entries: restore authenticated state
+ * - If session is active but no authenticated entries: start fresh authenticated state
+ * - If session is inactive: show anonymous flow starting with Welcome
  *
  * ### Anonymous State:
  * - Single back stack for unauthenticated users
@@ -44,18 +51,18 @@ import kotlinx.coroutines.launch
  * - On restoration, validates session to determine if authenticated stack should be used
  * - Falls back to anonymous state if session expired
  *
- * @param restoredBackStack The back stack restored by Navigation 3 runtime
+ * @param backStack The back stack managed by Navigation 3 runtime
  * @param session The session manager for authentication state
  */
 @HiltViewModel(assistedFactory = NavigationViewModel.Factory::class)
 class NavigationViewModel @AssistedInject constructor(
-    @Assisted private val restoredBackStack: SnapshotStateList<NavigationEntry>,
+    @Assisted private val backStack: SnapshotStateList<NavKey>,
     private val session: Session
 ) : ViewModel() {
 
     @AssistedFactory
     interface Factory {
-        fun create(restoredBackStack: SnapshotStateList<NavigationEntry>): NavigationViewModel
+        fun create(backStack: SnapshotStateList<NavKey>): NavigationViewModel
     }
 
     companion object {
@@ -65,18 +72,13 @@ class NavigationViewModel @AssistedInject constructor(
         )
     }
 
-    private val _navigationState = MutableStateFlow<NavigationState>(NavigationState.Anonymous())
+    private val _navigationState = MutableStateFlow<NavigationState>(NavigationState.Initializing)
     val navigationState: StateFlow<NavigationState> = _navigationState.asStateFlow()
 
-    private val tabStacks = mutableMapOf<AuthenticatedTab, MutableList<NavigationEntry>>()
+    private var currentTab: AuthenticatedTab = ConversationTab
 
     init {
-        // Initialize tab stacks
-        AUTHENTICATED_TABS.forEach { tab ->
-            tabStacks[tab] = mutableListOf(tab)
-        }
-
-        // Handle restored back stack based on session state
+        // Handle initialization based on session state and restored back stack
         viewModelScope.launch {
             initializeNavigationState()
         }
@@ -85,12 +87,19 @@ class NavigationViewModel @AssistedInject constructor(
     private suspend fun initializeNavigationState() {
         val isSessionActive = session.isSessionActive()
         val hasAuthenticatedEntries =
-            restoredBackStack.any { it is AuthenticatedTab || isAuthenticatedEntry(it) }
+            backStack.any { it is AuthenticatedTab || isAuthenticatedEntry(it) }
 
         when {
             isSessionActive && hasAuthenticatedEntries -> {
                 Log.d(TAG, "Restoring authenticated session with saved back stack")
-                restoreAuthenticatedState()
+                // Determine current tab from the back stack
+                currentTab =
+                    backStack.reversed().firstOrNull { it is AuthenticatedTab } as? AuthenticatedTab
+                        ?: ConversationTab
+                _navigationState.value = NavigationState.Authenticated(
+                    currentTab = currentTab,
+                    backStack = backStack.mapNotNull { it as? NavigationEntry }
+                )
             }
 
             isSessionActive -> {
@@ -98,15 +107,20 @@ class NavigationViewModel @AssistedInject constructor(
                     TAG,
                     "Session active but no authenticated entries, starting fresh authenticated state"
                 )
+                // Replace Welcome with first tab
+                backStack.clear()
+                backStack.add(ConversationTab)
+                currentTab = ConversationTab
                 _navigationState.value = NavigationState.Authenticated(
                     currentTab = ConversationTab,
-                    backStack = tabStacks[ConversationTab]?.toList() ?: listOf(ConversationTab)
+                    backStack = listOf(ConversationTab)
                 )
             }
+
             hasAuthenticatedEntries -> {
                 Log.d(TAG, "Session expired, discarding authenticated back stack")
-                restoredBackStack.clear()
-                restoredBackStack.add(Welcome)
+                backStack.clear()
+                backStack.add(Welcome)
                 _navigationState.value = NavigationState.Anonymous()
             }
 
@@ -117,7 +131,7 @@ class NavigationViewModel @AssistedInject constructor(
         }
     }
 
-    private fun isAuthenticatedEntry(entry: NavigationEntry): Boolean {
+    private fun isAuthenticatedEntry(entry: NavKey): Boolean {
         return when (entry) {
             is AuthenticatedTab -> true
             is ConversationDetail, is ConversationDetailFragment, is UserProfile -> true
@@ -125,65 +139,15 @@ class NavigationViewModel @AssistedInject constructor(
         }
     }
 
-    private fun restoreAuthenticatedState() {
-        // Rebuild tab stacks from restored back stack
-        val currentTab =
-            restoredBackStack.lastOrNull { it is AuthenticatedTab } as? AuthenticatedTab
-                ?: ConversationTab
-
-        // Group entries by tab
-        var currentTabForEntry: AuthenticatedTab = ConversationTab
-        tabStacks.clear()
-        AUTHENTICATED_TABS.forEach { tab -> tabStacks[tab] = mutableListOf() }
-
-        for (entry in restoredBackStack) {
-            when (entry) {
-                is AuthenticatedTab -> {
-                    currentTabForEntry = entry
-                    tabStacks[currentTabForEntry]?.add(entry)
-                }
-
-                is ConversationDetail, is ConversationDetailFragment -> {
-                    // These belong to conversation tab
-                    if (tabStacks[ConversationTab]?.isEmpty() == true) {
-                        tabStacks[ConversationTab]?.add(ConversationTab)
-                    }
-                    tabStacks[ConversationTab]?.add(entry)
-                }
-
-                is UserProfile -> {
-                    // This can belong to any tab, add to current
-                    tabStacks[currentTabForEntry]?.add(entry)
-                }
-
-                // Anonymous entries should not be in authenticated state
-                is Welcome, is Login, is Register, is ForgotPassword -> {
-                    // Skip these entries when restoring authenticated state
-                }
-            }
-        }
-
-        // Ensure each tab has at least its root
-        AUTHENTICATED_TABS.forEach { tab ->
-            if (tabStacks[tab]?.isEmpty() == true) {
-                tabStacks[tab]?.add(tab)
-            }
-        }
-
-        _navigationState.value = NavigationState.Authenticated(
-            currentTab = currentTab,
-            backStack = restoredBackStack.toList()
-        )
-    }
-
     fun authenticate() {
         viewModelScope.launch {
             Log.d(TAG, "User authenticated")
             session.startSession()
 
-            // Clear anonymous entries and start with conversation tab
-            restoredBackStack.clear()
-            restoredBackStack.add(ConversationTab)
+            // Clear current stack and start with conversation tab
+            backStack.clear()
+            backStack.add(ConversationTab)
+            currentTab = ConversationTab
 
             _navigationState.value = NavigationState.Authenticated(
                 currentTab = ConversationTab,
@@ -197,13 +161,9 @@ class NavigationViewModel @AssistedInject constructor(
             Log.d(TAG, "User logged out")
             session.endSession()
 
-            // Reset tab stacks and back stack
-            AUTHENTICATED_TABS.forEach { tab ->
-                tabStacks[tab] = mutableListOf(tab)
-            }
-
-            restoredBackStack.clear()
-            restoredBackStack.add(Welcome)
+            // Clear stack and return to welcome
+            backStack.clear()
+            backStack.add(Welcome)
 
             _navigationState.value = NavigationState.Anonymous()
         }
@@ -221,14 +181,16 @@ class NavigationViewModel @AssistedInject constructor(
             if (currentState is NavigationState.Authenticated) {
                 Log.d(TAG, "Switching to tab: $tab")
 
-                // Update back stack to show this tab's stack
-                val tabStack = tabStacks[tab] ?: listOf(tab)
-                restoredBackStack.clear()
-                restoredBackStack.addAll(tabStack)
+                // Update current tab
+                currentTab = tab
+
+                // Replace current stack with just the tab root
+                backStack.clear()
+                backStack.add(tab)
 
                 _navigationState.value = currentState.copy(
                     currentTab = tab,
-                    backStack = tabStack
+                    backStack = listOf(tab)
                 )
             }
         }
@@ -246,27 +208,25 @@ class NavigationViewModel @AssistedInject constructor(
                         return@launch
                     }
 
-                    // Add to current tab's stack and main back stack
-                    val currentTabStack: MutableList<NavigationEntry> =
-                        tabStacks[currentState.currentTab]?.toMutableList() ?: mutableListOf(
-                            currentState.currentTab
-                        )
-                    currentTabStack.add(entry)
-                    tabStacks[currentState.currentTab] = currentTabStack
-
-                    restoredBackStack.add(entry)
-
-                    Log.d(TAG, "Adding $entry to tab ${currentState.currentTab}")
-                    _navigationState.value =
-                        currentState.copy(backStack = restoredBackStack.toList())
+                    // Add to back stack
+                    backStack.add(entry)
+                    Log.d(TAG, "Adding $entry to authenticated stack")
+                    _navigationState.value = currentState.copy(
+                        backStack = backStack.mapNotNull { it as? NavigationEntry }
+                    )
                 }
 
                 is NavigationState.Anonymous -> {
                     // Add to back stack
-                    restoredBackStack.add(entry)
+                    backStack.add(entry)
                     Log.d(TAG, "Adding $entry to anonymous stack")
-                    _navigationState.value =
-                        currentState.copy(backStack = restoredBackStack.toList())
+                    _navigationState.value = currentState.copy(
+                        backStack = backStack.mapNotNull { it as? NavigationEntry }
+                    )
+                }
+
+                is NavigationState.Initializing -> {
+                    Log.d(TAG, "Navigation attempted during initialization, ignoring")
                 }
             }
         }
@@ -277,7 +237,7 @@ class NavigationViewModel @AssistedInject constructor(
 
         return when (currentState) {
             is NavigationState.Authenticated -> {
-                // Check session in a coroutine but return immediately based on current stack
+                // Check session
                 viewModelScope.launch {
                     if (!session.checkAndUpdateSession()) {
                         Log.d(TAG, "Session expired on back navigation, logging out")
@@ -286,18 +246,21 @@ class NavigationViewModel @AssistedInject constructor(
                     }
                 }
 
-                if (restoredBackStack.size > 1) {
-                    val removedEntry = restoredBackStack.removeLastOrNull()
+                if (backStack.size > 1) {
+                    val removedEntry = backStack.removeLastOrNull()
+                    Log.d(TAG, "Removed $removedEntry from back stack")
 
-                    // Also remove from tab stack if it's there
-                    val currentTabStack = tabStacks[currentState.currentTab]
-                    if (currentTabStack != null && currentTabStack.lastOrNull() == removedEntry && currentTabStack.size > 1) {
-                        currentTabStack.removeLastOrNull()
+                    // Update current tab if we're back to a tab
+                    val lastTab = backStack.reversed()
+                        .firstOrNull { it is AuthenticatedTab } as? AuthenticatedTab
+                    if (lastTab != null) {
+                        currentTab = lastTab
                     }
 
-                    Log.d(TAG, "Removed $removedEntry from back stack")
-                    _navigationState.value =
-                        currentState.copy(backStack = restoredBackStack.toList())
+                    _navigationState.value = currentState.copy(
+                        currentTab = currentTab,
+                        backStack = backStack.mapNotNull { it as? NavigationEntry }
+                    )
                     true
                 } else {
                     false
@@ -305,15 +268,20 @@ class NavigationViewModel @AssistedInject constructor(
             }
 
             is NavigationState.Anonymous -> {
-                if (restoredBackStack.size > 1) {
-                    val removedEntry = restoredBackStack.removeLastOrNull()
+                if (backStack.size > 1) {
+                    val removedEntry = backStack.removeLastOrNull()
                     Log.d(TAG, "Removed $removedEntry from anonymous stack")
-                    _navigationState.value =
-                        currentState.copy(backStack = restoredBackStack.toList())
+                    _navigationState.value = currentState.copy(
+                        backStack = backStack.mapNotNull { it as? NavigationEntry }
+                    )
                     true
                 } else {
                     false
                 }
+            }
+
+            is NavigationState.Initializing -> {
+                false
             }
         }
     }
