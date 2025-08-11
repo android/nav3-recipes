@@ -15,10 +15,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun ConversationDetailScreen(
     conversationId: ConversationId,
+    onProfileClicked: () -> Unit
+) {
+    // Use assisted Hilt ViewModel factory to pass conversationId.value to SavedStateHandle
+    val viewModel: ConversationDetailViewModel =
+        hiltViewModel<ConversationDetailViewModel, ConversationDetailViewModel.Factory> { factory ->
+            factory.create(conversationId)
+        }
+
+    ConversationDetailScreenImpl(
+        viewModel = viewModel,
+        onProfileClicked = onProfileClicked
+    )
+}
+
+@Composable
+private fun ConversationDetailScreenImpl(
+    viewModel: ConversationDetailViewModel,
     onProfileClicked: () -> Unit
 ) {
     Scaffold { paddingValues ->
@@ -26,13 +44,13 @@ fun ConversationDetailScreen(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
-                .background(conversationId.color)
+                .background(viewModel.conversationId.color)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Conversation Detail Screen: ${conversationId.value}",
+                text = "Conversation Detail Screen: ${viewModel.conversationId.value}",
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
