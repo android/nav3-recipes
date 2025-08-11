@@ -47,10 +47,12 @@ import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -118,7 +120,7 @@ sealed class NavigationState {
 
 @HiltViewModel
 class NavigationViewModel @Inject constructor(
-    private val sharedPreferences: SharedPreferences
+    private val session: Session
 ) : ViewModel() {
 
     companion object {
@@ -126,9 +128,6 @@ class NavigationViewModel @Inject constructor(
         private val AUTHENTICATED_TABS: List<AuthenticatedTab> = listOf(
             ConversationTab, MyProfileTab, SettingsTab
         )
-        private const val SESSION_KEY = "session_active"
-        private const val SESSION_TIMESTAMP_KEY = "session_start_time"
-        private const val SESSION_TIMEOUT_MS: Long = 2 * 60 * 1000 // 2 minutes
     }
 
     private val _navigationState = MutableStateFlow<NavigationState>(NavigationState.Anonymous())
@@ -142,69 +141,21 @@ class NavigationViewModel @Inject constructor(
             tabStacks[tab] = mutableListOf(tab)
         }
         // Restore session if possible
-        restoreSessionIfValid()
-    }
-
-    private fun restoreSessionIfValid() {
-        val isSessionActive = sharedPreferences.getBoolean(SESSION_KEY, false)
-        val sessionStart = sharedPreferences.getLong(SESSION_TIMESTAMP_KEY, 0L)
-        val now = System.currentTimeMillis()
-
-        if (isSessionActive && (now - sessionStart < SESSION_TIMEOUT_MS)) {
-            Log.d(TAG, "Restoring active session")
-            _navigationState.value = NavigationState.Authenticated(
-                currentTab = ConversationTab,
-                backStack = tabStacks[ConversationTab]?.toList() ?: listOf(ConversationTab)
-            )
-            // Update timestamp to extend session
-            sharedPreferences.edit()
-                .putLong(SESSION_TIMESTAMP_KEY, now)
-                .apply()
-        } else {
-            if (isSessionActive) {
-                Log.d(TAG, "Session expired, clearing saved state")
+        viewModelScope.launch {
+            if (session.isSessionActive()) {
+                Log.d(TAG, "Restoring active session")
+                _navigationState.value = NavigationState.Authenticated(
+                    currentTab = ConversationTab,
+                    backStack = tabStacks[ConversationTab]?.toList() ?: listOf(ConversationTab)
+                )
             }
-            endSession()
         }
-    }
-
-    private fun startSession() {
-        val now = System.currentTimeMillis()
-        Log.d(TAG, "Starting session at $now")
-        sharedPreferences.edit()
-            .putBoolean(SESSION_KEY, true)
-            .putLong(SESSION_TIMESTAMP_KEY, now)
-            .apply()
-    }
-
-    private fun endSession() {
-        Log.d(TAG, "Ending session")
-        sharedPreferences.edit()
-            .putBoolean(SESSION_KEY, false)
-            .remove(SESSION_TIMESTAMP_KEY)
-            .apply()
-    }
-
-    private fun updateSessionTimestampIfAuthenticated() {
-        val currentState = _navigationState.value
-        if (currentState is NavigationState.Authenticated) {
-            sharedPreferences.edit()
-                .putLong(SESSION_TIMESTAMP_KEY, System.currentTimeMillis())
-                .apply()
-        }
-    }
-
-    private fun checkSessionTimeout(): Boolean {
-        val isSessionActive = sharedPreferences.getBoolean(SESSION_KEY, false)
-        val sessionStart = sharedPreferences.getLong(SESSION_TIMESTAMP_KEY, 0L)
-        val now = System.currentTimeMillis()
-        return !(isSessionActive && (now - sessionStart < SESSION_TIMEOUT_MS))
     }
 
     fun authenticate() {
         viewModelScope.launch {
             Log.d(TAG, "User authenticated")
-            startSession()
+            session.startSession()
             _navigationState.value = NavigationState.Authenticated(
                 currentTab = ConversationTab,
                 backStack = tabStacks[ConversationTab]?.toList() ?: listOf(ConversationTab)
@@ -219,21 +170,20 @@ class NavigationViewModel @Inject constructor(
             AUTHENTICATED_TABS.forEach { tab ->
                 tabStacks[tab] = mutableListOf(tab)
             }
-            endSession()
+            session.endSession()
             _navigationState.value = NavigationState.Anonymous()
         }
     }
 
     fun navigateToTab(tab: AuthenticatedTab) {
         viewModelScope.launch {
-            if (checkSessionTimeout()) {
+            if (!session.checkAndUpdateSession()) {
                 Log.d(TAG, "Session expired when switching tabs, logging out")
                 logout()
                 return@launch
             }
             val currentState = _navigationState.value
             if (currentState is NavigationState.Authenticated) {
-                updateSessionTimestampIfAuthenticated()
                 Log.d(TAG, "Switching to tab: $tab")
                 _navigationState.value = currentState.copy(
                     currentTab = tab,
@@ -249,12 +199,11 @@ class NavigationViewModel @Inject constructor(
 
             when (currentState) {
                 is NavigationState.Authenticated -> {
-                    if (checkSessionTimeout()) {
+                    if (!session.checkAndUpdateSession()) {
                         Log.d(TAG, "Session expired when navigating, logging out")
                         logout()
                         return@launch
                     }
-                    updateSessionTimestampIfAuthenticated()
                     // Add to current tab's stack
                     val currentTabStack =
                         tabStacks[currentState.currentTab] ?: mutableListOf(currentState.currentTab)
@@ -282,12 +231,15 @@ class NavigationViewModel @Inject constructor(
 
         return when (currentState) {
             is NavigationState.Authenticated -> {
-                if (checkSessionTimeout()) {
-                    Log.d(TAG, "Session expired on back navigation, logging out")
-                    logout()
-                    return false
+                // Check session in a coroutine but return immediately based on current stack
+                viewModelScope.launch {
+                    if (!session.checkAndUpdateSession()) {
+                        Log.d(TAG, "Session expired on back navigation, logging out")
+                        logout()
+                        return@launch
+                    }
                 }
-                updateSessionTimestampIfAuthenticated()
+
                 val currentTabStack = tabStacks[currentState.currentTab] ?: mutableListOf()
                 if (currentTabStack.size > 1) {
                     currentTabStack.removeLastOrNull()
