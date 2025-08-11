@@ -16,15 +16,14 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.fragment.app.FragmentActivity
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
@@ -40,46 +39,192 @@ import com.example.nav3recipes.conversation.ConversationListScreen
 import com.example.nav3recipes.profile.ProfileScreen
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
+import javax.inject.Inject
 
-/**
- * Enhanced modular activity that combines:
- * - Bottom navigation for authenticated users with separate tab stacks
- * - Authentication flow for anonymous users
- * - Conditional navigation based on authentication state
- */
+// Serializable navigation entries
+@Serializable
+sealed interface NavigationEntry
 
 // Anonymous user routes
-private data object Welcome
-private data object Login
-private data object Register
-private data object ForgotPassword
+@Serializable
+data object Welcome : NavigationEntry
+
+@Serializable
+data object Login : NavigationEntry
+
+@Serializable
+data object Register : NavigationEntry
+
+@Serializable
+data object ForgotPassword : NavigationEntry
 
 // Authenticated user routes - main tabs
-private sealed interface AuthenticatedRoute {
+@Serializable
+sealed interface AuthenticatedTab : NavigationEntry {
     val icon: ImageVector
+        get() = when (this) {
+            is ConversationTab -> Icons.Default.Face
+            is MyProfileTab -> Icons.Default.Person
+            is SettingsTab -> Icons.Default.Settings
+        }
 }
 
-private data object ConversationTab : AuthenticatedRoute {
-    override val icon = Icons.Default.Face
-}
+@Serializable
+data object ConversationTab : AuthenticatedTab
 
-private data object MyProfileTab : AuthenticatedRoute {
-    override val icon = Icons.Default.Person
-}
+@Serializable
+data object MyProfileTab : AuthenticatedTab
 
-private data object SettingsTab : AuthenticatedRoute {
-    override val icon = Icons.Default.Settings
-}
+@Serializable
+data object SettingsTab : AuthenticatedTab
 
 // Conversation sub-routes
-private data class ConversationDetail(val id: Int)
-private data class ConversationDetailFragment(val id: Int)
+@Serializable
+data class ConversationDetail(val id: Int) : NavigationEntry
 
-private data object UserProfile
+@Serializable
+data class ConversationDetailFragment(val id: Int) : NavigationEntry
 
-private val AUTHENTICATED_TABS: List<AuthenticatedRoute> = listOf(
-    ConversationTab, MyProfileTab, SettingsTab
-)
+@Serializable
+data object UserProfile : NavigationEntry
+
+@Serializable
+sealed class NavigationState {
+    @Serializable
+    data class Anonymous(
+        val backStack: List<NavigationEntry> = listOf(Welcome)
+    ) : NavigationState()
+
+    @Serializable
+    data class Authenticated(
+        val currentTab: AuthenticatedTab = ConversationTab,
+        val backStack: List<NavigationEntry> = listOf(ConversationTab)
+    ) : NavigationState()
+}
+
+@HiltViewModel
+class NavigationViewModel @Inject constructor() : ViewModel() {
+
+    companion object {
+        private const val TAG = "NavigationViewModel"
+        private val AUTHENTICATED_TABS: List<AuthenticatedTab> = listOf(
+            ConversationTab, MyProfileTab, SettingsTab
+        )
+    }
+
+    private val _navigationState = MutableStateFlow<NavigationState>(NavigationState.Anonymous())
+    val navigationState: StateFlow<NavigationState> = _navigationState.asStateFlow()
+
+    private val tabStacks = mutableMapOf<AuthenticatedTab, MutableList<NavigationEntry>>()
+
+    init {
+        // Initialize tab stacks
+        AUTHENTICATED_TABS.forEach { tab ->
+            tabStacks[tab] = mutableListOf(tab)
+        }
+    }
+
+    fun authenticate() {
+        viewModelScope.launch {
+            Log.d(TAG, "User authenticated")
+            _navigationState.value = NavigationState.Authenticated(
+                currentTab = ConversationTab,
+                backStack = tabStacks[ConversationTab]?.toList() ?: listOf(ConversationTab)
+            )
+        }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            Log.d(TAG, "User logged out")
+            // Reset tab stacks
+            AUTHENTICATED_TABS.forEach { tab ->
+                tabStacks[tab] = mutableListOf(tab)
+            }
+            _navigationState.value = NavigationState.Anonymous()
+        }
+    }
+
+    fun navigateToTab(tab: AuthenticatedTab) {
+        viewModelScope.launch {
+            val currentState = _navigationState.value
+            if (currentState is NavigationState.Authenticated) {
+                Log.d(TAG, "Switching to tab: $tab")
+                _navigationState.value = currentState.copy(
+                    currentTab = tab,
+                    backStack = tabStacks[tab]?.toList() ?: listOf(tab)
+                )
+            }
+        }
+    }
+
+    fun navigateToEntry(entry: NavigationEntry) {
+        viewModelScope.launch {
+            val currentState = _navigationState.value
+
+            when (currentState) {
+                is NavigationState.Authenticated -> {
+                    // Add to current tab's stack
+                    val currentTabStack =
+                        tabStacks[currentState.currentTab] ?: mutableListOf(currentState.currentTab)
+                    val newStack = currentTabStack.toMutableList()
+                    newStack.add(entry)
+                    tabStacks[currentState.currentTab] = newStack
+
+                    Log.d(TAG, "Adding $entry to tab ${currentState.currentTab}")
+                    _navigationState.value = currentState.copy(backStack = newStack)
+                }
+
+                is NavigationState.Anonymous -> {
+                    // Add to anonymous stack
+                    val newStack = currentState.backStack.toMutableList()
+                    newStack.add(entry)
+                    Log.d(TAG, "Adding $entry to anonymous stack")
+                    _navigationState.value = currentState.copy(backStack = newStack)
+                }
+            }
+        }
+    }
+
+    fun navigateBack(): Boolean {
+        val currentState = _navigationState.value
+
+        return when (currentState) {
+            is NavigationState.Authenticated -> {
+                val currentTabStack = tabStacks[currentState.currentTab] ?: mutableListOf()
+                if (currentTabStack.size > 1) {
+                    currentTabStack.removeLastOrNull()
+                    Log.d(
+                        TAG,
+                        "Removing from tab ${currentState.currentTab}, remaining: $currentTabStack"
+                    )
+                    _navigationState.value = currentState.copy(
+                        backStack = currentTabStack.toList()
+                    )
+                    true
+                } else {
+                    false
+                }
+            }
+            is NavigationState.Anonymous -> {
+                if (currentState.backStack.size > 1) {
+                    val newStack = currentState.backStack.dropLast(1)
+                    Log.d(TAG, "Removing from anonymous stack, remaining: $newStack")
+                    _navigationState.value = currentState.copy(backStack = newStack)
+                    true
+                } else {
+                    false
+                }
+            }
+        }
+    }
+}
 
 @AndroidEntryPoint
 class ModularActivity : FragmentActivity() {
@@ -93,33 +238,55 @@ class ModularActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         setEdgeToEdgeConfig()
         setContent {
-            val authBackStack = remember { AuthBackStack() }
+            val viewModel: NavigationViewModel = hiltViewModel()
+            val navigationState by viewModel.navigationState.collectAsState()
 
-            if (authBackStack.isAuthenticated) {
-                Log.d(TAG, "Showing authenticated UI")
-                AuthenticatedUI(authBackStack)
-            } else {
-                Log.d(TAG, "Showing anonymous UI")
-                AnonymousUI(authBackStack)
+            when (val state = navigationState) {
+                is NavigationState.Authenticated -> {
+                    Log.d(TAG, "Showing authenticated UI")
+                    AuthenticatedUI(
+                        navigationState = state,
+                        onTabSelected = viewModel::navigateToTab,
+                        onNavigate = viewModel::navigateToEntry,
+                        onBack = { viewModel.navigateBack() },
+                        onLogout = viewModel::logout
+                    )
+                }
+
+                is NavigationState.Anonymous -> {
+                    Log.d(TAG, "Showing anonymous UI")
+                    AnonymousUI(
+                        navigationState = state,
+                        onNavigate = viewModel::navigateToEntry,
+                        onBack = { viewModel.navigateBack() },
+                        onAuthenticate = viewModel::authenticate
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun AuthenticatedUI(authBackStack: AuthBackStack) {
-    val topLevelBackStack = remember { TopLevelBackStack<Any>(ConversationTab) }
+private fun AuthenticatedUI(
+    navigationState: NavigationState.Authenticated,
+    onTabSelected: (AuthenticatedTab) -> Unit,
+    onNavigate: (NavigationEntry) -> Unit,
+    onBack: () -> Unit,
+    onLogout: () -> Unit
+) {
+    val authenticatedTabs = listOf(ConversationTab, MyProfileTab, SettingsTab)
 
     Scaffold(
         bottomBar = {
             NavigationBar {
-                AUTHENTICATED_TABS.forEach { tab ->
-                    val isSelected = tab == topLevelBackStack.topLevelKey
+                authenticatedTabs.forEach { tab ->
+                    val isSelected = tab == navigationState.currentTab
                     NavigationBarItem(
                         selected = isSelected,
                         onClick = {
                             Log.d("ModularActivity", "Tab clicked: $tab")
-                            topLevelBackStack.addTopLevel(tab)
+                            onTabSelected(tab)
                         },
                         icon = {
                             Icon(
@@ -133,24 +300,24 @@ private fun AuthenticatedUI(authBackStack: AuthBackStack) {
         }
     ) { contentPadding ->
         NavDisplay(
-            backStack = topLevelBackStack.backStack,
+            backStack = navigationState.backStack,
             onBack = {
                 Log.d("ModularActivity", "Back pressed in authenticated UI")
-                topLevelBackStack.removeLast()
+                onBack()
             },
             entryProvider = entryProvider {
                 entry<ConversationTab> {
                     ConversationListScreen(
                         onConversationClicked = { conversationId ->
                             Log.d("ModularActivity", "Conversation clicked: $conversationId")
-                            topLevelBackStack.add(ConversationDetail(conversationId.value))
+                            onNavigate(ConversationDetail(conversationId.value))
                         },
                         onConversationFragmentClicked = { conversationId ->
                             Log.d(
                                 "ModularActivity",
                                 "Conversation fragment clicked: $conversationId"
                             )
-                            topLevelBackStack.add(ConversationDetailFragment(conversationId.value))
+                            onNavigate(ConversationDetailFragment(conversationId.value))
                         },
                     )
                 }
@@ -160,7 +327,7 @@ private fun AuthenticatedUI(authBackStack: AuthBackStack) {
                         conversationId = ConversationId(key.id),
                         onProfileClicked = {
                             Log.d("ModularActivity", "Profile clicked from conversation detail")
-                            topLevelBackStack.add(UserProfile)
+                            onNavigate(UserProfile)
                         }
                     )
                 }
@@ -170,7 +337,7 @@ private fun AuthenticatedUI(authBackStack: AuthBackStack) {
                         conversationId = ConversationId(key.id),
                         onProfileClicked = {
                             Log.d("ModularActivity", "Profile clicked from conversation fragment")
-                            topLevelBackStack.add(UserProfile)
+                            onNavigate(UserProfile)
                         }
                     )
                 }
@@ -189,7 +356,7 @@ private fun AuthenticatedUI(authBackStack: AuthBackStack) {
                     SettingsScreen(
                         onLogout = {
                             Log.d("ModularActivity", "User logged out")
-                            authBackStack.logout()
+                            onLogout()
                         }
                     )
                 }
@@ -200,12 +367,17 @@ private fun AuthenticatedUI(authBackStack: AuthBackStack) {
 }
 
 @Composable
-private fun AnonymousUI(authBackStack: AuthBackStack) {
+private fun AnonymousUI(
+    navigationState: NavigationState.Anonymous,
+    onNavigate: (NavigationEntry) -> Unit,
+    onBack: () -> Unit,
+    onAuthenticate: () -> Unit
+) {
     NavDisplay(
-        backStack = authBackStack.anonymousBackStack,
+        backStack = navigationState.backStack,
         onBack = {
             Log.d("ModularActivity", "Back pressed in anonymous UI")
-            authBackStack.removeFromAnonymous()
+            onBack()
         },
         entryProvider = entryProvider {
             entry<Welcome> {
@@ -213,13 +385,13 @@ private fun AnonymousUI(authBackStack: AuthBackStack) {
                     Column {
                         Button(onClick = {
                             Log.d("ModularActivity", "Login button clicked")
-                            authBackStack.addToAnonymous(Login)
+                            onNavigate(Login)
                         }) {
                             Text("Login")
                         }
                         Button(onClick = {
                             Log.d("ModularActivity", "Register button clicked")
-                            authBackStack.addToAnonymous(Register)
+                            onNavigate(Register)
                         }) {
                             Text("Register")
                         }
@@ -232,19 +404,19 @@ private fun AnonymousUI(authBackStack: AuthBackStack) {
                     Column {
                         Button(onClick = {
                             Log.d("ModularActivity", "User authenticated")
-                            authBackStack.authenticate()
+                            onAuthenticate()
                         }) {
                             Text("Sign In")
                         }
                         Button(onClick = {
                             Log.d("ModularActivity", "Navigate to register")
-                            authBackStack.addToAnonymous(Register)
+                            onNavigate(Register)
                         }) {
                             Text("Don't have account? Register")
                         }
                         Button(onClick = {
                             Log.d("ModularActivity", "Navigate to forgot password")
-                            authBackStack.addToAnonymous(ForgotPassword)
+                            onNavigate(ForgotPassword)
                         }) {
                             Text("Forgot Password?")
                         }
@@ -257,13 +429,13 @@ private fun AnonymousUI(authBackStack: AuthBackStack) {
                     Column {
                         Button(onClick = {
                             Log.d("ModularActivity", "Registration completed")
-                            authBackStack.authenticate()
+                            onAuthenticate()
                         }) {
                             Text("Create Account")
                         }
                         Button(onClick = {
                             Log.d("ModularActivity", "Navigate back to login")
-                            authBackStack.addToAnonymous(Login)
+                            onNavigate(Login)
                         }) {
                             Text("Already have account? Login")
                         }
@@ -276,13 +448,13 @@ private fun AnonymousUI(authBackStack: AuthBackStack) {
                     Column {
                         Button(onClick = {
                             Log.d("ModularActivity", "Password reset requested")
-                            authBackStack.addToAnonymous(Login)
+                            onNavigate(Login)
                         }) {
                             Text("Send Reset Email")
                         }
                         Button(onClick = {
                             Log.d("ModularActivity", "Navigate back to login from forgot password")
-                            authBackStack.addToAnonymous(Login)
+                            onNavigate(Login)
                         }) {
                             Text("Back to Login")
                         }
@@ -301,102 +473,5 @@ private fun SettingsScreen(onLogout: () -> Unit) {
                 Text("Logout")
             }
         }
-    }
-}
-
-/**
- * Manages authentication state and navigation stacks
- */
-class AuthBackStack {
-    companion object {
-        private const val TAG = "AuthBackStack"
-    }
-
-    var isAuthenticated by mutableStateOf(false)
-        private set
-
-    val anonymousBackStack = mutableStateListOf<Any>(Welcome)
-
-    fun addToAnonymous(route: Any) {
-        Log.d(TAG, "Adding to anonymous stack: $route")
-        anonymousBackStack.add(route)
-    }
-
-    fun removeFromAnonymous() {
-        val removed = anonymousBackStack.removeLastOrNull()
-        Log.d(TAG, "Removed from anonymous stack: $removed")
-    }
-
-    fun authenticate() {
-        Log.d(TAG, "User authenticated")
-        isAuthenticated = true
-    }
-
-    fun logout() {
-        Log.d(TAG, "User logged out")
-        isAuthenticated = false
-        anonymousBackStack.clear()
-        anonymousBackStack.add(Welcome)
-    }
-}
-
-/**
- * Manages separate navigation stacks for each authenticated tab
- */
-class TopLevelBackStack<T : Any>(startKey: T) {
-    companion object {
-        private const val TAG = "TopLevelBackStack"
-    }
-
-    private var topLevelStacks: LinkedHashMap<T, SnapshotStateList<T>> = linkedMapOf(
-        startKey to mutableStateListOf(startKey)
-    )
-
-    var topLevelKey by mutableStateOf(startKey)
-        private set
-
-    val backStack = mutableStateListOf(startKey)
-
-    private fun updateBackStack(): SnapshotStateList<T> {
-        Log.d(TAG, "Updating back stack")
-        return backStack.apply {
-            clear()
-            addAll(topLevelStacks.flatMap { it.value })
-            Log.d(TAG, "New back stack: $backStack")
-        }
-    }
-
-    fun addTopLevel(key: T) {
-        Log.d(TAG, "Adding top level route: $key")
-
-        if (topLevelStacks[key] == null) {
-            topLevelStacks[key] = mutableStateListOf(key)
-        } else {
-            topLevelStacks.remove(key)?.let {
-                topLevelStacks[key] = it
-            }
-        }
-        topLevelKey = key
-        updateBackStack()
-    }
-
-    fun add(key: T) {
-        Log.d(TAG, "Adding $key to current stack ($topLevelKey)")
-        topLevelStacks[topLevelKey]?.add(key)
-        updateBackStack()
-    }
-
-    fun removeLast() {
-        Log.d(TAG, "Removing last from current stack ($topLevelKey)")
-        val removedKey = topLevelStacks[topLevelKey]?.removeLastOrNull()
-
-        if (removedKey != null && topLevelStacks[removedKey] != null) {
-            topLevelStacks.remove(removedKey)
-        }
-
-        if (topLevelStacks.isNotEmpty()) {
-            topLevelKey = topLevelStacks.keys.last()
-        }
-        updateBackStack()
     }
 }
