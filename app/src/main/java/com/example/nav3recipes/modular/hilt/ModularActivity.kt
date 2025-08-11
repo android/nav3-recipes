@@ -186,15 +186,14 @@ class ModularActivity : FragmentActivity() {
                     }
 
                     entry<ConversationDetailFragment> { key ->
-                        authenticatedWrapper {
-                            ConversationDetailFragmentScreen(
-                                conversationId = ConversationId(key.id),
-                                onProfileClicked = {
-                                    Log.d(TAG, "Profile clicked from conversation fragment")
-                                    viewModel.navigateToEntry(UserProfile)
-                                }
-                            )
-                        }
+                        // We do omit authenticatedWrapper on purpose to show case that we can show UI without using tabs
+                        ConversationDetailFragmentScreen(
+                            conversationId = ConversationId(key.id),
+                            onProfileClicked = {
+                                Log.d(TAG, "Profile clicked from conversation fragment")
+                                viewModel.navigateToEntry(UserProfile)
+                            }
+                        )
                     }
 
                     entry<MyProfileTab> {
