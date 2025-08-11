@@ -45,6 +45,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":navigator"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.compose.runtime.livedata)
     implementation(libs.androidx.lifecycle.runtime.ktx)

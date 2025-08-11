@@ -8,8 +8,6 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
@@ -17,27 +15,27 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.fragment.compose.AndroidFragment
+import com.example.nav3recipes.navigator.LocalNavBackStack
+import com.example.nav3recipes.navigator.Route
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.withCreationCallback
 
 @Composable
 fun ConversationDetailFragmentScreen(
     conversationId: ConversationId,
-    onProfileClicked: () -> Unit
 ) {
-    Scaffold { paddingValues ->
-        AndroidFragment<ConversationDetailFragment>(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize(),
-            arguments = bundleOf(
-                "conversationId" to conversationId.value
-            ),
-            onUpdate = { fragment ->
-                fragment.onProfileClicked.value = onProfileClicked
+    val navBackStack = LocalNavBackStack.current
+    AndroidFragment<ConversationDetailFragment>(
+        modifier = Modifier.fillMaxSize(),
+        arguments = bundleOf(
+            "conversationId" to conversationId.value
+        ),
+        onUpdate = { fragment ->
+            fragment.onProfileClicked.value = {
+                navBackStack.add(Route.UserProfile)
             }
-        )
-    }
+        }
+    )
 }
 
 @AndroidEntryPoint

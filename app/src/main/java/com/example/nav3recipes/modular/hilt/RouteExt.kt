@@ -9,7 +9,7 @@ import com.example.nav3recipes.navigator.Route
 
 val Route.Tab.icon: ImageVector
     get() = when (this) {
-        is Route.ConversationTab -> Icons.Default.Face
-        is Route.MyProfileTab -> Icons.Default.Person
-        is Route.SettingsTab -> Icons.Default.Settings
+        is Route.Tab.Conversations -> Icons.Default.Face
+        is Route.Tab.MyProfile -> Icons.Default.Person
+        is Route.Tab.Settings -> Icons.Default.Settings
     }

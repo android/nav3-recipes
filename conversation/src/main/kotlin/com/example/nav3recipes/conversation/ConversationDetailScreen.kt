@@ -16,11 +16,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.nav3recipes.navigator.LocalNavBackStack
+import com.example.nav3recipes.navigator.Route
 
 @Composable
 fun ConversationDetailScreen(
     conversationId: ConversationId,
-    onProfileClicked: () -> Unit
 ) {
     // Use assisted Hilt ViewModel factory to pass conversationId.value to SavedStateHandle
     val viewModel: ConversationDetailViewModel =
@@ -30,34 +31,32 @@ fun ConversationDetailScreen(
 
     ConversationDetailScreenImpl(
         viewModel = viewModel,
-        onProfileClicked = onProfileClicked
     )
 }
 
 @Composable
 private fun ConversationDetailScreenImpl(
     viewModel: ConversationDetailViewModel,
-    onProfileClicked: () -> Unit
 ) {
-    Scaffold { paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-                .background(viewModel.conversationId.color)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = "Conversation Detail Screen: ${viewModel.conversationId.value}",
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = onProfileClicked) {
-                Text("View Profile")
-            }
+    val navBackStack = LocalNavBackStack.current
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(viewModel.conversationId.color)
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Conversation Detail Screen: ${viewModel.conversationId.value}",
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = {
+            navBackStack.add(Route.UserProfile)
+        }) {
+            Text("View Profile")
         }
     }
 }

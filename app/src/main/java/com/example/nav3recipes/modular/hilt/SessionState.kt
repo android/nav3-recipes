@@ -9,6 +9,7 @@ sealed class SessionState {
     companion object {
         const val TAG = "SessionState"
     }
+
     @Serializable
     data object Initializing : SessionState()
 
@@ -16,9 +17,9 @@ sealed class SessionState {
     data class Initialized(val account: Account) : SessionState() {
         val startKey: Route
             get() = when (account.isAuthenticated) {
-            true -> Route.ConversationTab
-            false -> Route.Login
-        }
+                true -> Route.Tab.Conversations
+                false -> Route.Login
+            }
 
         fun mutate(topLevelBackStack: TopLevelBackStack<Route>) {
             when (account.isAuthenticated) {
@@ -26,7 +27,7 @@ sealed class SessionState {
                     when (topLevelBackStack.topLevelKey == Route.Login) {
                         true -> {
                             Log.d(TAG, "User authenticated, switching to ConversationTab")
-                            topLevelBackStack.clearAndSet(Route.ConversationTab)
+                            topLevelBackStack.clearAndSet(startKey)
                         }
 
                         false -> {
@@ -37,7 +38,7 @@ sealed class SessionState {
 
                 false -> {
                     Log.d(TAG, "User logged out, switching to Anonymous")
-                    topLevelBackStack.clearAndSet(Route.Login)
+                    topLevelBackStack.clearAndSet(startKey)
                 }
             }
         }
