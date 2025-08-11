@@ -63,7 +63,7 @@ private data object ConversationTab : AuthenticatedRoute {
     override val icon = Icons.Default.Face
 }
 
-private data object ProfileTab : AuthenticatedRoute {
+private data object MyProfileTab : AuthenticatedRoute {
     override val icon = Icons.Default.Person
 }
 
@@ -75,8 +75,10 @@ private data object SettingsTab : AuthenticatedRoute {
 private data class ConversationDetail(val id: Int)
 private data class ConversationDetailFragment(val id: Int)
 
+private data object UserProfile
+
 private val AUTHENTICATED_TABS: List<AuthenticatedRoute> = listOf(
-    ConversationTab, ProfileTab, SettingsTab
+    ConversationTab, MyProfileTab, SettingsTab
 )
 
 @AndroidEntryPoint
@@ -158,7 +160,7 @@ private fun AuthenticatedUI(authBackStack: AuthBackStack) {
                         conversationId = ConversationId(key.id),
                         onProfileClicked = {
                             Log.d("ModularActivity", "Profile clicked from conversation detail")
-                            topLevelBackStack.addTopLevel(ProfileTab)
+                            topLevelBackStack.add(UserProfile)
                         }
                     )
                 }
@@ -168,12 +170,18 @@ private fun AuthenticatedUI(authBackStack: AuthBackStack) {
                         conversationId = ConversationId(key.id),
                         onProfileClicked = {
                             Log.d("ModularActivity", "Profile clicked from conversation fragment")
-                            topLevelBackStack.addTopLevel(ProfileTab)
+                            topLevelBackStack.add(UserProfile)
                         }
                     )
                 }
 
-                entry<ProfileTab> {
+                entry<MyProfileTab> {
+                    ContentPurple("My Profile") {
+                        Text("My Profile")
+                    }
+                }
+
+                entry<UserProfile> {
                     ProfileScreen()
                 }
 
@@ -354,7 +362,7 @@ class TopLevelBackStack<T : Any>(startKey: T) {
         return backStack.apply {
             clear()
             addAll(topLevelStacks.flatMap { it.value })
-            Log.d(TAG, "New back stack size: ${this.size}")
+            Log.d(TAG, "New back stack: $backStack")
         }
     }
 
