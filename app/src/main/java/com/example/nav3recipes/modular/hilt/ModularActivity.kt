@@ -54,6 +54,7 @@ class ModularActivity : FragmentActivity() {
 
                     ProvideNavBackStack(navBackStack) {
                         val backStack = topLevelBackStack.backStack
+                        if (backStack.isEmpty()) return@ProvideNavBackStack
                         sessionState.mutate(topLevelBackStack)
 
                         NavDisplay(
