@@ -53,9 +53,9 @@ class ModularActivity : FragmentActivity() {
                 }
             val navigationState = viewModel.navigationState.collectAsState().value
             // Create movable bottom navigation wrapper that persists across tab changes
-            val authenticatedWrapper = remember {
+            val withNavigationBar = remember {
                 movableContentOf { content: @Composable () -> Unit ->
-                    AuthenticatedScaffold(
+                    NavigationBarScaffold(
                         isTabSelected = { tab ->
                             val currentTab = if (navigationState is NavigationState.Authenticated) {
                                 navigationState.currentTab
@@ -155,7 +155,7 @@ class ModularActivity : FragmentActivity() {
 
                     // Authenticated screens with movable bottom navigation
                     entry<ConversationTab> {
-                        authenticatedWrapper {
+                        withNavigationBar {
                             ConversationListScreen(
                                 onConversationClicked = { conversationId ->
                                     Log.d(TAG, "Conversation clicked: $conversationId")
@@ -174,7 +174,7 @@ class ModularActivity : FragmentActivity() {
                     }
 
                     entry<ConversationDetail> { key ->
-                        authenticatedWrapper {
+                        withNavigationBar {
                             ConversationDetailScreen(
                                 conversationId = ConversationId(key.id),
                                 onProfileClicked = {
@@ -186,7 +186,7 @@ class ModularActivity : FragmentActivity() {
                     }
 
                     entry<ConversationDetailFragment> { key ->
-                        // We do omit authenticatedWrapper on purpose to show case that we can show UI without using tabs
+                        // We do omit withNavigationBar {} on purpose to show case that we can show UI without using tabs
                         ConversationDetailFragmentScreen(
                             conversationId = ConversationId(key.id),
                             onProfileClicked = {
@@ -197,7 +197,7 @@ class ModularActivity : FragmentActivity() {
                     }
 
                     entry<MyProfileTab> {
-                        authenticatedWrapper {
+                        withNavigationBar {
                             ContentPurple("My Profile") {
                                 Text("My Profile")
                             }
@@ -205,13 +205,13 @@ class ModularActivity : FragmentActivity() {
                     }
 
                     entry<UserProfile> {
-                        authenticatedWrapper {
+                        withNavigationBar {
                             ProfileScreen()
                         }
                     }
 
                     entry<SettingsTab> {
-                        authenticatedWrapper {
+                        withNavigationBar {
                             ContentRed("Settings Screen") {
                                 Column {
                                     Button(onClick = {
@@ -271,7 +271,7 @@ private fun WelcomeScreen(
 }
 
 @Composable
-private fun AuthenticatedScaffold(
+private fun NavigationBarScaffold(
     isTabSelected: (AuthenticatedTab) -> Boolean,
     onTabSelected: (AuthenticatedTab) -> Unit,
     content: @Composable () -> Unit
