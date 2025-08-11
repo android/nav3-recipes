@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
@@ -45,226 +46,223 @@ class ModularActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         setEdgeToEdgeConfig()
         setContent {
-            val topLevelBackStack = rememberTopLevelBackStack<NavigationEntry>(Welcome)
-            val viewModel = hiltViewModel<NavigationViewModel, NavigationViewModel.Factory> { factory ->
+            val topLevelBackStack = rememberTopLevelBackStack<NavigationEntry>(Anonymous)
+
+            // Initialize with Login screen in the Anonymous stack
+            if (topLevelBackStack.getCurrentStack().size == 1) {
+                topLevelBackStack.add(Login)
+            }
+
+            val viewModel =
+                hiltViewModel<NavigationViewModel, NavigationViewModel.Factory> { factory ->
                     factory.create(topLevelBackStack)
                 }
             val navigationState = viewModel.navigationState.collectAsState().value
-            // Create movable bottom navigation wrapper that persists across tab changes
-            val withNavigationBar = remember {
-                movableContentOf { content: @Composable () -> Unit ->
-                    NavigationBarScaffold(
-                        isTabSelected = { tab ->
-                            val currentTab = if (navigationState is NavigationState.Authenticated) {
-                                navigationState.currentTab
-                            } else {
-                                ConversationTab
-                            }
-                            currentTab == tab
+            val backStack: List<NavigationEntry> = when (navigationState) {
+                is NavigationState.Anonymous -> {
+                    navigationState.backStack
+                }
+
+                is NavigationState.Authenticated -> {
+                    navigationState.backStack
+                }
+
+                NavigationState.Initializing -> {
+                    emptyList()
+                }
+            }
+
+            if (backStack.isEmpty()) {
+                WelcomeScreen()
+            } else {
+                NavDisplay(
+                    backStack = backStack,
+                    onBack = {
+                        Log.d(TAG, "Back pressed")
+                        if (!viewModel.navigateBack()) {
+                            // If ViewModel can't handle back, let the system handle it
+                            finish()
+                        }
+                    },
+                    entryProvider = navGraph(navigationState, viewModel)
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun <T : Any> navGraph(
+        navigationState: NavigationState,
+        viewModel: NavigationViewModel
+    ): (T) -> NavEntry<T> {
+        // Create movable bottom navigation wrapper that persists across tab changes
+        val withNavigationBar = remember {
+            movableContentOf { content: @Composable () -> Unit ->
+                NavigationBarScaffold(
+                    isTabSelected = { tab ->
+                        val currentTab = if (navigationState is NavigationState.Authenticated) {
+                            navigationState.currentTab
+                        } else {
+                            ConversationTab
+                        }
+                        currentTab == tab
+                    },
+                    onTabSelected = viewModel::navigateToTab,
+                    content = content
+                )
+            }
+        }
+
+        return entryProvider {
+            // Anonymous top-level entry (should not normally be displayed)
+            entry<Anonymous> {
+                WelcomeScreen()
+            }
+
+            // Anonymous screens
+            entry<Login> {
+                ContentBlue("Login Screen") {
+                    Column {
+                        Button(onClick = {
+                            Log.d(TAG, "User authenticated")
+                            viewModel.authenticate()
+                        }) {
+                            Text("Sign In")
+                        }
+                        Button(onClick = {
+                            Log.d(TAG, "Navigate to register")
+                            viewModel.navigateToEntry(Register)
+                        }) {
+                            Text("Don't have account? Register")
+                        }
+                        Button(onClick = {
+                            Log.d(TAG, "Navigate to forgot password")
+                            viewModel.navigateToEntry(ForgotPassword)
+                        }) {
+                            Text("Forgot Password?")
+                        }
+                    }
+                }
+            }
+
+            entry<Register> {
+                ContentYellow("Register Screen") {
+                    Column {
+                        Button(onClick = {
+                            Log.d(TAG, "Registration completed")
+                            viewModel.authenticate()
+                        }) {
+                            Text("Create Account")
+                        }
+                        Button(onClick = {
+                            Log.d(TAG, "Navigate back to login")
+                            viewModel.navigateToEntry(Login)
+                        }) {
+                            Text("Already have account? Login")
+                        }
+                    }
+                }
+            }
+
+            entry<ForgotPassword> {
+                ContentPurple("Forgot Password Screen") {
+                    Column {
+                        Button(onClick = {
+                            Log.d(TAG, "Password reset requested")
+                            viewModel.navigateToEntry(Login)
+                        }) {
+                            Text("Send Reset Email")
+                        }
+                        Button(onClick = {
+                            Log.d(TAG, "Navigate back to login from forgot password")
+                            viewModel.navigateToEntry(Login)
+                        }) {
+                            Text("Back to Login")
+                        }
+                    }
+                }
+            }
+
+            // Authenticated screens with movable bottom navigation
+            entry<ConversationTab> {
+                withNavigationBar {
+                    ConversationListScreen(
+                        onConversationClicked = { conversationId ->
+                            Log.d(TAG, "Conversation clicked: $conversationId")
+                            viewModel.navigateToEntry(ConversationDetail(conversationId.value))
                         },
-                        onTabSelected = viewModel::navigateToTab,
-                        content = content
+                        onConversationFragmentClicked = { conversationId ->
+                            Log.d(TAG, "Conversation fragment clicked: $conversationId")
+                            viewModel.navigateToEntry(
+                                ConversationDetailFragment(
+                                    conversationId.value
+                                )
+                            )
+                        },
                     )
                 }
             }
 
-            // Always use NavDisplay with the actual backStack from Navigation 3
-            NavDisplay(
-                backStack = topLevelBackStack.backStack,
-                onBack = {
-                    Log.d(TAG, "Back pressed")
-                    if (!viewModel.navigateBack()) {
-                        // If ViewModel can't handle back, let the system handle it
-                        finish()
-                    }
-                },
-                entryProvider = entryProvider {
-                    // Welcome screen - shown during initialization
-                    entry<Welcome> {
-                        WelcomeScreen(
-                            navigationState = navigationState,
-                            onNavigate = viewModel::navigateToEntry
-                        )
-                    }
-
-                    // Anonymous screens
-                    entry<Login> {
-                        ContentBlue("Login Screen") {
-                            Column {
-                                Button(onClick = {
-                                    Log.d(TAG, "User authenticated")
-                                    viewModel.authenticate()
-                                }) {
-                                    Text("Sign In")
-                                }
-                                Button(onClick = {
-                                    Log.d(TAG, "Navigate to register")
-                                    viewModel.navigateToEntry(Register)
-                                }) {
-                                    Text("Don't have account? Register")
-                                }
-                                Button(onClick = {
-                                    Log.d(TAG, "Navigate to forgot password")
-                                    viewModel.navigateToEntry(ForgotPassword)
-                                }) {
-                                    Text("Forgot Password?")
-                                }
-                            }
+            entry<ConversationDetail> { key ->
+                withNavigationBar {
+                    ConversationDetailScreen(
+                        conversationId = ConversationId(key.id),
+                        onProfileClicked = {
+                            Log.d(TAG, "Profile clicked from conversation detail")
+                            viewModel.navigateToEntry(UserProfile)
                         }
-                    }
+                    )
+                }
+            }
 
-                    entry<Register> {
-                        ContentYellow("Register Screen") {
-                            Column {
-                                Button(onClick = {
-                                    Log.d(TAG, "Registration completed")
-                                    viewModel.authenticate()
-                                }) {
-                                    Text("Create Account")
-                                }
-                                Button(onClick = {
-                                    Log.d(TAG, "Navigate back to login")
-                                    viewModel.navigateToEntry(Login)
-                                }) {
-                                    Text("Already have account? Login")
-                                }
-                            }
-                        }
+            entry<ConversationDetailFragment> { key ->
+                // We do omit withNavigationBar {} on purpose to show case that we can show UI without using tabs
+                ConversationDetailFragmentScreen(
+                    conversationId = ConversationId(key.id),
+                    onProfileClicked = {
+                        Log.d(TAG, "Profile clicked from conversation fragment")
+                        viewModel.navigateToEntry(UserProfile)
                     }
+                )
+            }
 
-                    entry<ForgotPassword> {
-                        ContentPurple("Forgot Password Screen") {
-                            Column {
-                                Button(onClick = {
-                                    Log.d(TAG, "Password reset requested")
-                                    viewModel.navigateToEntry(Login)
-                                }) {
-                                    Text("Send Reset Email")
-                                }
-                                Button(onClick = {
-                                    Log.d(TAG, "Navigate back to login from forgot password")
-                                    viewModel.navigateToEntry(Login)
-                                }) {
-                                    Text("Back to Login")
-                                }
-                            }
-                        }
+            entry<MyProfileTab> {
+                withNavigationBar {
+                    ContentPurple("My Profile") {
+                        Text("My Profile")
                     }
+                }
+            }
 
-                    // Authenticated screens with movable bottom navigation
-                    entry<ConversationTab> {
-                        withNavigationBar {
-                            ConversationListScreen(
-                                onConversationClicked = { conversationId ->
-                                    Log.d(TAG, "Conversation clicked: $conversationId")
-                                    viewModel.navigateToEntry(ConversationDetail(conversationId.value))
-                                },
-                                onConversationFragmentClicked = { conversationId ->
-                                    Log.d(TAG, "Conversation fragment clicked: $conversationId")
-                                    viewModel.navigateToEntry(
-                                        ConversationDetailFragment(
-                                            conversationId.value
-                                        )
-                                    )
-                                },
-                            )
-                        }
-                    }
+            entry<UserProfile> {
+                withNavigationBar {
+                    ProfileScreen()
+                }
+            }
 
-                    entry<ConversationDetail> { key ->
-                        withNavigationBar {
-                            ConversationDetailScreen(
-                                conversationId = ConversationId(key.id),
-                                onProfileClicked = {
-                                    Log.d(TAG, "Profile clicked from conversation detail")
-                                    viewModel.navigateToEntry(UserProfile)
-                                }
-                            )
-                        }
-                    }
-
-                    entry<ConversationDetailFragment> { key ->
-                        // We do omit withNavigationBar {} on purpose to show case that we can show UI without using tabs
-                        ConversationDetailFragmentScreen(
-                            conversationId = ConversationId(key.id),
-                            onProfileClicked = {
-                                Log.d(TAG, "Profile clicked from conversation fragment")
-                                viewModel.navigateToEntry(UserProfile)
-                            }
-                        )
-                    }
-
-                    entry<MyProfileTab> {
-                        withNavigationBar {
-                            ContentPurple("My Profile") {
-                                Text("My Profile")
-                            }
-                        }
-                    }
-
-                    entry<UserProfile> {
-                        withNavigationBar {
-                            ProfileScreen()
-                        }
-                    }
-
-                    entry<SettingsTab> {
-                        withNavigationBar {
-                            ContentRed("Settings Screen") {
-                                Column {
-                                    Button(onClick = {
-                                        Log.d(TAG, "User logged out")
-                                        viewModel.logout()
-                                    }) {
-                                        Text("Logout")
-                                    }
-                                }
+            entry<SettingsTab> {
+                withNavigationBar {
+                    ContentRed("Settings Screen") {
+                        Column {
+                            Button(onClick = {
+                                Log.d(TAG, "User logged out")
+                                viewModel.logout()
+                            }) {
+                                Text("Logout")
                             }
                         }
                     }
                 }
-            )
+            }
         }
     }
 }
 
+
 @Composable
-private fun WelcomeScreen(
-    navigationState: NavigationState,
-    onNavigate: (NavigationEntry) -> Unit
-) {
-    when (navigationState) {
-        is NavigationState.Initializing -> {
-            ContentGreen("Loading...") {
-                Text("Checking session...")
-            }
-        }
-
-        is NavigationState.Anonymous -> {
-            ContentGreen("Welcome to Nav3 Recipes") {
-                Column {
-                    Button(onClick = {
-                        Log.d("ModularActivity", "Login button clicked")
-                        onNavigate(Login)
-                    }) {
-                        Text("Login")
-                    }
-                    Button(onClick = {
-                        Log.d("ModularActivity", "Register button clicked")
-                        onNavigate(Register)
-                    }) {
-                        Text("Register")
-                    }
-                }
-            }
-        }
-
-        is NavigationState.Authenticated -> {
-            // This shouldn't happen on Welcome screen, but handle gracefully
-            ContentGreen("Redirecting...") {
-                Text("Loading authenticated content...")
-            }
-        }
+private fun WelcomeScreen(modifier: Modifier = Modifier) {
+    ContentGreen(title = "Loading...", modifier = modifier) {
+        Text("Checking session...")
     }
 }
 

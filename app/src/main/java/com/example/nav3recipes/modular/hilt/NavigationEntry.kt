@@ -15,7 +15,7 @@ sealed interface NavigationEntry : NavKey
 
 // Anonymous user routes
 @Serializable
-data object Welcome : NavigationEntry
+data object Anonymous : NavigationEntry
 
 @Serializable
 data object Login : NavigationEntry

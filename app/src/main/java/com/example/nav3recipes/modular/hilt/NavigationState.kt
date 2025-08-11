@@ -1,8 +1,7 @@
 package com.example.nav3recipes.modular.hilt
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import kotlinx.serialization.Serializable
+import com.example.nav3recipes.modular.hilt.Anonymous as AnonymousTab
 
 @Serializable
 sealed class NavigationState {
@@ -11,7 +10,7 @@ sealed class NavigationState {
 
     @Serializable
     data class Anonymous(
-        val backStack: List<NavigationEntry> = listOf(Welcome)
+        val backStack: List<NavigationEntry> = listOf(AnonymousTab)
     ) : NavigationState()
 
     @Serializable
