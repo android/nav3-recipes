@@ -14,12 +14,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.example.nav3recipes.content.ContentBlue
 import com.example.nav3recipes.content.ContentGreen
@@ -51,6 +53,17 @@ class ModularActivity : FragmentActivity() {
                     factory.create(backStack)
                 }
             val navigationState by viewModel.navigationState.collectAsState()
+
+            // Create movable bottom navigation wrapper that persists across tab changes
+            val authenticatedWrapper = remember {
+                movableContentOf { currentTab: AuthenticatedTab, content: @Composable () -> Unit ->
+                    AuthenticatedScaffold(
+                        currentTab = currentTab,
+                        onTabSelected = viewModel::navigateToTab,
+                        content = content
+                    )
+                }
+            }
 
             // Always use NavDisplay with the actual backStack from Navigation 3
             NavDisplay(
@@ -135,12 +148,9 @@ class ModularActivity : FragmentActivity() {
                         }
                     }
 
-                    // Authenticated screens with bottom navigation
+                    // Authenticated screens with movable bottom navigation
                     entry<ConversationTab> {
-                        AuthenticatedWrapper(
-                            currentTab = ConversationTab,
-                            onTabSelected = viewModel::navigateToTab
-                        ) {
+                        authenticatedWrapper(ConversationTab) {
                             ConversationListScreen(
                                 onConversationClicked = { conversationId ->
                                     Log.d(TAG, "Conversation clicked: $conversationId")
@@ -159,10 +169,7 @@ class ModularActivity : FragmentActivity() {
                     }
 
                     entry<ConversationDetail> { key ->
-                        AuthenticatedWrapper(
-                            currentTab = ConversationTab,
-                            onTabSelected = viewModel::navigateToTab
-                        ) {
+                        authenticatedWrapper(ConversationTab) {
                             ConversationDetailScreen(
                                 conversationId = ConversationId(key.id),
                                 onProfileClicked = {
@@ -174,10 +181,7 @@ class ModularActivity : FragmentActivity() {
                     }
 
                     entry<ConversationDetailFragment> { key ->
-                        AuthenticatedWrapper(
-                            currentTab = ConversationTab,
-                            onTabSelected = viewModel::navigateToTab
-                        ) {
+                        authenticatedWrapper(ConversationTab) {
                             ConversationDetailFragmentScreen(
                                 conversationId = ConversationId(key.id),
                                 onProfileClicked = {
@@ -189,10 +193,7 @@ class ModularActivity : FragmentActivity() {
                     }
 
                     entry<MyProfileTab> {
-                        AuthenticatedWrapper(
-                            currentTab = MyProfileTab,
-                            onTabSelected = viewModel::navigateToTab
-                        ) {
+                        authenticatedWrapper(MyProfileTab) {
                             ContentPurple("My Profile") {
                                 Text("My Profile")
                             }
@@ -200,19 +201,13 @@ class ModularActivity : FragmentActivity() {
                     }
 
                     entry<UserProfile> {
-                        AuthenticatedWrapper(
-                            currentTab = determineCurrentTab(navigationState, backStack),
-                            onTabSelected = viewModel::navigateToTab
-                        ) {
+                        authenticatedWrapper(determineCurrentTab(navigationState, backStack)) {
                             ProfileScreen()
                         }
                     }
 
                     entry<SettingsTab> {
-                        AuthenticatedWrapper(
-                            currentTab = SettingsTab,
-                            onTabSelected = viewModel::navigateToTab
-                        ) {
+                        authenticatedWrapper(SettingsTab) {
                             ContentRed("Settings Screen") {
                                 Column {
                                     Button(onClick = {
@@ -261,6 +256,7 @@ private fun WelcomeScreen(
                 }
             }
         }
+
         is NavigationState.Authenticated -> {
             // This shouldn't happen on Welcome screen, but handle gracefully
             ContentGreen("Redirecting...") {
@@ -271,7 +267,7 @@ private fun WelcomeScreen(
 }
 
 @Composable
-private fun AuthenticatedWrapper(
+private fun AuthenticatedScaffold(
     currentTab: AuthenticatedTab,
     onTabSelected: (AuthenticatedTab) -> Unit,
     content: @Composable () -> Unit
