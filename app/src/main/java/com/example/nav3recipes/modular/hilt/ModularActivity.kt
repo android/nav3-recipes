@@ -13,7 +13,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -52,13 +51,19 @@ class ModularActivity : FragmentActivity() {
                 hiltViewModel<NavigationViewModel, NavigationViewModel.Factory> { factory ->
                     factory.create(backStack)
                 }
-            val navigationState by viewModel.navigationState.collectAsState()
-
+            val navigationState = viewModel.navigationState.collectAsState().value
             // Create movable bottom navigation wrapper that persists across tab changes
             val authenticatedWrapper = remember {
-                movableContentOf { currentTab: AuthenticatedTab, content: @Composable () -> Unit ->
+                movableContentOf { content: @Composable () -> Unit ->
                     AuthenticatedScaffold(
-                        currentTab = currentTab,
+                        isTabSelected = { tab ->
+                            val currentTab = if (navigationState is NavigationState.Authenticated) {
+                                navigationState.currentTab
+                            } else {
+                                ConversationTab
+                            }
+                            currentTab == tab
+                        },
                         onTabSelected = viewModel::navigateToTab,
                         content = content
                     )
@@ -150,7 +155,7 @@ class ModularActivity : FragmentActivity() {
 
                     // Authenticated screens with movable bottom navigation
                     entry<ConversationTab> {
-                        authenticatedWrapper(ConversationTab) {
+                        authenticatedWrapper {
                             ConversationListScreen(
                                 onConversationClicked = { conversationId ->
                                     Log.d(TAG, "Conversation clicked: $conversationId")
@@ -169,7 +174,7 @@ class ModularActivity : FragmentActivity() {
                     }
 
                     entry<ConversationDetail> { key ->
-                        authenticatedWrapper(ConversationTab) {
+                        authenticatedWrapper {
                             ConversationDetailScreen(
                                 conversationId = ConversationId(key.id),
                                 onProfileClicked = {
@@ -181,7 +186,7 @@ class ModularActivity : FragmentActivity() {
                     }
 
                     entry<ConversationDetailFragment> { key ->
-                        authenticatedWrapper(ConversationTab) {
+                        authenticatedWrapper {
                             ConversationDetailFragmentScreen(
                                 conversationId = ConversationId(key.id),
                                 onProfileClicked = {
@@ -193,7 +198,7 @@ class ModularActivity : FragmentActivity() {
                     }
 
                     entry<MyProfileTab> {
-                        authenticatedWrapper(MyProfileTab) {
+                        authenticatedWrapper {
                             ContentPurple("My Profile") {
                                 Text("My Profile")
                             }
@@ -201,13 +206,13 @@ class ModularActivity : FragmentActivity() {
                     }
 
                     entry<UserProfile> {
-                        authenticatedWrapper(determineCurrentTab(navigationState, backStack)) {
+                        authenticatedWrapper {
                             ProfileScreen()
                         }
                     }
 
                     entry<SettingsTab> {
-                        authenticatedWrapper(SettingsTab) {
+                        authenticatedWrapper {
                             ContentRed("Settings Screen") {
                                 Column {
                                     Button(onClick = {
@@ -268,19 +273,17 @@ private fun WelcomeScreen(
 
 @Composable
 private fun AuthenticatedScaffold(
-    currentTab: AuthenticatedTab,
+    isTabSelected: (AuthenticatedTab) -> Boolean,
     onTabSelected: (AuthenticatedTab) -> Unit,
     content: @Composable () -> Unit
 ) {
     val authenticatedTabs = listOf(ConversationTab, MyProfileTab, SettingsTab)
-
     Scaffold(
         bottomBar = {
             NavigationBar {
                 authenticatedTabs.forEach { tab ->
-                    val isSelected = tab == currentTab
                     NavigationBarItem(
-                        selected = isSelected,
+                        selected = isTabSelected(tab),
                         onClick = {
                             Log.d("ModularActivity", "Tab clicked: $tab")
                             onTabSelected(tab)
@@ -302,18 +305,4 @@ private fun AuthenticatedScaffold(
             content()
         }
     }
-}
-
-@Composable
-private fun determineCurrentTab(
-    navigationState: NavigationState,
-    backStack: androidx.compose.runtime.snapshots.SnapshotStateList<androidx.navigation3.runtime.NavKey>
-): AuthenticatedTab {
-    if (navigationState is NavigationState.Authenticated) {
-        return navigationState.currentTab
-    }
-
-    // Fall back to determining from backStack
-    val lastTab = backStack.reversed().firstOrNull { it is AuthenticatedTab } as? AuthenticatedTab
-    return lastTab ?: ConversationTab
 }

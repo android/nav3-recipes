@@ -1,5 +1,7 @@
 package com.example.nav3recipes.modular.hilt
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import kotlinx.serialization.Serializable
 
 @Serializable
