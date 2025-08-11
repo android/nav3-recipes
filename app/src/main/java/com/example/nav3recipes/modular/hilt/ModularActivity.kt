@@ -14,6 +14,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.toMutableStateList
+import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.compose.ui.Modifier
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -32,6 +35,7 @@ import com.example.nav3recipes.conversation.ConversationListScreen
 import com.example.nav3recipes.profile.ProfileScreen
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.EntryPointAccessors
 
 @AndroidEntryPoint
 class ModularActivity : FragmentActivity() {
@@ -44,7 +48,10 @@ class ModularActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         setEdgeToEdgeConfig()
         setContent {
-            val viewModel: NavigationViewModel = hiltViewModel()
+            val backStack = rememberNavBackStack(Welcome)
+            val viewModel = hiltViewModel<NavigationViewModel, NavigationViewModel.Factory>(creationCallback = { factory ->
+                factory.create(backStack.mapNotNull { it as? NavigationEntry }.toMutableStateList())
+            })
             val navigationState by viewModel.navigationState.collectAsState()
 
             when (val state = navigationState) {

@@ -5,12 +5,13 @@ import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 
 
 // Serializable navigation entries
 @Serializable
-sealed interface NavigationEntry
+sealed interface NavigationEntry : NavKey
 
 // Anonymous user routes
 @Serializable
