@@ -33,6 +33,7 @@ ksp = "2.2.0-RC2-2.0.1"
 hilt = "2.56.2"
 hiltNavigationCompose = "1.2.0"
 fragmentCompose = "1.8.8"
+android-navigation = { require = "2.8.9" }
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -64,6 +65,9 @@ androidx-material3-navigation3 = { group = "androidx.compose.material3.adaptive"
 androidx-fragment-compose = { group = "androidx.fragment", name = "fragment-compose", version.ref = "fragmentCompose" }
 androidx-compose-runtime = { module = "androidx.compose.runtime:runtime", version.ref = "composeRuntime" }
 androidx-compose-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "composeRuntime" }
+
+androidx-navigation-runtime = { module = "androidx.navigation:navigation-runtime", version.ref = "android-navigation" }
+androidx-navigation-common = { module = "androidx.navigation:navigation-common", version.ref = "android-navigation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -11,6 +11,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
@@ -31,7 +32,6 @@ import com.example.nav3recipes.navigator.Route
 import com.example.nav3recipes.profile.ProfileScreen
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 import dagger.hilt.android.AndroidEntryPoint
-import kotlin.collections.listOf
 
 @AndroidEntryPoint
 class ModularActivity : FragmentActivity() {
@@ -49,13 +49,16 @@ class ModularActivity : FragmentActivity() {
 
             when (sessionState) {
                 is SessionState.Initialized -> {
-                    val topLevelBackStack = rememberTopLevelBackStack(sessionState.startKey)
+                    val topLevelBackStack: TopLevelBackStack<Route> =
+                        rememberTopLevelBackStack(sessionState.startKey)
                     val navBackStack = remember { NavBackStackImpl(topLevelBackStack) }
 
                     ProvideNavBackStack(navBackStack) {
                         val backStack = topLevelBackStack.backStack
                         if (backStack.isEmpty()) return@ProvideNavBackStack
-                        sessionState.mutate(topLevelBackStack)
+                        LaunchedEffect(sessionState) {
+                            sessionState.mutate(topLevelBackStack)
+                        }
 
                         NavDisplay(
                             backStack = backStack,
@@ -71,6 +74,24 @@ class ModularActivity : FragmentActivity() {
                                     topLevelBackStack.addTopLevel(tab)
                                 },
                             )
+                        )
+                        NavDeeplinkHandler(
+                            savedInstanceState = savedInstanceState,
+                            onDeepLink = {
+                                topLevelBackStack.add(it)
+                            },
+                            routeBuilder = {
+                                register(
+                                    route = "login",
+                                    navDeepLink = {
+                                        uriPattern = "dm-nav://register?email={email}"
+                                    },
+                                    routeFactory = { args ->
+                                        val email = args.getString("email", null)
+                                        Route.Register(email)
+                                    }
+                                )
+                            },
                         )
                     }
                 }
@@ -106,8 +127,8 @@ class ModularActivity : FragmentActivity() {
                 LoginScreen()
             }
 
-            entry<Route.Register> {
-                RegisterScreen()
+            entry<Route.Register> { key ->
+                RegisterScreen(email = key.email)
             }
 
             entry<Route.ForgotPassword> {

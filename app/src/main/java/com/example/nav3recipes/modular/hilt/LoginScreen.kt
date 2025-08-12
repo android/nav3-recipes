@@ -24,7 +24,7 @@ internal fun LoginScreen(
                 Text("Sign In")
             }
             Button(onClick = {
-                navBackStack.add(Route.Register)
+                navBackStack.add(Route.Register())
             }) {
                 Text("Don't have account? Register")
             }

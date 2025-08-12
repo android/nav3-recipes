@@ -11,11 +11,17 @@ import com.example.nav3recipes.navigator.LocalNavBackStack
 import com.example.nav3recipes.navigator.Route
 
 @Composable
-fun RegisterScreen(modifier: Modifier = Modifier) {
+fun RegisterScreen(
+    modifier: Modifier = Modifier,
+    email: String?
+) {
     val navBackStack = LocalNavBackStack.current
     val viewModel = hiltViewModel<AuthViewModel>()
     ContentYellow(title = "Register Screen", modifier = modifier) {
         Column {
+            if (!email.isNullOrBlank()) {
+                Text(text = "received email from deeplink: $email")
+            }
             Button(onClick = {
                 viewModel.authenticate()
             }) {
