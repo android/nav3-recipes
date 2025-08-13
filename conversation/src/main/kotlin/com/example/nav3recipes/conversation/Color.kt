@@ -1,0 +1,39 @@
+/*
+ * Copyright 2025 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.example.nav3recipes.conversation
+
+import androidx.compose.ui.graphics.Color
+
+val PastelRed = Color(0xFFFFADAD)
+val PastelOrange = Color(0xFFFFD6A5)
+val PastelYellow = Color(0xFFFDFFB6)
+val PastelGreen = Color(0xFFCAFFBF)
+val PastelBlue = Color(0xFF9BF6FF)
+val PastelMauve = Color(0xFFA0C4FF)
+val PastelPurple = Color(0xFFBDB2FF)
+val PastelPink = Color(0xFFFFC6FF)
+
+val colors = listOf(
+    PastelRed,
+    PastelOrange,
+    PastelYellow,
+    PastelGreen,
+    PastelBlue,
+    PastelMauve,
+    PastelPurple,
+    PastelPink
+)

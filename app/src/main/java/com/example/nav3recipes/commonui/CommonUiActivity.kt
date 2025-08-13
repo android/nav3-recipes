@@ -17,6 +17,7 @@
 package com.example.nav3recipes.commonui
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.icons.Icons
@@ -69,11 +70,18 @@ private data object Camera : TopLevelRoute { override val icon = Icons.Default.P
 private val TOP_LEVEL_ROUTES : List<TopLevelRoute> = listOf(Home, ChatList, Camera)
 
 class CommonUiActivity : ComponentActivity() {
+
+    companion object {
+        private const val TAG = "CommonUiActivity"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d(TAG, "onCreate: Initializing CommonUiActivity")
         setEdgeToEdgeConfig()
         super.onCreate(savedInstanceState)
         setContent {
             val topLevelBackStack = remember { TopLevelBackStack<Any>(Home) }
+            Log.d(TAG, "onCreate: TopLevelBackStack initialized with Home route")
 
             Scaffold(
                 bottomBar = {
@@ -84,6 +92,7 @@ class CommonUiActivity : ComponentActivity() {
                             NavigationBarItem(
                                 selected = isSelected,
                                 onClick = {
+                                    Log.d(TAG, "NavigationBarItem clicked: $topLevelRoute")
                                     topLevelBackStack.addTopLevel(topLevelRoute)
                                 },
                                 icon = {
@@ -96,17 +105,23 @@ class CommonUiActivity : ComponentActivity() {
                         }
                     }
                 }
-            ) { _ ->
+            ) { contentPadding ->
                 NavDisplay(
                     backStack = topLevelBackStack.backStack,
-                    onBack = { topLevelBackStack.removeLast() },
+                    onBack = {
+                        Log.d(TAG, "onBack called")
+                        topLevelBackStack.removeLast()
+                    },
                     entryProvider = entryProvider {
                         entry<Home>{
                             ContentRed("Home screen")
                         }
                         entry<ChatList>{
                             ContentGreen("Chat list screen"){
-                                Button(onClick = { topLevelBackStack.add(ChatDetail) }) {
+                                Button(onClick = {
+                                    Log.d(TAG, "Navigate to ChatDetail")
+                                    topLevelBackStack.add(ChatDetail)
+                                }) {
                                     Text("Go to conversation")
                                 }
                             }
@@ -126,6 +141,10 @@ class CommonUiActivity : ComponentActivity() {
 
 class TopLevelBackStack<T: Any>(startKey: T) {
 
+    companion object {
+        private const val TAG = "TopLevelBackStack"
+    }
+
     // Maintain a stack for each top level route
     private var topLevelStacks : LinkedHashMap<T, SnapshotStateList<T>> = linkedMapOf(
         startKey to mutableStateListOf(startKey)
@@ -138,18 +157,24 @@ class TopLevelBackStack<T: Any>(startKey: T) {
     // Expose the back stack so it can be rendered by the NavDisplay
     val backStack = mutableStateListOf(startKey)
 
-    private fun updateBackStack() =
-        backStack.apply {
+    private fun updateBackStack(): SnapshotStateList<T> {
+        Log.d(TAG, "updateBackStack: Updating back stack")
+        return backStack.apply {
             clear()
             addAll(topLevelStacks.flatMap { it.value })
+            Log.d(TAG, "updateBackStack: New back stack size: ${this.size}, contents: $this")
         }
+    }
 
     fun addTopLevel(key: T){
+        Log.d(TAG, "addTopLevel: Adding top level route: $key")
 
         // If the top level doesn't exist, add it
         if (topLevelStacks[key] == null){
+            Log.d(TAG, "addTopLevel: Creating new stack for $key")
             topLevelStacks.put(key, mutableStateListOf(key))
         } else {
+            Log.d(TAG, "addTopLevel: Moving existing stack for $key to end")
             // Otherwise just move it to the end of the stacks
             topLevelStacks.apply {
                 remove(key)?.let {
@@ -158,19 +183,29 @@ class TopLevelBackStack<T: Any>(startKey: T) {
             }
         }
         topLevelKey = key
+        Log.d(TAG, "addTopLevel: Current top level key: $topLevelKey")
         updateBackStack()
     }
 
     fun add(key: T){
+        Log.d(TAG, "add: Adding $key to current top level stack ($topLevelKey)")
         topLevelStacks[topLevelKey]?.add(key)
         updateBackStack()
     }
 
     fun removeLast(){
+        Log.d(TAG, "removeLast: Removing last item from current stack ($topLevelKey)")
         val removedKey = topLevelStacks[topLevelKey]?.removeLastOrNull()
+        Log.d(TAG, "removeLast: Removed key: $removedKey")
+
         // If the removed key was a top level key, remove the associated top level stack
         topLevelStacks.remove(removedKey)
+        if (removedKey != null) {
+            Log.d(TAG, "removeLast: Removed top level stack for: $removedKey")
+        }
+
         topLevelKey = topLevelStacks.keys.last()
+        Log.d(TAG, "removeLast: New top level key: $topLevelKey")
         updateBackStack()
     }
 }
