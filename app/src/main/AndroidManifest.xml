@@ -52,6 +52,11 @@
             android:label="@string/app_name"
             android:theme="@style/Theme.Nav3Recipes"/>
         <activity
+            android:name=".navigator.basic.NavigatorActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Nav3Recipes"/>
+        <activity
             android:name=".basicdsl.BasicDslActivity"
             android:exported="true"
             android:label="@string/app_name"
