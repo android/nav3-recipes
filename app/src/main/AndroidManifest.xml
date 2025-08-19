@@ -94,6 +94,16 @@
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Nav3Recipes"/>
+        <activity
+            android:name=".results.event.ResultEventActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Nav3Recipes"/>
+        <activity
+            android:name=".results.state.ResultStateActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Nav3Recipes"/>
     </application>
 
 </manifest>

@@ -35,6 +35,8 @@ import com.example.nav3recipes.dialog.DialogActivity
 import com.example.nav3recipes.modular.hilt.ModularActivity
 import com.example.nav3recipes.passingarguments.basicviewmodels.BasicViewModelsActivity
 import com.example.nav3recipes.passingarguments.injectedviewmodels.InjectedViewModelsActivity
+import com.example.nav3recipes.results.event.ResultEventActivity
+import com.example.nav3recipes.results.state.ResultStateActivity
 import com.example.nav3recipes.scenes.materiallistdetail.MaterialListDetailActivity
 import com.example.nav3recipes.scenes.twopane.TwoPaneActivity
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
@@ -71,6 +73,10 @@ private val recipes = listOf(
     Heading("Passing navigation arguments"),
     Recipe("Argument passing to basic ViewModel", BasicViewModelsActivity::class.java),
     Recipe("Argument passing to injected ViewModel", InjectedViewModelsActivity::class.java),
+
+    Heading("Returning Results"),
+    Recipe("Return result as Event", ResultEventActivity::class.java),
+    Recipe("Return result as State", ResultStateActivity::class.java),
 )
 
 class RecipePickerActivity : ComponentActivity() {
