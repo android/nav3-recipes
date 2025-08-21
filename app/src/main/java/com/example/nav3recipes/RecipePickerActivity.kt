@@ -29,6 +29,7 @@ import com.example.nav3recipes.animations.AnimatedActivity
 import com.example.nav3recipes.basic.BasicActivity
 import com.example.nav3recipes.basicdsl.BasicDslActivity
 import com.example.nav3recipes.basicsaveable.BasicSaveableActivity
+import com.example.nav3recipes.bottomsheet.BottomSheetActivity
 import com.example.nav3recipes.commonui.CommonUiActivity
 import com.example.nav3recipes.conditional.ConditionalActivity
 import com.example.nav3recipes.dialog.DialogActivity
@@ -56,8 +57,9 @@ private val recipes = listOf(
     Recipe("Basic Saveable", BasicSaveableActivity::class.java),
 
     Heading("Layouts and animations"),
-    Recipe("Material list-detail layout", MaterialListDetailActivity::class.java),
+    Recipe("Bottom Sheet", BottomSheetActivity::class.java),
     Recipe("Dialog", DialogActivity::class.java),
+    Recipe("Material list-detail layout", MaterialListDetailActivity::class.java),
     Recipe("Two pane layout (custom scene)", TwoPaneActivity::class.java),
     Recipe("Animations", AnimatedActivity::class.java),
 
