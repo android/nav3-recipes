@@ -96,7 +96,6 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
 
         setContent {
 
-            //val wsc = currentWindowAdaptiveInfo().windowSizeClass
             val localNavSharedTransitionScope: ProvidableCompositionLocal<SharedTransitionScope> =
                 compositionLocalOf {
                     throw IllegalStateException(
@@ -202,8 +201,18 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
     private fun SnapshotStateList<NavKey>.addProductRoute(productId: Int) {
         val productRoute =
             Product(productId)
-        // Avoid adding the same product route to the back stack twice.
-        if (!contains(productRoute)) {
+
+        val lastItem = last()
+        if(lastItem is Product) {
+            // Avoid adding the same product route to the back stack twice.
+            if(lastItem == productRoute) {
+                return
+            } else {
+                //Only have a single product as detail
+                remove(lastItem)
+                add(productRoute)
+            }
+        } else {
             add(productRoute)
         }
     }

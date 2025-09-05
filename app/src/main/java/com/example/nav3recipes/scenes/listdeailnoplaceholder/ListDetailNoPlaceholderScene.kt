@@ -104,6 +104,14 @@ class ListDetailNoPlaceholderSceneStrategy<T : Any>(val listInitialWeight: Float
             throw IllegalArgumentException("listInitialWeight must be less than or equal to 1f")
         }
 
+        val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
+
+        // Condition 1: Only return a Scene if the window is sufficiently wide to render two panes.
+        // We use isWidthAtLeastBreakpoint with WIDTH_DP_MEDIUM_LOWER_BOUND (600dp).
+        if (!windowSizeClass.isWidthAtLeastBreakpoint(WIDTH_DP_MEDIUM_LOWER_BOUND)) {
+            return null
+        }
+
         if (entries.size >= 2) {
             val lastEntry = entries.last()
             val secondLastEntry = entries[entries.size - 2]
