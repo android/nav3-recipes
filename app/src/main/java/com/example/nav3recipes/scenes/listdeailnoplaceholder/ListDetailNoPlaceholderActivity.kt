@@ -33,6 +33,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.compositionLocalOf
@@ -94,7 +95,8 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            //val defaultNumberOfColumns = columnsBySize()
+
+            //val wsc = currentWindowAdaptiveInfo().windowSizeClass
             val localNavSharedTransitionScope: ProvidableCompositionLocal<SharedTransitionScope> =
                 compositionLocalOf {
                     throw IllegalStateException(
