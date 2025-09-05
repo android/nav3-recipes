@@ -7,9 +7,14 @@ import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavEntryDecorator
+import androidx.navigation3.runtime.navEntryDecorator
 import androidx.navigation3.ui.Scene
 import androidx.navigation3.ui.SceneStrategy
+import androidx.navigation3.ui.SinglePaneSceneStrategy
 import androidx.window.core.layout.WindowSizeClass.Companion.BREAKPOINTS_V2
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXPANDED_LOWER_BOUND
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXTRA_LARGE_LOWER_BOUND
@@ -18,7 +23,7 @@ import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_MEDIUM_LOW
 import androidx.window.layout.WindowMetrics
 
 @Composable
-fun columnsBySize() : Int {
+fun columnsBySize(): Int {
     val info = currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true).windowSizeClass
 
     return when {
@@ -30,27 +35,54 @@ fun columnsBySize() : Int {
     }
 }
 
+fun columnsByComposableWidth(width: Dp): Int {
+    return when {
+        width >= WIDTH_DP_EXTRA_LARGE_LOWER_BOUND.dp -> 5
+        width >= WIDTH_DP_LARGE_LOWER_BOUND.dp -> 4
+        width >= WIDTH_DP_EXPANDED_LOWER_BOUND.dp -> 3
+        width >= WIDTH_DP_MEDIUM_LOWER_BOUND.dp -> 2
+        else -> 1
+    }
+}
+
 class ListDetailNoPlaceholderScene<T : Any>(
-    override val entries: List<NavEntry<T>>,
+    val list: NavEntry<T>,
+    val detail: NavEntry<T>,
     override val previousEntries: List<NavEntry<T>>,
     override val key: Any,
     private val columns: Int
 ) : Scene<T> {
 
+    override val entries: List<NavEntry<T>> = listOf(list, detail)
+
     override val content: @Composable (() -> Unit) = {
-        if (previousEntries.isNotEmpty()) {
-            Row(modifier = Modifier.fillMaxSize()) {
-                Column(modifier = Modifier.weight(0.5f)) {
-                    previousEntries.last().Content()
-                }
-                Column(modifier = Modifier.weight(0.5f)) {
-                    entries.last().Content()
-                }
+
+        Row(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = Modifier.weight(0.5f)) {
+                list.Content()
             }
-        } else {
-            entries.last().Content()
+            Column(modifier = Modifier.weight(0.5f)) {
+                detail.Content()
+            }
         }
     }
+}
+
+class ListNoPlaceholderScene<T : Any>(
+    val list: NavEntry<T>,
+    override val previousEntries: List<NavEntry<T>>,
+    override val key: Any,
+    private val columns: Int
+) : Scene<T> {
+
+    override val entries: List<NavEntry<T>> = listOf(list)
+
+    override val content: @Composable (() -> Unit) = {
+        list.Content()
+    }
+}
+
+class ListDetailNoPlaceholderSceneStrategy<T : Any> : SceneStrategy<T> {
 
     companion object {
         internal const val LIST = "list"
@@ -59,11 +91,8 @@ class ListDetailNoPlaceholderScene<T : Any>(
 
         fun list() = mapOf(LIST to true)
         fun detail() = mapOf(DETAIL to true)
-        fun columns(count: Int) = mapOf(COLUMNS_KEY to count)
     }
-}
 
-class ListDetailNoPlaceholderSceneStrategy<T : Any> : SceneStrategy<T>{
     @Composable
     override fun calculateScene(
         entries: List<NavEntry<T>>,
@@ -74,10 +103,12 @@ class ListDetailNoPlaceholderSceneStrategy<T : Any> : SceneStrategy<T>{
         if (entries.size >= 2) {
             val lastEntry = entries.last()
             val secondLastEntry = entries[entries.size - 2]
-            if (lastEntry.metadata[ListDetailNoPlaceholderScene.DETAIL] == true &&
-                secondLastEntry.metadata[ListDetailNoPlaceholderScene.LIST] == true) {
+            if (lastEntry.metadata[DETAIL] == true &&
+                secondLastEntry.metadata[LIST] == true
+            ) {
                 return ListDetailNoPlaceholderScene(
-                    entries = listOf(lastEntry),
+                    list = secondLastEntry,
+                    detail = lastEntry,
                     previousEntries = listOf(secondLastEntry),
                     key = "list_detail_scene",
                     columns = columns
@@ -86,11 +117,11 @@ class ListDetailNoPlaceholderSceneStrategy<T : Any> : SceneStrategy<T>{
         }
         if (entries.isNotEmpty()) {
             val lastEntry = entries.last()
-            if (lastEntry.metadata[ListDetailNoPlaceholderScene.LIST] == true) {
-                return ListDetailNoPlaceholderScene(
-                    entries = listOf(lastEntry),
-                    previousEntries = emptyList(),
-                    key = "list_only_scene",
+            if (lastEntry.metadata[LIST] == true) {
+                return ListNoPlaceholderScene(
+                    list = lastEntry,
+                    previousEntries = entries.dropLast(1),
+                    key = "list_scene",
                     columns = columns
                 )
             }
