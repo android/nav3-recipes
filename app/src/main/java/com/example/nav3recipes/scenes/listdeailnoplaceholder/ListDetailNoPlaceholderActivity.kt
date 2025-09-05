@@ -188,8 +188,10 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
                                     }
                                 }
                             }
-                            entry<Profile> {
-                                ContentGreen("Profile (single pane only)")
+                            entry<Profile>(
+                                metadata = ListDetailNoPlaceholderSceneStrategy.thirdPanel()
+                            ) {
+                                ContentGreen("Profile")
                             }
                         }
                     )
