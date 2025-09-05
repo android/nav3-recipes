@@ -7,6 +7,7 @@ import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
@@ -48,9 +49,10 @@ fun columnsByComposableWidth(width: Dp): Int {
 class ListDetailNoPlaceholderScene<T : Any>(
     val list: NavEntry<T>,
     val detail: NavEntry<T>,
+    val listWeight: Float = 0.5f,
+    val detailWeight: Float = 0.5f,
     override val previousEntries: List<NavEntry<T>>,
-    override val key: Any,
-    private val columns: Int
+    override val key: Any
 ) : Scene<T> {
 
     override val entries: List<NavEntry<T>> = listOf(list, detail)
@@ -58,10 +60,10 @@ class ListDetailNoPlaceholderScene<T : Any>(
     override val content: @Composable (() -> Unit) = {
 
         Row(modifier = Modifier.fillMaxSize()) {
-            Column(modifier = Modifier.weight(0.5f)) {
+            Column(modifier = Modifier.weight(listWeight)) {
                 list.Content()
             }
-            Column(modifier = Modifier.weight(0.5f)) {
+            Column(modifier = Modifier.weight(detailWeight)) {
                 detail.Content()
             }
         }
@@ -71,8 +73,7 @@ class ListDetailNoPlaceholderScene<T : Any>(
 class ListNoPlaceholderScene<T : Any>(
     val list: NavEntry<T>,
     override val previousEntries: List<NavEntry<T>>,
-    override val key: Any,
-    private val columns: Int
+    override val key: Any
 ) : Scene<T> {
 
     override val entries: List<NavEntry<T>> = listOf(list)
@@ -82,12 +83,12 @@ class ListNoPlaceholderScene<T : Any>(
     }
 }
 
-class ListDetailNoPlaceholderSceneStrategy<T : Any> : SceneStrategy<T> {
+class ListDetailNoPlaceholderSceneStrategy<T : Any>(val listInitialWeight: Float = 0.5f) :
+    SceneStrategy<T> {
 
     companion object {
         internal const val LIST = "list"
         internal const val DETAIL = "detail"
-        internal const val COLUMNS_KEY = "columns"
 
         fun list() = mapOf(LIST to true)
         fun detail() = mapOf(DETAIL to true)
@@ -98,7 +99,10 @@ class ListDetailNoPlaceholderSceneStrategy<T : Any> : SceneStrategy<T> {
         entries: List<NavEntry<T>>,
         onBack: (Int) -> Unit
     ): Scene<T>? {
-        val columns = columnsBySize()
+
+        if(listInitialWeight > 1f) {
+            throw IllegalArgumentException("listInitialWeight must be less than or equal to 1f")
+        }
 
         if (entries.size >= 2) {
             val lastEntry = entries.last()
@@ -109,9 +113,10 @@ class ListDetailNoPlaceholderSceneStrategy<T : Any> : SceneStrategy<T> {
                 return ListDetailNoPlaceholderScene(
                     list = secondLastEntry,
                     detail = lastEntry,
+                    listWeight = listInitialWeight,
+                    detailWeight = 1f - listInitialWeight,
                     previousEntries = listOf(secondLastEntry),
-                    key = "list_detail_scene",
-                    columns = columns
+                    key = Pair(secondLastEntry.contentKey, lastEntry.contentKey)
                 )
             }
         }
@@ -121,8 +126,7 @@ class ListDetailNoPlaceholderSceneStrategy<T : Any> : SceneStrategy<T> {
                 return ListNoPlaceholderScene(
                     list = lastEntry,
                     previousEntries = entries.dropLast(1),
-                    key = "list_scene",
-                    columns = columns
+                    key = lastEntry.contentKey
                 )
             }
         }

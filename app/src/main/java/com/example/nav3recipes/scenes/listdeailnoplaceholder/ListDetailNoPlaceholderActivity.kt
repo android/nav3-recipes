@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.Button
@@ -42,7 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
@@ -85,7 +86,7 @@ private data object Profile : NavKey
 
 class ListDetailNoPlaceholderActivity : ComponentActivity() {
 
-    private val mockProducts = List(100) { Product(it) }
+    private val mockProducts = List(10) { Product(it) }
 
     @OptIn(ExperimentalSharedTransitionApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -93,6 +94,7 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
+            //val defaultNumberOfColumns = columnsBySize()
             val localNavSharedTransitionScope: ProvidableCompositionLocal<SharedTransitionScope> =
                 compositionLocalOf {
                     throw IllegalStateException(
@@ -102,36 +104,33 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
                     )
                 }
 
+
+            var numberOfColumns by remember { mutableIntStateOf(1) }
+
             /**
              * A [NavEntryDecorator] that wraps each entry in a shared element that is controlled by the
              * [Scene].
              */
             val sharedEntryInSceneNavEntryDecorator = navEntryDecorator<NavKey> { entry ->
                 with(localNavSharedTransitionScope.current) {
-                    Box(
+                    BoxWithConstraints(
                         Modifier.sharedElement(
                             rememberSharedContentState(entry.contentKey),
                             animatedVisibilityScope = LocalNavAnimatedContentScope.current,
                         ),
                     ) {
+                        if (entry.metadata.containsKey(ListDetailNoPlaceholderSceneStrategy.LIST)) {
+                            numberOfColumns = columnsByComposableWidth(maxWidth)
+                        }
                         entry.Content()
                     }
                 }
             }
 
-            val defaultNumberOfColumns = columnsBySize()
-            var numberOfColumns by remember { mutableIntStateOf(defaultNumberOfColumns) }
-
-            val adaptiveContentDecorator = navEntryDecorator<NavKey> { entry ->
-                BoxWithConstraints {
-                    numberOfColumns = columnsByComposableWidth(maxWidth)
-                    entry.Content()
-                }
-            }
-
 
             val backStack = rememberNavBackStack(Home)
-            val strategy = remember { ListDetailNoPlaceholderSceneStrategy<Any>() }
+            val strategy =
+                remember { ListDetailNoPlaceholderSceneStrategy<Any>(listInitialWeight = .5f) }
 
             SharedTransitionLayout {
                 CompositionLocalProvider(localNavSharedTransitionScope provides this) {
@@ -141,8 +140,7 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
                         entryDecorators = listOf(
                             sharedEntryInSceneNavEntryDecorator,
                             rememberSceneSetupNavEntryDecorator(),
-                            rememberSavedStateNavEntryDecorator(),
-                            adaptiveContentDecorator
+                            rememberSavedStateNavEntryDecorator()
                         ),
                         sceneStrategy = strategy,
                         entryProvider = entryProvider {
@@ -152,11 +150,18 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
                                 ContentRed("Adaptive List") {
                                     val gridCells = GridCells.Fixed(numberOfColumns)
 
-                                    LazyVerticalGrid(columns = gridCells, modifier = Modifier.fillMaxSize()) {
+                                    LazyVerticalGrid(
+                                        columns = gridCells,
+                                        modifier = Modifier.fillMaxSize()
+                                    ) {
                                         items(mockProducts.size) {
-                                            Text(text = "Product $it", modifier = Modifier.clickable{
-                                                backStack.addProductRoute(1)
-                                            })
+                                            Text(
+                                                text = "Product $it",
+                                                modifier = Modifier
+                                                    .padding(all = 16.dp)
+                                                    .clickable {
+                                                        backStack.addProductRoute(it)
+                                                    })
                                         }
                                     }
                                 }
