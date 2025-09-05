@@ -31,6 +31,7 @@ nav3Material = "1.0.0-SNAPSHOT"
 ksp = "2.2.0-2.0.2"
 hilt = "2.57"
 hiltNavigationCompose = "1.2.0"
+window = "1.5.0-rc01"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -59,6 +60,8 @@ kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationCore" }
 androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 androidx-material3-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version.ref = "nav3Material" }
+androidx-window = { group = "androidx.window", name = "window", version.ref = "window" }
+androidx-window-core = { group = "androidx.window", name = "window-core", version.ref = "window" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
