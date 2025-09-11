@@ -61,6 +61,8 @@ class Exercise1Activity : ComponentActivity() {
                         entry<ConversationList> {
                             ConversationListScreen(
                                 onConversationClicked = { conversationDetail ->
+                                    // Pop any existing ConversationDetail screens
+                                    backStack.removeIf { it is ConversationDetail }
                                     backStack.add(conversationDetail)
                                 }
                             )
