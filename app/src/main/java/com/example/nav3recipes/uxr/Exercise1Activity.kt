@@ -19,7 +19,10 @@ package com.example.nav3recipes.uxr
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -30,6 +33,8 @@ import androidx.compose.material3.adaptive.layout.calculatePaneScaffoldDirective
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ProvidableCompositionLocal
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,7 +43,9 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.navEntryDecorator
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.Scene
 import androidx.navigation3.ui.SceneStrategy
@@ -67,12 +74,40 @@ data class ConversationDetail(val id: Int) : NavKey {
 
 class Exercise1Activity : ComponentActivity() {
 
-    @OptIn(ExperimentalMaterial3AdaptiveApi::class)
+    @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalSharedTransitionApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         setEdgeToEdgeConfig()
         super.onCreate(savedInstanceState)
         setContent {
             val backStack = rememberNavBackStack<NavKey>(ConversationList)
+
+
+            val localNavSharedTransitionScope: ProvidableCompositionLocal<SharedTransitionScope> =
+                compositionLocalOf {
+                    throw IllegalStateException(
+                        "Unexpected access to LocalNavSharedTransitionScope. You must provide a " +
+                                "SharedTransitionScope from a call to SharedTransitionLayout() or " +
+                                "SharedTransitionScope()"
+                    )
+                }
+
+            /**
+             * A [NavEntryDecorator] that wraps each entry in a shared element that is controlled by the
+             * [Scene].
+             */
+            val sharedEntryInSceneNavEntryDecorator = navEntryDecorator<NavKey> { entry ->
+                with(localNavSharedTransitionScope.current) {
+                    Box(
+                        Modifier.sharedElement(
+                            rememberSharedContentState(entry.contentKey),
+                            animatedVisibilityScope = LocalNavAnimatedContentScope.current,
+                        ),
+                    ) {
+                        entry.Content()
+                    }
+                }
+            }
+
 
             val twoPaneSceneStrategy = remember { VerticalListDetailSceneStrategy<NavKey>() }
 
@@ -90,6 +125,9 @@ class Exercise1Activity : ComponentActivity() {
                     onBack = { backStack.removeLastOrNull() },
                     modifier = Modifier.padding(paddingValues),
                     sceneStrategy = twoPaneSceneStrategy then listDetailStrategy,
+
+                    entryDecorators = listOf(sharedEntryInSceneNavEntryDecorator),
+
                     entryProvider = entryProvider {
                         entry<ConversationList>(metadata =
                             ListDetailSceneStrategy.listPane(detailPlaceholder = {
@@ -139,7 +177,7 @@ class VerticalListDetailSceneStrategy<T: Any> : SceneStrategy<T> {
             VerticalListDetailScene(
                 listEntry = listEntry,
                 detailEntry = detailEntry,
-                previousEntries = entries.dropLast(2)
+                previousEntries = entries.dropLast(1)
             )
         } else {
             null
