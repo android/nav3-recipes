@@ -25,9 +25,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.Posture
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.layout.calculatePaneScaffoldDirective
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
@@ -36,8 +41,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.platform.WindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
@@ -81,36 +90,6 @@ class Exercise1Activity : ComponentActivity() {
         setContent {
             val backStack = rememberNavBackStack<NavKey>(ConversationList)
 
-
-            val localNavSharedTransitionScope: ProvidableCompositionLocal<SharedTransitionScope> =
-                compositionLocalOf {
-                    throw IllegalStateException(
-                        "Unexpected access to LocalNavSharedTransitionScope. You must provide a " +
-                                "SharedTransitionScope from a call to SharedTransitionLayout() or " +
-                                "SharedTransitionScope()"
-                    )
-                }
-
-            /**
-             * A [NavEntryDecorator] that wraps each entry in a shared element that is controlled by the
-             * [Scene].
-             */
-            val sharedEntryInSceneNavEntryDecorator = navEntryDecorator<NavKey> { entry ->
-                with(localNavSharedTransitionScope.current) {
-                    Box(
-                        Modifier.sharedElement(
-                            rememberSharedContentState(entry.contentKey),
-                            animatedVisibilityScope = LocalNavAnimatedContentScope.current,
-                        ),
-                    ) {
-                        entry.Content()
-                    }
-                }
-            }
-
-
-            val twoPaneSceneStrategy = remember { VerticalListDetailSceneStrategy<NavKey>() }
-
             // Override the defaults so that there isn't a horizontal space between the panes.
             val windowAdaptiveInfo = currentWindowAdaptiveInfo()
             val directive = remember(windowAdaptiveInfo) {
@@ -118,23 +97,29 @@ class Exercise1Activity : ComponentActivity() {
                     .copy(horizontalPartitionSpacerSize = 0.dp)
             }
             val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>(directive = directive)
+            val verticalListDetailStrategy = remember { VerticalListDetailSceneStrategy<NavKey>() }
+            val singlePaneStrategy = remember { SinglePaneSceneStrategy<NavKey>() }
 
             Scaffold { paddingValues ->
                 NavDisplay(
                     backStack = backStack,
                     onBack = { backStack.removeLastOrNull() },
                     modifier = Modifier.padding(paddingValues),
-                    sceneStrategy = twoPaneSceneStrategy then listDetailStrategy,
-
-                    entryDecorators = listOf(sharedEntryInSceneNavEntryDecorator),
-
+                    sceneStrategy =
+                        listDetailStrategy then
+                        verticalListDetailStrategy then
+                        singlePaneStrategy,
                     entryProvider = entryProvider {
-                        entry<ConversationList>(metadata =
-                            ListDetailSceneStrategy.listPane(detailPlaceholder = {
-                                ContentBase(
-                                    title = "Choose a conversation from the list",
-                                    modifier = Modifier.background(Grey90)
-                                ) }) + mapOf("list" to true)
+                        entry<ConversationList>(
+                            metadata =
+                                ListDetailSceneStrategy.listPane(detailPlaceholder = {
+                                    ContentBase(
+                                        title = "Choose a conversation from the list",
+                                        modifier = Modifier.background(Grey90)
+                                    )
+                                }) + mapOf("list" to true) + mapOf(
+                                    SinglePaneSceneStrategy.TITLE_KEY to "Conversation list"
+                                )
                         ) {
                             ConversationListScreen(
                                 onConversationClicked = { conversationDetail ->
@@ -145,7 +130,9 @@ class Exercise1Activity : ComponentActivity() {
                             )
                         }
                         entry<ConversationDetail>(
-                            metadata = ListDetailSceneStrategy.detailPane() + mapOf("detail" to true)
+                            metadata = ListDetailSceneStrategy.detailPane() + mapOf("detail" to true) + mapOf(
+                                SinglePaneSceneStrategy.TITLE_KEY to "Conversation detail"
+                            )
                         ) { key ->
                             ConversationDetailScreen(key)
                         }
@@ -156,41 +143,79 @@ class Exercise1Activity : ComponentActivity() {
     }
 }
 
-class VerticalListDetailSceneStrategy<T: Any> : SceneStrategy<T> {
+class SinglePaneSceneStrategy<T : Any> : SceneStrategy<T> {
+    @Composable
+    override fun calculateScene(
+        entries: List<NavEntry<T>>,
+        onBack: (Int) -> Unit
+    ): Scene<T>? {
+        return SinglePaneScene(entry = entries.last(), previousEntries = entries.dropLast(1))
+    }
+
+    companion object {
+        const val TITLE_KEY = "single_pane_title"
+    }
+}
+
+class SinglePaneScene<T : Any>(
+    entry: NavEntry<T>,
+    override val previousEntries: List<NavEntry<T>>
+) : Scene<T> {
+
+    override val key = entry.contentKey
+    override val entries = listOf(entry)
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    override val content: @Composable (() -> Unit) = {
+
+        val title: String =
+            entry.metadata[SinglePaneSceneStrategy.TITLE_KEY] as? String ?: "Unknown title"
+
+        Column {
+            Row {
+                CenterAlignedTopAppBar(title = {
+                    Text(title)
+                })
+            }
+            Row {
+                entry.Content()
+            }
+        }
+    }
+}
+
+class VerticalListDetailSceneStrategy<T : Any> : SceneStrategy<T> {
     @Composable
     override fun calculateScene(
         entries: List<NavEntry<T>>,
         onBack: (Int) -> Unit
     ): Scene<T>? {
 
-        val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
+        var scene : Scene<T>? = null
+        val windowInfo = LocalWindowInfo.current
 
-        if (!windowSizeClass.isHeightAtLeastBreakpoint(600)) {
-            return null
+        if (windowInfo.containerSize.height > windowInfo.containerSize.width) {
+            val detailEntry = entries.findLast { it.metadata.containsKey("detail") }
+            val listEntry = entries.findLast { it.metadata.containsKey("list") }
+
+            if (listEntry != null && detailEntry != null) {
+                scene = VerticalListDetailScene(
+                    listEntry = listEntry,
+                    detailEntry = detailEntry,
+                    previousEntries = entries.dropLast(1)
+                )
+            }
         }
-
-        val detailEntry = entries.findLast { it.metadata.containsKey("detail") }
-        val listEntry = entries.findLast { it.metadata.containsKey("list") }
-
-        return if (listEntry != null && detailEntry != null){
-
-            VerticalListDetailScene(
-                listEntry = listEntry,
-                detailEntry = detailEntry,
-                previousEntries = entries.dropLast(1)
-            )
-        } else {
-            null
-        }
+        return scene
     }
 }
 
-class VerticalListDetailScene<T: Any>(
+class VerticalListDetailScene<T : Any>(
     val listEntry: NavEntry<T>,
     val detailEntry: NavEntry<T>,
     override val previousEntries: List<NavEntry<T>>,
 
-) : Scene<T> {
+    ) : Scene<T> {
 
     override val key = listEntry.contentKey
     override val entries: List<NavEntry<T>> = listOf(listEntry, detailEntry)
