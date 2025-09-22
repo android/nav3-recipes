@@ -31,7 +31,7 @@
         android:name=".content.Nav3RecipesApplication"
         tools:targetApi="31">
         <activity
-            android:name=".RecipePickerActivity"
+            android:name=".uxr.Exercise1Activity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Nav3Recipes">
@@ -41,63 +41,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".basic.BasicActivity"
-            android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.Nav3Recipes"/>
-        <activity
-            android:name=".commonui.CommonUiActivity"
-            android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.Nav3Recipes"/>
-        <activity
-            android:name=".basicdsl.BasicDslActivity"
-            android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.Nav3Recipes"/>
-        <activity
-            android:name=".basicsaveable.BasicSaveableActivity"
-            android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.Nav3Recipes"/>
-        <activity
-            android:name=".dialog.DialogActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Nav3Recipes"/>
-        <activity
-            android:name=".scenes.materiallistdetail.MaterialListDetailActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Nav3Recipes"/>
-        <activity
-            android:name=".scenes.twopane.TwoPaneActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Nav3Recipes"/>
-        <activity
-            android:name=".animations.AnimatedActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Nav3Recipes"/>
-        <activity
-            android:name=".conditional.ConditionalActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Nav3Recipes"/>
-        <activity
-            android:name=".passingarguments.basicviewmodels.BasicViewModelsActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Nav3Recipes"/>
-        <activity
-            android:name=".passingarguments.injectedviewmodels.InjectedViewModelsActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Nav3Recipes"/>
-        <activity
-            android:name=".modular.hilt.ModularActivity"
-            android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.Nav3Recipes"/>
-        <activity
-            android:name=".uxr.Exercise1Activity"
-            android:exported="true"
-            android:theme="@style/Theme.Nav3Recipes"/>
     </application>
 
 </manifest>
