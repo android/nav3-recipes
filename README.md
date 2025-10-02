@@ -14,6 +14,7 @@ These are the recipes and what they demonstrate.
 - **[Dialog](app/src/main/java/com/example/nav3recipes/dialog)**: Shows how to create a Dialog destination.
 - **[Custom Scene](app/src/main/java/com/example/nav3recipes/scenes/twopane)**: Shows how to create a custom layout using a `Scene` and `SceneStrategy` (see video of UI behavior below).
 - **[Animations](app/src/main/java/com/example/nav3recipes/animations)**: Override the default animations for all destinations and a single destination.
+- **[List-Detail without placeholder](app/src/main/java/com/example/nav3recipes/scenes/listdeailnoplaceholder)**: Shows how to make a list-detail without a placeholder, adapting the number of columns to the window size
 
 ### Material adaptive layouts
 Examples showing how to use the layouts provided by the [Compose Material3 Adaptive Navigation3 library](https://developer.android.com/jetpack/androidx/releases/compose-material3-adaptive#compose_material3_adaptive_navigation3_version_10_2)
