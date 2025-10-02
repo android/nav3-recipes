@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.nav3recipes.scenes.listdeailnoplaceholder
+package com.example.nav3recipes.scenes.listdetailnoplaceholder
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -62,14 +62,15 @@ import kotlinx.serialization.Serializable
 /**
  * This example shows how to create custom layouts using the Scenes API.
  *
- * A custom Scene, `TwoPaneScene`, will render content in two panes if:
+ * A custom List Detail scene will render in the following way:
+ *  - a single pane with a variable number of columns if no product has been selected
+ *  - a list of products and the product detail, whenever a product is selected and the available
+ *    window width is at least 600 dp
+ *  - the product detail and an additional one if the window width is at least 600 dp
+ *  - all three panes, when available, on bigger window size
  *
- * - the window width is over 600dp
- * - the last two nav entries on the back stack have indicated that they support being displayed in
- * a `TwoPaneScene` in their metadata.
  *
- *
- * @see `TwoPaneScene`
+ * @see `ListDetailNoPlaceholderScene`
  */
 @Serializable
 private object Home : NavKey

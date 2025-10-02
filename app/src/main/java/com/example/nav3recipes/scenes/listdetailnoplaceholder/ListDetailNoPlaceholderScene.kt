@@ -1,4 +1,4 @@
-package com.example.nav3recipes.scenes.listdeailnoplaceholder
+package com.example.nav3recipes.scenes.listdetailnoplaceholder
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,19 +15,6 @@ import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXPANDED_L
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXTRA_LARGE_LOWER_BOUND
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_LARGE_LOWER_BOUND
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_MEDIUM_LOWER_BOUND
-
-@Composable
-fun columnsBySize(): Int {
-    val info = currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true).windowSizeClass
-
-    return when {
-        info.isWidthAtLeastBreakpoint(WIDTH_DP_EXTRA_LARGE_LOWER_BOUND) -> 5
-        info.isWidthAtLeastBreakpoint(WIDTH_DP_LARGE_LOWER_BOUND) -> 4
-        info.isWidthAtLeastBreakpoint(WIDTH_DP_EXPANDED_LOWER_BOUND) -> 3
-        info.isWidthAtLeastBreakpoint(WIDTH_DP_MEDIUM_LOWER_BOUND) -> 2
-        else -> 1
-    }
-}
 
 fun columnsByComposableWidth(width: Dp): Int {
     return when {
@@ -107,8 +94,6 @@ class ListDetailNoPlaceholderSceneStrategy<T : Any>(val listInitialWeight: Float
         if (!windowSizeClass.isWidthAtLeastBreakpoint(WIDTH_DP_MEDIUM_LOWER_BOUND)) {
             return null
         }
-
-        //if(entries.size >= 3 && windowSizeClass.isWidthAtLeastBreakpoint())
 
         if (entries.size >= 2) {
             return buildTwoPaneScene(entries)

@@ -74,7 +74,7 @@
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes"/>
         <activity
-            android:name=".scenes.listdeailnoplaceholder.ListDetailNoPlaceholderActivity"
+            android:name=".scenes.listdetailnoplaceholder.ListDetailNoPlaceholderActivity"
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes"/>
         <activity
