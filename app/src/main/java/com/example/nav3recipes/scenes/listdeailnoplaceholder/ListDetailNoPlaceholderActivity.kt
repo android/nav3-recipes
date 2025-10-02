@@ -24,7 +24,6 @@ import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,7 +32,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.compositionLocalOf
@@ -41,10 +39,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
@@ -57,8 +55,6 @@ import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
 import com.example.nav3recipes.content.ContentBase
 import com.example.nav3recipes.content.ContentGreen
 import com.example.nav3recipes.content.ContentRed
-import com.example.nav3recipes.scenes.twopane.TwoPaneScene
-import com.example.nav3recipes.scenes.twopane.TwoPaneSceneStrategy
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 import com.example.nav3recipes.ui.theme.colors
 import kotlinx.serialization.Serializable
@@ -200,7 +196,7 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
         }
     }
 
-    private fun SnapshotStateList<NavKey>.addProductRoute(productId: Int) {
+    private fun NavBackStack<NavKey>.addProductRoute(productId: Int) {
         val productRoute =
             Product(productId)
 
