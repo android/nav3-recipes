@@ -23,12 +23,10 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -36,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.navEntryDecorator
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.scene.rememberSceneSetupNavEntryDecorator
@@ -63,8 +60,10 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 private object Home : NavKey
+
 @Serializable
 private data class Product(val id: Int) : NavKey
+
 @Serializable
 private data object Profile : NavKey
 
@@ -76,94 +75,82 @@ class TwoPaneActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val localNavSharedTransitionScope: ProvidableCompositionLocal<SharedTransitionScope> =
-                compositionLocalOf {
-                    throw IllegalStateException(
-                        "Unexpected access to LocalNavSharedTransitionScope. You must provide a " +
-                                "SharedTransitionScope from a call to SharedTransitionLayout() or " +
-                                "SharedTransitionScope()"
-                    )
-                }
-
-            /**
-             * A [NavEntryDecorator] that wraps each entry in a shared element that is controlled by the
-             * [Scene].
-             */
-            val sharedEntryInSceneNavEntryDecorator = navEntryDecorator<NavKey> { entry ->
-                with(localNavSharedTransitionScope.current) {
-                    Box(
-                        Modifier.sharedElement(
-                            rememberSharedContentState(entry.contentKey),
-                            animatedVisibilityScope = LocalNavAnimatedContentScope.current,
-                        ),
-                    ) {
-                        entry.Content()
-                    }
-                }
-            }
-
 
             val backStack = rememberNavBackStack(Home)
             val twoPaneStrategy = remember { TwoPaneSceneStrategy<NavKey>() }
 
             SharedTransitionLayout {
-                CompositionLocalProvider(localNavSharedTransitionScope provides this) {
-                    NavDisplay(
-                        backStack = backStack,
-                        onBack = { keysToRemove -> repeat(keysToRemove) { backStack.removeLastOrNull() } },
-                        entryDecorators = listOf(
-                            sharedEntryInSceneNavEntryDecorator,
-                            rememberSceneSetupNavEntryDecorator(),
-                            rememberSavedStateNavEntryDecorator()
-                        ),
-                        sceneStrategy = twoPaneStrategy,
-                        entryProvider = entryProvider {
-                            entry<Home>(
-                                metadata = TwoPaneScene.twoPane()
+                NavDisplay(
+                    backStack = backStack,
+                    onBack = { keysToRemove -> repeat(keysToRemove) { backStack.removeLastOrNull() } },
+                    sceneStrategy = twoPaneStrategy,
+                    entryDecorators = listOf(
+                        rememberSceneSetupNavEntryDecorator(),
+                        rememberSavedStateNavEntryDecorator()
+                    ),
+                    entryProvider = entryProvider {
+                        entry<Home>(
+                            metadata = TwoPaneScene.twoPane()
+                        ) { entry ->
+                            ContentRed(
+                                title = "Welcome to Nav3",
+                                modifier = Modifier.sharedElement(
+                                    rememberSharedContentState(Home),
+                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current,
+                                )
                             ) {
-                                ContentRed("Welcome to Nav3") {
-                                    Button(onClick = { backStack.addProductRoute(1) }) {
-                                        Text("View the first product")
-                                    }
+                                Button(onClick = { backStack.addProductRoute(1) }) {
+                                    Text("View the first product")
                                 }
-                            }
-                            entry<Product>(
-                                metadata = TwoPaneScene.twoPane()
-                            ) { product ->
-                                ContentBase(
-                                    "Product ${product.id} ",
-                                    Modifier.background(colors[product.id % colors.size])
-                                ) {
-                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        Button(onClick = {
-                                            backStack.addProductRoute(product.id + 1)
-                                        }) {
-                                            Text("View the next product")
-                                        }
-                                        Button(onClick = {
-                                            backStack.add(Profile)
-                                        }) {
-                                            Text("View profile")
-                                        }
-                                    }
-                                }
-                            }
-                            entry<Profile> {
-                                ContentGreen("Profile (single pane only)")
                             }
                         }
-                    )
-                }
+                        entry<Product>(
+                            metadata = TwoPaneScene.twoPane()
+                        ) { product ->
+                            ContentBase(
+                                title = "Product ${product.id} ",
+                                modifier = Modifier
+                                    .background(colors[product.id % colors.size])
+                                    .sharedElement(
+                                        rememberSharedContentState(product),
+                                        animatedVisibilityScope = LocalNavAnimatedContentScope.current,
+                                    )
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Button(onClick = {
+                                        backStack.addProductRoute(product.id + 1)
+                                    }) {
+                                        Text("View the next product")
+                                    }
+                                    Button(onClick = {
+                                        backStack.add(Profile)
+                                    }) {
+                                        Text("View profile")
+                                    }
+                                }
+                            }
+                        }
+                        entry<Profile> {
+                            ContentGreen(
+                                title = "Profile (single pane only)",
+                                modifier = Modifier.sharedElement(
+                                    rememberSharedContentState(Profile),
+                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current,
+                                )
+                            )
+                        }
+                    }
+                )
             }
         }
     }
+}
 
-    private fun NavBackStack<NavKey>.addProductRoute(productId: Int) {
-        val productRoute =
-            Product(productId)
-        // Avoid adding the same product route to the back stack twice.
-        if (!contains(productRoute)) {
-            add(productRoute)
-        }
+private fun NavBackStack<NavKey>.addProductRoute(productId: Int) {
+    val productRoute =
+        Product(productId)
+    // Avoid adding the same product route to the back stack twice.
+    if (!contains(productRoute)) {
+        add(productRoute)
     }
 }
