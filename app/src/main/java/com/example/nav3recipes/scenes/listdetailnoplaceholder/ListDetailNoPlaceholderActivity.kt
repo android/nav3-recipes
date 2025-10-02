@@ -127,8 +127,15 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
 
 
             val backStack = rememberNavBackStack(Home)
+
+            /**
+             * A [SceneWeightsDefaults] that wraps variable initial weights to customise the appearance
+             * of each panel
+             */
+            val weights = ListDetailNoPlaceholderSceneStrategy.SceneWeightsDefaults()
+                .copy(twoPanesScenePaneWeight = .4f)
             val strategy =
-                remember { ListDetailNoPlaceholderSceneStrategy<Any>(listInitialWeight = .5f) }
+                remember { ListDetailNoPlaceholderSceneStrategy<Any>(weights) }
 
             SharedTransitionLayout {
                 CompositionLocalProvider(localNavSharedTransitionScope provides this) {
@@ -202,9 +209,9 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
             Product(productId)
 
         val lastItem = last()
-        if(lastItem is Product) {
+        if (lastItem is Product) {
             // Avoid adding the same product route to the back stack twice.
-            if(lastItem == productRoute) {
+            if (lastItem == productRoute) {
                 return
             } else {
                 //Only have a single product as detail
