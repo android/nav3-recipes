@@ -66,7 +66,11 @@
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes"/>
         <activity
-            android:name=".scenes.materiallistdetail.MaterialListDetailActivity"
+            android:name=".material.listdetail.MaterialListDetailActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Nav3Recipes"/>
+        <activity
+            android:name=".material.supportingpane.MaterialSupportingPaneActivity"
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes"/>
         <activity
@@ -86,15 +90,20 @@
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes"/>
         <activity
-            android:name=".passingarguments.basicviewmodels.BasicViewModelsActivity"
+            android:name=".passingarguments.viewmodels.basic.BasicViewModelsActivity"
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes"/>
         <activity
-            android:name=".passingarguments.injectedviewmodels.InjectedViewModelsActivity"
+            android:name=".passingarguments.viewmodels.hilt.HiltViewModelsActivity"
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes"/>
         <activity
             android:name=".modular.hilt.ModularActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Nav3Recipes"/>
+        <activity
+            android:name=".passingarguments.viewmodels.koin.KoinViewModelsActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Nav3Recipes"/>

@@ -31,9 +31,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
@@ -159,7 +159,7 @@ class TwoPaneActivity : ComponentActivity() {
         }
     }
 
-    private fun SnapshotStateList<NavKey>.addProductRoute(productId: Int) {
+    private fun NavBackStack<NavKey>.addProductRoute(productId: Int) {
         val productRoute =
             Product(productId)
         // Avoid adding the same product route to the back stack twice.

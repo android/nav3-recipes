@@ -5,29 +5,34 @@ use its APIs to implement common navigation use cases.
 ## Recipes
 These are the recipes and what they demonstrate. 
 
-**Basic API examples**
+### Basic API examples
 - **[Basic](app/src/main/java/com/example/nav3recipes/basic)**: Shows most basic API usage.
 - **[Saveable back stack](app/src/main/java/com/example/nav3recipes/basicsaveable)**: As above, with a persistent back stack.
 - **[Entry provider DSL](app/src/main/java/com/example/nav3recipes/basicdsl)**: As above, using the entryProvider DSL.
 
-**Layouts and animations**
-- **[Material adaptive](app/src/main/java/com/example/nav3recipes/scenes/materiallistdetail)**: Shows how to use a Material list-detail layout. 
+### Layouts and animations
 - **[Dialog](app/src/main/java/com/example/nav3recipes/dialog)**: Shows how to create a Dialog destination.
 - **[Custom Scene](app/src/main/java/com/example/nav3recipes/scenes/twopane)**: Shows how to create a custom layout using a `Scene` and `SceneStrategy` (see video of UI behavior below).
 - **[Animations](app/src/main/java/com/example/nav3recipes/animations)**: Override the default animations for all destinations and a single destination.
 
-**Common use cases**
+### Material adaptive layouts
+Examples showing how to use the layouts provided by the [Compose Material3 Adaptive Navigation3 library](https://developer.android.com/jetpack/androidx/releases/compose-material3-adaptive#compose_material3_adaptive_navigation3_version_10_2)
+- **[List-Detail](app/src/main/java/com/example/nav3recipes/material/listdetail)**: Shows how to use a Material adaptive list-detail layout.
+- **[Supporting Pane](app/src/main/java/com/example/nav3recipes/material/supportingpane)**: Shows how to use a Material adaptive supporting pane layout.
+
+### Common use cases
 - **[Common navigation UI](app/src/main/java/com/example/nav3recipes/commonui)**: A common navigation toolbar where each item in the toolbar navigates to a top level destination.
 - **[Conditional navigation](app/src/main/java/com/example/nav3recipes/conditional)**: Switch to a different navigation flow when a condition is met. For example, for authentication or first-time user onboarding.
 
-**Architecture**
+### Architecture
 - **[Modularized navigation code](app/src/main/java/com/example/nav3recipes/modular/hilt)**: Demonstrates how to decouple navigation code into separate modules (uses Dagger/Hilt for DI). 
 
-**Passing navigation arguments to ViewModels**
-- **[Basic ViewModel](app/src/main/java/com/example/nav3recipes/passingarguments/basicviewmodels)**: Navigation arguments are passed to a ViewModel constructed using `viewModel()`
-- **[Hilt injected ViewModel](app/src/main/java/com/example/nav3recipes/passingarguments/injectedviewmodels)**: Navigation arguments are passed to a ViewModel constructed using `hiltViewModel()`
+### Passing navigation arguments to ViewModels
+- **[Basic ViewModel](app/src/main/java/com/example/nav3recipes/passingarguments/viewmodels/basic)**: Navigation arguments are passed to a ViewModel constructed using `viewModel()`
+- **[Hilt injected ViewModel](app/src/main/java/com/example/nav3recipes/passingarguments/viewmodels/hilt)**: Navigation arguments are passed to a ViewModel constructed using `hiltViewModel()`
+- **[Koin injected ViewModel](app/src/main/java/com/example/nav3recipes/passingarguments/viewmodels/koin)**: Navigation arguments are passed to a ViewModel constructed using `koinViewModel()`
 
-**Planned**
+### Planned
 - **Deeplinks**: Create and handle deeplinks to specific destinations
 - **Android XR**: Custom navigation and layout behavior for Android XR
 - **Returning a result from a destination**: Return a result to a previous destination

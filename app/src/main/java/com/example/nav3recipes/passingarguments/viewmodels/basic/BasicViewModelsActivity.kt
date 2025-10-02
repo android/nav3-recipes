@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.nav3recipes.passingarguments.basicviewmodels
+package com.example.nav3recipes.passingarguments.viewmodels.basic
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
