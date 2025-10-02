@@ -26,40 +26,69 @@ fun columnsByComposableWidth(width: Dp): Int {
     }
 }
 
-class ListDetailNoPlaceholderScene<T : Any>(
-    val list: NavEntry<T>,
-    val detail: NavEntry<T>,
-    val listWeight: Float = 0.5f,
-    val detailWeight: Float = 0.5f,
+class AdaptiveThreePaneScene<T : Any>(
+    val firstPane: NavEntry<T>,
+    val secondPane: NavEntry<T>,
+    val thirdPane: NavEntry<T>,
+    val firstPaneWeight: Float = 0.4f,
+    val secondPaneWeight: Float = 0.3f,
+    val thirdPaneWeight: Float = 0.3f,
     override val previousEntries: List<NavEntry<T>>,
     override val key: Any
 ) : Scene<T> {
 
-    override val entries: List<NavEntry<T>> = listOf(list, detail)
+    override val entries: List<NavEntry<T>> = listOf(firstPane, secondPane, thirdPane)
 
     override val content: @Composable (() -> Unit) = {
 
         Row(modifier = Modifier.fillMaxSize()) {
-            Column(modifier = Modifier.weight(listWeight)) {
-                list.Content()
+            Column(modifier = Modifier.weight(firstPaneWeight)) {
+                firstPane.Content()
             }
-            Column(modifier = Modifier.weight(detailWeight)) {
-                detail.Content()
+            Column(modifier = Modifier.weight(secondPaneWeight)) {
+                secondPane.Content()
+            }
+            Column(modifier = Modifier.weight(thirdPaneWeight)) {
+                thirdPane.Content()
             }
         }
     }
 }
 
-class ListNoPlaceholderScene<T : Any>(
-    val list: NavEntry<T>,
+class AdaptiveTwoPaneScene<T : Any>(
+    val firstPane: NavEntry<T>,
+    val secondPane: NavEntry<T>,
+    val firstPaneWeight: Float = 0.5f,
+    val secondPaneWeight: Float = 0.5f,
     override val previousEntries: List<NavEntry<T>>,
     override val key: Any
 ) : Scene<T> {
 
-    override val entries: List<NavEntry<T>> = listOf(list)
+    override val entries: List<NavEntry<T>> = listOf(firstPane, secondPane)
 
     override val content: @Composable (() -> Unit) = {
-        list.Content()
+
+        Row(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = Modifier.weight(firstPaneWeight)) {
+                firstPane.Content()
+            }
+            Column(modifier = Modifier.weight(secondPaneWeight)) {
+                secondPane.Content()
+            }
+        }
+    }
+}
+
+class AdaptiveSinglePaneScene<T : Any>(
+    val pane: NavEntry<T>,
+    override val previousEntries: List<NavEntry<T>>,
+    override val key: Any
+) : Scene<T> {
+
+    override val entries: List<NavEntry<T>> = listOf(pane)
+
+    override val content: @Composable (() -> Unit) = {
+        pane.Content()
     }
 }
 
@@ -87,7 +116,7 @@ class ListDetailNoPlaceholderSceneStrategy<T : Any>(val listInitialWeight: Float
             throw IllegalArgumentException("listInitialWeight must be less than or equal to 1f")
         }
 
-        val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
+        val windowSizeClass = currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true).windowSizeClass
 
         // Condition 1: Only return a Scene if the window is sufficiently wide to render two panes.
         // We use isWidthAtLeastBreakpoint with WIDTH_DP_MEDIUM_LOWER_BOUND (600dp).
@@ -95,8 +124,12 @@ class ListDetailNoPlaceholderSceneStrategy<T : Any>(val listInitialWeight: Float
             return null
         }
 
+        if (windowSizeClass.isWidthAtLeastBreakpoint(WIDTH_DP_LARGE_LOWER_BOUND) && entries.size >= 3) {
+            return buildAdaptiveThreePanesScene(entries)
+        }
+
         if (entries.size >= 2) {
-            return buildTwoPaneScene(entries)
+            return buildAdaptiveTwoPanesScene(entries)
         }
         //Only the list is available
         if (entries.isNotEmpty()) {
@@ -105,7 +138,32 @@ class ListDetailNoPlaceholderSceneStrategy<T : Any>(val listInitialWeight: Float
         return null
     }
 
-    private fun buildTwoPaneScene(entries: List<NavEntry<T>>): Scene<T>? {
+    private fun buildAdaptiveThreePanesScene(entries: List<NavEntry<T>>): Scene<T>? {
+        val lastEntry = entries.last()
+        val secondLastEntry = entries[entries.size - 2]
+        val thirdLastEntry = entries[entries.size - 3]
+
+        return if (lastEntry.metadata[THIRD_PANEL] == true &&
+            secondLastEntry.metadata[DETAIL] == true &&
+            thirdLastEntry.metadata[LIST] == true
+        ) {
+            AdaptiveThreePaneScene(
+                firstPane = thirdLastEntry,
+                secondPane = secondLastEntry,
+                thirdPane = lastEntry,
+                previousEntries = listOf(thirdLastEntry, secondLastEntry),
+                key = Triple(
+                    thirdLastEntry.contentKey,
+                    secondLastEntry.contentKey,
+                    lastEntry.contentKey
+                )
+            )
+        } else {
+            null
+        }
+    }
+
+    private fun buildAdaptiveTwoPanesScene(entries: List<NavEntry<T>>): Scene<T>? {
         val lastEntry = entries.last()
         val secondLastEntry = entries[entries.size - 2]
 
@@ -121,15 +179,14 @@ class ListDetailNoPlaceholderSceneStrategy<T : Any>(val listInitialWeight: Float
         } else {
             null
         }
-
     }
 
     private fun buildListDetailScene(firstEntry: NavEntry<T>, secondEntry: NavEntry<T>): Scene<T> {
-        return ListDetailNoPlaceholderScene(
-            list = firstEntry,
-            detail = secondEntry,
-            listWeight = listInitialWeight,
-            detailWeight = 1f - listInitialWeight,
+        return AdaptiveTwoPaneScene(
+            firstPane = firstEntry,
+            secondPane = secondEntry,
+            firstPaneWeight = listInitialWeight,
+            secondPaneWeight = 1f - listInitialWeight,
             previousEntries = listOf(firstEntry),
             key = Pair(firstEntry.contentKey, secondEntry.contentKey)
         )
@@ -140,11 +197,11 @@ class ListDetailNoPlaceholderSceneStrategy<T : Any>(val listInitialWeight: Float
         secondEntry: NavEntry<T>,
         previousEntry: NavEntry<T>
     ): Scene<T> {
-        return ListDetailNoPlaceholderScene(
-            list = firstEntry,
-            detail = secondEntry,
-            listWeight = listInitialWeight,
-            detailWeight = 1f - listInitialWeight,
+        return AdaptiveTwoPaneScene(
+            firstPane = firstEntry,
+            secondPane = secondEntry,
+            firstPaneWeight = listInitialWeight,
+            secondPaneWeight = 1f - listInitialWeight,
             previousEntries = listOf(previousEntry, firstEntry),
             key = Pair(firstEntry.contentKey, secondEntry.contentKey)
         )
@@ -153,8 +210,8 @@ class ListDetailNoPlaceholderSceneStrategy<T : Any>(val listInitialWeight: Float
     private fun buildAdaptiveListScene(entries: List<NavEntry<T>>): Scene<T>? {
         val lastEntry = entries.last()
         if (lastEntry.metadata[LIST] == true) {
-            return ListNoPlaceholderScene(
-                list = lastEntry,
+            return AdaptiveSinglePaneScene(
+                pane = lastEntry,
                 previousEntries = entries.dropLast(1),
                 key = lastEntry.contentKey
             )
