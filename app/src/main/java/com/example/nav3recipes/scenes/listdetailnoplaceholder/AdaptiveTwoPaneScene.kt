@@ -6,27 +6,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.Scene
 import androidx.navigation3.ui.SceneStrategy
-import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXPANDED_LOWER_BOUND
-import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXTRA_LARGE_LOWER_BOUND
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_LARGE_LOWER_BOUND
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_MEDIUM_LOWER_BOUND
 
-fun columnsByComposableWidth(width: Dp): Int {
-    return when {
-        width >= WIDTH_DP_EXTRA_LARGE_LOWER_BOUND.dp -> 5
-        width >= WIDTH_DP_LARGE_LOWER_BOUND.dp -> 4
-        width >= WIDTH_DP_EXPANDED_LOWER_BOUND.dp -> 3
-        width >= WIDTH_DP_MEDIUM_LOWER_BOUND.dp -> 2
-        else -> 1
-    }
-}
-
-class AdaptiveThreePaneScene<T : Any>(
+internal class AdaptiveThreePaneScene<T : Any>(
     val firstPane: NavEntry<T>,
     val secondPane: NavEntry<T>,
     val thirdPane: NavEntry<T>,
@@ -53,7 +39,7 @@ class AdaptiveThreePaneScene<T : Any>(
     }
 }
 
-class AdaptiveTwoPaneScene<T : Any>(
+internal class AdaptiveTwoPaneScene<T : Any>(
     val firstPane: NavEntry<T>,
     val secondPane: NavEntry<T>,
     val weights: ListDetailNoPlaceholderSceneStrategy.SceneWeightsDefaults,

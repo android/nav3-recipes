@@ -41,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -52,6 +53,10 @@ import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
+import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXPANDED_LOWER_BOUND
+import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXTRA_LARGE_LOWER_BOUND
+import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_LARGE_LOWER_BOUND
+import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_MEDIUM_LOWER_BOUND
 import com.example.nav3recipes.content.ContentBase
 import com.example.nav3recipes.content.ContentGreen
 import com.example.nav3recipes.content.ContentRed
@@ -220,6 +225,16 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
             }
         } else {
             add(productRoute)
+        }
+    }
+
+    fun columnsByComposableWidth(width: Dp): Int {
+        return when {
+            width >= WIDTH_DP_EXTRA_LARGE_LOWER_BOUND.dp -> 5
+            width >= WIDTH_DP_LARGE_LOWER_BOUND.dp -> 4
+            width >= WIDTH_DP_EXPANDED_LOWER_BOUND.dp -> 3
+            width >= WIDTH_DP_MEDIUM_LOWER_BOUND.dp -> 2
+            else -> 1
         }
     }
 }
