@@ -228,6 +228,10 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
         }
     }
 
+    /***
+     * This function exemplify how to calculate the number of columns for the adaptive list based
+     * on how much space is available inside the container
+     */
     fun columnsByComposableWidth(width: Dp): Int {
         return when {
             width >= WIDTH_DP_EXTRA_LARGE_LOWER_BOUND.dp -> 5
