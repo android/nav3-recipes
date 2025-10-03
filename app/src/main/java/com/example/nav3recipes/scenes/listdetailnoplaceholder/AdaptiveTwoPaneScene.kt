@@ -76,17 +76,6 @@ class AdaptiveTwoPaneScene<T : Any>(
     }
 }
 
-class AdaptiveSinglePaneScene<T : Any>(
-    val pane: NavEntry<T>, override val previousEntries: List<NavEntry<T>>, override val key: Any
-) : Scene<T> {
-
-    override val entries: List<NavEntry<T>> = listOf(pane)
-
-    override val content: @Composable (() -> Unit) = {
-        pane.Content()
-    }
-}
-
 class ListDetailNoPlaceholderSceneStrategy<T : Any>(val sceneWeights: SceneWeightsDefaults = SceneWeightsDefaults()) :
     SceneStrategy<T> {
 
@@ -130,10 +119,6 @@ class ListDetailNoPlaceholderSceneStrategy<T : Any>(val sceneWeights: SceneWeigh
 
         if (entries.size >= 2) {
             return buildAdaptiveTwoPanesScene(entries)
-        }
-        //Only the list is available
-        if (entries.isNotEmpty()) {
-            return buildAdaptiveListScene(entries)
         }
         return null
     }
@@ -193,16 +178,5 @@ class ListDetailNoPlaceholderSceneStrategy<T : Any>(val sceneWeights: SceneWeigh
             previousEntries = listOf(previousEntry, firstEntry),
             key = Pair(firstEntry.contentKey, secondEntry.contentKey)
         )
-    }
-
-    private fun buildAdaptiveListScene(entries: List<NavEntry<T>>): Scene<T>? {
-        val lastEntry = entries.last()
-        if (lastEntry.metadata[LIST] == true) {
-            return AdaptiveSinglePaneScene(
-                pane = lastEntry, previousEntries = entries.dropLast(1), key = lastEntry.contentKey
-            )
-        }
-
-        return null
     }
 }
