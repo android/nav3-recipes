@@ -38,6 +38,8 @@ import com.example.nav3recipes.passingarguments.viewmodels.hilt.HiltViewModelsAc
 import com.example.nav3recipes.passingarguments.viewmodels.koin.KoinViewModelsActivity
 import com.example.nav3recipes.material.listdetail.MaterialListDetailActivity
 import com.example.nav3recipes.material.supportingpane.MaterialSupportingPaneActivity
+import com.example.nav3recipes.results.event.ResultEventActivity
+import com.example.nav3recipes.results.state.ResultStateActivity
 import com.example.nav3recipes.scenes.twopane.TwoPaneActivity
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 
@@ -75,6 +77,10 @@ private val recipes = listOf(
     Recipe("Basic", BasicViewModelsActivity::class.java),
     Recipe("Using Hilt", HiltViewModelsActivity::class.java),
     Recipe("Using Koin", KoinViewModelsActivity::class.java),
+
+    Heading("Returning Results"),
+    Recipe("Return result as Event", ResultEventActivity::class.java),
+    Recipe("Return result as State", ResultStateActivity::class.java),
 )
 
 class RecipePickerActivity : ComponentActivity() {
