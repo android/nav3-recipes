@@ -150,7 +150,7 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
                         sceneStrategy = strategy,
                         entryProvider = entryProvider {
                             entry<Home>(
-                                metadata = ListDetailNoPlaceholderSceneStrategy.Companion.list()
+                                metadata = ListDetailNoPlaceholderSceneStrategy.list()
                             ) {
                                 ContentRed("Adaptive List") {
                                     val gridCells = GridCells.Fixed(numberOfColumns)
@@ -172,7 +172,7 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
                                 }
                             }
                             entry<Product>(
-                                metadata = ListDetailNoPlaceholderSceneStrategy.Companion.detail()
+                                metadata = ListDetailNoPlaceholderSceneStrategy.detail()
                             ) { product ->
                                 ContentBase(
                                     "Product ${product.id} ",

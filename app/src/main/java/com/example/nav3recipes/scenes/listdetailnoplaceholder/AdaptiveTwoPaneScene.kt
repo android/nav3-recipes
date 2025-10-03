@@ -95,9 +95,11 @@ class ListDetailNoPlaceholderSceneStrategy<T : Any>(val sceneWeights: SceneWeigh
         internal const val DETAIL = "detail"
         internal const val THIRD_PANEL = "thirdPanel"
 
+        @JvmStatic
         fun list() = mapOf(LIST to true)
+        @JvmStatic
         fun detail() = mapOf(DETAIL to true)
-
+        @JvmStatic
         fun thirdPanel() = mapOf(THIRD_PANEL to true)
     }
 
