@@ -53,6 +53,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
+import androidx.navigation3.ui.SceneStrategy
 import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXPANDED_LOWER_BOUND
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXTRA_LARGE_LOWER_BOUND
@@ -144,8 +145,8 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
              */
             val weights = ListDetailNoPlaceholderSceneStrategy.SceneWeightsDefaults()
                 .copy(twoPanesScenePaneWeight = .4f)
-            val strategy =
-                remember { ListDetailNoPlaceholderSceneStrategy<Any>(weights) }
+            val strategy : SceneStrategy<Any> =
+                remember { ListDetailNoPlaceholderSceneStrategy(weights) }
 
             SharedTransitionLayout {
                 CompositionLocalProvider(localNavSharedTransitionScope provides this) {
