@@ -20,7 +20,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.navigation3.runtime.entry
 import com.example.nav3recipes.ui.theme.colors
 import dagger.Module
 import dagger.Provides

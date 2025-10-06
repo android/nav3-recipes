@@ -15,7 +15,6 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay

@@ -14,21 +14,22 @@
 
 [versions]
 agp = "8.11.2"
-kotlin = "2.2.20"
-kotlinSerialization = "2.2.20"
+kotlin = "2.2.10" # Downgraded from 2.2.20 to align with KSP
+kotlinSerialization = "2.2.10"
 coreKtx = "1.17.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 kotlinxSerializationCore = "1.9.0"
-lifecycleRuntimeKtx = "2.9.3"
+lifecycleRuntimeKtx = "2.9.4"
 lifecycleViewmodel = "1.0.0-alpha04"
-activityCompose = "1.12.0-alpha08"
-composeBom = "2025.09.00"
-navigation3 = "1.0.0-alpha09"
-material3 = "1.4.0-rc01"
-nav3Material = "1.0.0-alpha02"
-ksp = "2.2.0-2.0.2"
+activityCompose = "1.12.0-alpha09"
+composeBom = "2025.09.01"
+navigation2 = "2.9.1"
+navigation3 = "1.0.0-alpha10"
+material3 = "1.4.0"
+nav3Material = "1.0.0-alpha03"
+ksp = "2.2.10-2.0.2"
 hilt = "2.57.1"
 hiltNavigationCompose = "1.3.0"
 koin = "4.1.1"
@@ -53,6 +54,7 @@ androidx-material3-windowsizeclass = { group = "androidx.compose.material3", nam
 androidx-adaptive-layout = { group = "androidx.compose.material3.adaptive", name = "adaptive-layout" }
 androidx-hilt-navigation-compose         = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycleViewmodel" }
+androidx-navigation2 = { module = "androidx.navigation:navigation-compose", version.ref = "navigation2" }
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }

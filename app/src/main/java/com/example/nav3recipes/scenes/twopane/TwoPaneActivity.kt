@@ -35,14 +35,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.navEntryDecorator
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
+import androidx.navigation3.scene.rememberSceneSetupNavEntryDecorator
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
-import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
 import com.example.nav3recipes.content.ContentBase
 import com.example.nav3recipes.content.ContentGreen
 import com.example.nav3recipes.content.ContentRed
@@ -105,7 +104,7 @@ class TwoPaneActivity : ComponentActivity() {
 
 
             val backStack = rememberNavBackStack(Home)
-            val twoPaneStrategy = remember { TwoPaneSceneStrategy<Any>() }
+            val twoPaneStrategy = remember { TwoPaneSceneStrategy<NavKey>() }
 
             SharedTransitionLayout {
                 CompositionLocalProvider(localNavSharedTransitionScope provides this) {
