@@ -46,15 +46,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.navEntryDecorator
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
+import androidx.navigation3.scene.SceneStrategy
+import androidx.navigation3.scene.rememberSceneSetupNavEntryDecorator
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
-import androidx.navigation3.ui.SceneStrategy
-import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXPANDED_LOWER_BOUND
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXTRA_LARGE_LOWER_BOUND
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_LARGE_LOWER_BOUND
@@ -145,7 +144,7 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
              */
             val weights = ListDetailNoPlaceholderSceneStrategy.SceneWeightsDefaults()
                 .copy(twoPanesScenePaneWeight = .4f)
-            val strategy : SceneStrategy<Any> =
+            val strategy : SceneStrategy<NavKey> =
                 remember { ListDetailNoPlaceholderSceneStrategy(weights) }
 
             SharedTransitionLayout {
