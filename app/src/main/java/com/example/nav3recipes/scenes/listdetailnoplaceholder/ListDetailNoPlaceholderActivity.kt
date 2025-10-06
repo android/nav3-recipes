@@ -26,8 +26,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.Button
@@ -58,6 +59,7 @@ import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXTRA_LARG
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_LARGE_LOWER_BOUND
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_MEDIUM_LOWER_BOUND
 import com.example.nav3recipes.content.ContentBase
+import com.example.nav3recipes.content.ContentBlue
 import com.example.nav3recipes.content.ContentGreen
 import com.example.nav3recipes.content.ContentRed
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
@@ -85,6 +87,9 @@ private data class Product(val id: Int) : NavKey
 
 @Serializable
 private data object Profile : NavKey
+
+@Serializable
+private data object Toolbar : NavKey
 
 
 class ListDetailNoPlaceholderActivity : ComponentActivity() {
@@ -122,7 +127,7 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
                             animatedVisibilityScope = LocalNavAnimatedContentScope.current,
                         ),
                     ) {
-                        if (entry.metadata.containsKey(ListDetailNoPlaceholderSceneStrategy.LIST)) {
+                        if (entry.metadata.containsKey(ListDetailNoPlaceholderSceneStrategy.MAIN)) {
                             numberOfColumns = columnsByComposableWidth(maxWidth)
                         }
                         entry.Content()
@@ -155,14 +160,16 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
                         sceneStrategy = strategy,
                         entryProvider = entryProvider {
                             entry<Home>(
-                                metadata = ListDetailNoPlaceholderSceneStrategy.list()
+                                metadata = ListDetailNoPlaceholderSceneStrategy.main()
                             ) {
                                 ContentRed("Adaptive List") {
                                     val gridCells = GridCells.Fixed(numberOfColumns)
 
                                     LazyVerticalGrid(
                                         columns = gridCells,
-                                        modifier = Modifier.fillMaxSize()
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .wrapContentHeight()
                                     ) {
                                         items(mockProducts.size) {
                                             Text(
@@ -173,6 +180,13 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
                                                         backStack.addProductRoute(it)
                                                     })
                                         }
+                                    }
+
+                                    Button(
+                                        onClick = { backStack.add(Toolbar) },
+                                        modifier = Modifier.padding(top = 32.dp)
+                                    ) {
+                                        Text("Open toolbar")
                                     }
                                 }
                             }
@@ -202,6 +216,12 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
                             ) {
                                 ContentGreen("Profile")
                             }
+
+                            entry<Toolbar>(
+                                metadata = ListDetailNoPlaceholderSceneStrategy.support()
+                            ) {
+                                ContentBlue("Toolbar")
+                            }
                         }
                     )
                 }
@@ -214,7 +234,7 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
             Product(productId)
 
         val lastItem = last()
-        if (lastItem is Product) {
+        if (lastItem is Product || lastItem is Toolbar) {
             // Avoid adding the same product route to the back stack twice.
             if (lastItem == productRoute) {
                 return

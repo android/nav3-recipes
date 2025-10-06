@@ -3,6 +3,9 @@ package com.example.nav3recipes.scenes.listdetailnoplaceholder
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ModalBottomSheetProperties
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -62,20 +65,48 @@ internal class AdaptiveTwoPaneScene<T : Any>(
     }
 }
 
+internal class BottomPaneScene<T : Any>(
+    val pane: NavEntry<T>,
+    override val previousEntries: List<NavEntry<T>>,
+    override val key: Any,
+    val onBack: (Int) -> Unit
+) : Scene<T> {
+
+    override val entries: List<NavEntry<T>> = listOf(pane)
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    override val content: @Composable (() -> Unit) = {
+
+        ModalBottomSheet(
+            onDismissRequest = { onBack(1) },
+            properties = ModalBottomSheetProperties()
+        ) {
+            pane.Content()
+        }
+
+    }
+}
+
 class ListDetailNoPlaceholderSceneStrategy<T : Any>(val sceneWeights: SceneWeightsDefaults = SceneWeightsDefaults()) :
     SceneStrategy<T> {
 
     companion object {
-        internal const val LIST = "list"
+        internal const val MAIN = "main"
         internal const val DETAIL = "detail"
+        internal const val SUPPORT = "support"
         internal const val THIRD_PANEL = "thirdPanel"
 
         @JvmStatic
-        fun list() = mapOf(LIST to true)
+        fun main() = mapOf(MAIN to true)
+
         @JvmStatic
         fun detail() = mapOf(DETAIL to true)
+
         @JvmStatic
         fun thirdPanel() = mapOf(THIRD_PANEL to true)
+
+        @JvmStatic
+        fun support() = mapOf(SUPPORT to true)
     }
 
     data class SceneWeightsDefaults(
@@ -92,11 +123,22 @@ class ListDetailNoPlaceholderSceneStrategy<T : Any>(val sceneWeights: SceneWeigh
 
         val windowSizeClass =
             currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true).windowSizeClass
+        val isLastEntrySupportingPane = entries.lastOrNull()?.metadata[SUPPORT] == true
 
-        // Condition 1: Only return a Scene if the window is sufficiently wide to render two panes.
+        // Condition 1: Only return a Scene if the window is sufficiently wide to render two panes,
+        // or if a supporting pane is detected.
+        //
         // We use isWidthAtLeastBreakpoint with WIDTH_DP_MEDIUM_LOWER_BOUND (600dp).
         if (!windowSizeClass.isWidthAtLeastBreakpoint(WIDTH_DP_MEDIUM_LOWER_BOUND)) {
-            return null
+            return if (isLastEntrySupportingPane) {
+                buildSupportingPaneScene(
+                    pane = entries.last(),
+                    previousEntry = entries[entries.size - 2],
+                    onBack = onBack
+                )
+            } else {
+                null
+            }
         }
 
         if (windowSizeClass.isWidthAtLeastBreakpoint(WIDTH_DP_LARGE_LOWER_BOUND) && entries.size >= 3) {
@@ -114,7 +156,7 @@ class ListDetailNoPlaceholderSceneStrategy<T : Any>(val sceneWeights: SceneWeigh
         val secondLastEntry = entries[entries.size - 2]
         val thirdLastEntry = entries[entries.size - 3]
 
-        return if (lastEntry.metadata[THIRD_PANEL] == true && secondLastEntry.metadata[DETAIL] == true && thirdLastEntry.metadata[LIST] == true) {
+        return if (lastEntry.metadata[THIRD_PANEL] == true && secondLastEntry.metadata[DETAIL] == true && thirdLastEntry.metadata[MAIN] == true) {
             AdaptiveThreePaneScene(
                 firstPane = thirdLastEntry,
                 secondPane = secondLastEntry,
@@ -130,13 +172,17 @@ class ListDetailNoPlaceholderSceneStrategy<T : Any>(val sceneWeights: SceneWeigh
         }
     }
 
+    private fun NavEntry<T>.isMainPane() : Boolean = metadata[MAIN] == true
+    private fun NavEntry<T>.isSecondPane() : Boolean = metadata[DETAIL] == true || metadata[SUPPORT] == true
+    private fun NavEntry<T>.isLastPane() : Boolean = metadata[THIRD_PANEL] == true
+
     private fun buildAdaptiveTwoPanesScene(entries: List<NavEntry<T>>): Scene<T>? {
         val lastEntry = entries.last()
         val secondLastEntry = entries[entries.size - 2]
 
-        return if (lastEntry.metadata[DETAIL] == true && secondLastEntry.metadata[LIST] == true) {
+        return if (lastEntry.isSecondPane() && secondLastEntry.isMainPane()) {
             buildListDetailScene(secondLastEntry, lastEntry)
-        } else if (lastEntry.metadata[THIRD_PANEL] == true && secondLastEntry.metadata[DETAIL] == true && entries.size >= 3) {
+        } else if (lastEntry.isLastPane() && secondLastEntry.isSecondPane() && entries.size >= 3) {
             val zeroethEntry = entries[entries.size - 3]
             buildDetailAndThirdPanelScene(secondLastEntry, lastEntry, zeroethEntry)
         } else {
@@ -163,6 +209,19 @@ class ListDetailNoPlaceholderSceneStrategy<T : Any>(val sceneWeights: SceneWeigh
             weights = sceneWeights,
             previousEntries = listOf(previousEntry, firstEntry),
             key = Pair(firstEntry.contentKey, secondEntry.contentKey)
+        )
+    }
+
+    private fun buildSupportingPaneScene(
+        pane: NavEntry<T>,
+        previousEntry: NavEntry<T>,
+        onBack: (Int) -> Unit
+    ): Scene<T> {
+        return BottomPaneScene(
+            pane = pane,
+            previousEntries = listOf(previousEntry),
+            key = pane.contentKey,
+            onBack = onBack
         )
     }
 }
