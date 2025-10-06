@@ -1,3 +1,20 @@
+/*
+ * Copyright 2025 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@file:OptIn(ExperimentalMaterial3Api::class)
 package com.example.nav3recipes.scenes.listdetailnoplaceholder
 
 import androidx.compose.foundation.layout.Column
@@ -19,7 +36,7 @@ internal class AdaptiveThreePaneScene<T : Any>(
     val firstPane: NavEntry<T>,
     val secondPane: NavEntry<T>,
     val thirdPane: NavEntry<T>,
-    val weights: ListDetailNoPlaceholderSceneStrategy.SceneWeightsDefaults,
+    val weights: ListDetailNoPlaceholderSceneStrategy.SceneDefaults,
     override val previousEntries: List<NavEntry<T>>,
     override val key: Any
 ) : Scene<T> {
@@ -45,7 +62,7 @@ internal class AdaptiveThreePaneScene<T : Any>(
 internal class AdaptiveTwoPaneScene<T : Any>(
     val firstPane: NavEntry<T>,
     val secondPane: NavEntry<T>,
-    val weights: ListDetailNoPlaceholderSceneStrategy.SceneWeightsDefaults,
+    val weights: ListDetailNoPlaceholderSceneStrategy.SceneDefaults,
     override val previousEntries: List<NavEntry<T>>,
     override val key: Any
 ) : Scene<T> {
@@ -65,8 +82,10 @@ internal class AdaptiveTwoPaneScene<T : Any>(
     }
 }
 
+
 internal class BottomPaneScene<T : Any>(
     val pane: NavEntry<T>,
+    val properties: ModalBottomSheetProperties = ModalBottomSheetProperties(),
     override val previousEntries: List<NavEntry<T>>,
     override val key: Any,
     val onBack: (Int) -> Unit
@@ -79,7 +98,7 @@ internal class BottomPaneScene<T : Any>(
 
         ModalBottomSheet(
             onDismissRequest = { onBack(1) },
-            properties = ModalBottomSheetProperties()
+            properties = properties
         ) {
             pane.Content()
         }
@@ -87,7 +106,7 @@ internal class BottomPaneScene<T : Any>(
     }
 }
 
-class ListDetailNoPlaceholderSceneStrategy<T : Any>(val sceneWeights: SceneWeightsDefaults = SceneWeightsDefaults()) :
+class ListDetailNoPlaceholderSceneStrategy<T : Any>(val sceneDefaults: SceneDefaults = SceneDefaults()) :
     SceneStrategy<T> {
 
     companion object {
@@ -109,11 +128,12 @@ class ListDetailNoPlaceholderSceneStrategy<T : Any>(val sceneWeights: SceneWeigh
         fun support() = mapOf(SUPPORT to true)
     }
 
-    data class SceneWeightsDefaults(
+    data class SceneDefaults(
         val twoPanesScenePaneWeight: Float = .5f,
         val threePanesSceneFirstPaneWeight: Float = .4f,
         val threePanesSceneSecondPaneWeight: Float = .3f,
         val threePanesSceneThirdPaneWeight: Float = .3f,
+        val bottomSheetProperties: ModalBottomSheetProperties = ModalBottomSheetProperties()
     )
 
     @Composable
@@ -161,7 +181,7 @@ class ListDetailNoPlaceholderSceneStrategy<T : Any>(val sceneWeights: SceneWeigh
                 firstPane = thirdLastEntry,
                 secondPane = secondLastEntry,
                 thirdPane = lastEntry,
-                weights = sceneWeights,
+                weights = sceneDefaults,
                 previousEntries = listOf(thirdLastEntry, secondLastEntry),
                 key = Triple(
                     thirdLastEntry.contentKey, secondLastEntry.contentKey, lastEntry.contentKey
@@ -194,7 +214,7 @@ class ListDetailNoPlaceholderSceneStrategy<T : Any>(val sceneWeights: SceneWeigh
         return AdaptiveTwoPaneScene(
             firstPane = firstEntry,
             secondPane = secondEntry,
-            weights = sceneWeights,
+            weights = sceneDefaults,
             previousEntries = listOf(firstEntry),
             key = Pair(firstEntry.contentKey, secondEntry.contentKey)
         )
@@ -206,7 +226,7 @@ class ListDetailNoPlaceholderSceneStrategy<T : Any>(val sceneWeights: SceneWeigh
         return AdaptiveTwoPaneScene(
             firstPane = firstEntry,
             secondPane = secondEntry,
-            weights = sceneWeights,
+            weights = sceneDefaults,
             previousEntries = listOf(previousEntry, firstEntry),
             key = Pair(firstEntry.contentKey, secondEntry.contentKey)
         )
@@ -219,6 +239,7 @@ class ListDetailNoPlaceholderSceneStrategy<T : Any>(val sceneWeights: SceneWeigh
     ): Scene<T> {
         return BottomPaneScene(
             pane = pane,
+            properties = sceneDefaults.bottomSheetProperties,
             previousEntries = listOf(previousEntry),
             key = pane.contentKey,
             onBack = onBack

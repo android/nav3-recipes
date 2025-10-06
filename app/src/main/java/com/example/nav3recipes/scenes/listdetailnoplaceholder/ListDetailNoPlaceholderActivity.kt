@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ProvidableCompositionLocal
@@ -92,6 +93,7 @@ private data object Profile : NavKey
 private data object Toolbar : NavKey
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 class ListDetailNoPlaceholderActivity : ComponentActivity() {
 
     private val mockProducts = List(10) { Product(it) }
@@ -142,10 +144,10 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
              * A [SceneWeightsDefaults] that wraps variable initial weights to customise the appearance
              * of each panel
              */
-            val weights = ListDetailNoPlaceholderSceneStrategy.SceneWeightsDefaults()
+            val defaults = ListDetailNoPlaceholderSceneStrategy.SceneDefaults()
                 .copy(twoPanesScenePaneWeight = .4f)
             val strategy : SceneStrategy<NavKey> =
-                remember { ListDetailNoPlaceholderSceneStrategy(weights) }
+                remember { ListDetailNoPlaceholderSceneStrategy(defaults) }
 
             SharedTransitionLayout {
                 CompositionLocalProvider(localNavSharedTransitionScope provides this) {
