@@ -38,6 +38,7 @@ import com.example.nav3recipes.passingarguments.viewmodels.hilt.HiltViewModelsAc
 import com.example.nav3recipes.passingarguments.viewmodels.koin.KoinViewModelsActivity
 import com.example.nav3recipes.material.listdetail.MaterialListDetailActivity
 import com.example.nav3recipes.material.supportingpane.MaterialSupportingPaneActivity
+import com.example.nav3recipes.scenes.listdetailnoplaceholder.ListDetailNoPlaceholderActivity
 import com.example.nav3recipes.scenes.twopane.TwoPaneActivity
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 
@@ -58,11 +59,14 @@ private val recipes = listOf(
     Recipe("Basic Saveable", BasicSaveableActivity::class.java),
 
     Heading("Layouts and animations"),
-    Recipe("Material list-detail layout", MaterialListDetailActivity::class.java),
-    Recipe("Material supporting-pane layout", MaterialSupportingPaneActivity::class.java),
     Recipe("Dialog", DialogActivity::class.java),
     Recipe("Two pane layout (custom scene)", TwoPaneActivity::class.java),
     Recipe("Animations", AnimatedActivity::class.java),
+    Recipe("List-Detail and Supporting Pane", ListDetailNoPlaceholderActivity::class.java),
+
+    Heading("Material"),
+    Recipe("Material list-detail layout", MaterialListDetailActivity::class.java),
+    Recipe("Material supporting-pane layout", MaterialSupportingPaneActivity::class.java),
 
     Heading("Common use cases"),
     Recipe("Common UI", CommonUiActivity::class.java),
