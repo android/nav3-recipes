@@ -146,7 +146,7 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
              */
             val defaults = ListDetailNoPlaceholderSceneStrategy.SceneDefaults()
                 .copy(twoPanesScenePaneWeight = .4f)
-            val strategy : SceneStrategy<NavKey> =
+            val strategy: SceneStrategy<NavKey> =
                 remember { ListDetailNoPlaceholderSceneStrategy(defaults) }
 
             SharedTransitionLayout {
@@ -185,7 +185,7 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
                                     }
 
                                     Button(
-                                        onClick = { backStack.add(Toolbar) },
+                                        onClick = { backStack.addToolbar() },
                                         modifier = Modifier.padding(top = 32.dp)
                                     ) {
                                         Text("Open toolbar")
@@ -248,6 +248,16 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
         } else {
             add(productRoute)
         }
+    }
+
+    private fun NavBackStack<NavKey>.addToolbar() {
+
+        val lastItem = last()
+        if (lastItem is Product || lastItem is Toolbar) {
+            remove(lastItem)
+        }
+
+        add(Toolbar)
     }
 
     /***
