@@ -24,6 +24,7 @@ import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,10 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
@@ -115,23 +113,18 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
                 }
 
 
-            var numberOfColumns by remember { mutableIntStateOf(1) }
-
             /**
              * A [NavEntryDecorator] that wraps each entry in a shared element that is controlled by the
              * [Scene].
              */
             val sharedEntryInSceneNavEntryDecorator = navEntryDecorator<NavKey> { entry ->
                 with(localNavSharedTransitionScope.current) {
-                    BoxWithConstraints(
+                    Box(
                         Modifier.sharedElement(
                             rememberSharedContentState(entry.contentKey),
                             animatedVisibilityScope = LocalNavAnimatedContentScope.current,
                         ),
                     ) {
-                        if (entry.metadata.containsKey(ListDetailNoPlaceholderSceneStrategy.MAIN)) {
-                            numberOfColumns = columnsByComposableWidth(maxWidth)
-                        }
                         entry.Content()
                     }
                 }
@@ -164,31 +157,34 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
                             entry<Home>(
                                 metadata = ListDetailNoPlaceholderSceneStrategy.main()
                             ) {
-                                ContentRed("Adaptive List") {
-                                    val gridCells = GridCells.Fixed(numberOfColumns)
+                                BoxWithConstraints {
+                                    ContentRed("Adaptive List") {
+                                        val numberOfColumns = columnsByComposableWidth(maxWidth)
+                                        val gridCells = GridCells.Fixed(numberOfColumns)
 
-                                    LazyVerticalGrid(
-                                        columns = gridCells,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .wrapContentHeight()
-                                    ) {
-                                        items(mockProducts.size) {
-                                            Text(
-                                                text = "Product $it",
-                                                modifier = Modifier
-                                                    .padding(all = 16.dp)
-                                                    .clickable {
-                                                        backStack.addProductRoute(it)
-                                                    })
+                                        LazyVerticalGrid(
+                                            columns = gridCells,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .wrapContentHeight()
+                                        ) {
+                                            items(mockProducts.size) {
+                                                Text(
+                                                    text = "Product $it",
+                                                    modifier = Modifier
+                                                        .padding(all = 16.dp)
+                                                        .clickable {
+                                                            backStack.addProductRoute(it)
+                                                        })
+                                            }
                                         }
-                                    }
 
-                                    Button(
-                                        onClick = { backStack.addToolbar() },
-                                        modifier = Modifier.padding(top = 32.dp)
-                                    ) {
-                                        Text("Open toolbar")
+                                        Button(
+                                            onClick = { backStack.addToolbar() },
+                                            modifier = Modifier.padding(top = 32.dp)
+                                        ) {
+                                            Text("Open toolbar")
+                                        }
                                     }
                                 }
                             }
