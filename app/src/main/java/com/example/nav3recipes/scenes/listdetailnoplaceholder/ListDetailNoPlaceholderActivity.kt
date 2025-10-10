@@ -20,11 +20,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,9 +32,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.ProvidableCompositionLocal
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,12 +40,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.navEntryDecorator
 import androidx.navigation3.runtime.rememberNavBackStack
-import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.scene.SceneStrategy
-import androidx.navigation3.scene.rememberSceneSetupNavEntryDecorator
-import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXPANDED_LOWER_BOUND
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXTRA_LARGE_LOWER_BOUND
@@ -103,34 +93,6 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
 
         setContent {
 
-            val localNavSharedTransitionScope: ProvidableCompositionLocal<SharedTransitionScope> =
-                compositionLocalOf {
-                    throw IllegalStateException(
-                        "Unexpected access to LocalNavSharedTransitionScope. You must provide a " +
-                                "SharedTransitionScope from a call to SharedTransitionLayout() or " +
-                                "SharedTransitionScope()"
-                    )
-                }
-
-
-            /**
-             * A [NavEntryDecorator] that wraps each entry in a shared element that is controlled by the
-             * [Scene].
-             */
-            val sharedEntryInSceneNavEntryDecorator = navEntryDecorator<NavKey> { entry ->
-                with(localNavSharedTransitionScope.current) {
-                    Box(
-                        Modifier.sharedElement(
-                            rememberSharedContentState(entry.contentKey),
-                            animatedVisibilityScope = LocalNavAnimatedContentScope.current,
-                        ),
-                    ) {
-                        entry.Content()
-                    }
-                }
-            }
-
-
             val backStack = rememberNavBackStack(Home)
 
             /**
@@ -142,88 +104,79 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
             val strategy: SceneStrategy<NavKey> =
                 remember { ListDetailNoPlaceholderSceneStrategy(defaults) }
 
-            SharedTransitionLayout {
-                CompositionLocalProvider(localNavSharedTransitionScope provides this) {
-                    NavDisplay(
-                        backStack = backStack,
-                        onBack = { keysToRemove -> repeat(keysToRemove) { backStack.removeLastOrNull() } },
-                        entryDecorators = listOf(
-                            sharedEntryInSceneNavEntryDecorator,
-                            rememberSceneSetupNavEntryDecorator(),
-                            rememberSavedStateNavEntryDecorator()
-                        ),
-                        sceneStrategy = strategy,
-                        entryProvider = entryProvider {
-                            entry<Home>(
-                                metadata = ListDetailNoPlaceholderSceneStrategy.main()
-                            ) {
-                                BoxWithConstraints {
-                                    ContentRed("Adaptive List") {
-                                        val numberOfColumns = columnsByComposableWidth(maxWidth)
-                                        val gridCells = GridCells.Fixed(numberOfColumns)
+            NavDisplay(
+                backStack = backStack,
+                onBack = { keysToRemove -> repeat(keysToRemove) { backStack.removeLastOrNull() } },
+                sceneStrategy = strategy,
+                entryProvider = entryProvider {
+                    entry<Home>(
+                        metadata = ListDetailNoPlaceholderSceneStrategy.main()
+                    ) {
+                        BoxWithConstraints {
+                            ContentRed("Adaptive List") {
+                                val numberOfColumns = columnsByComposableWidth(maxWidth)
+                                val gridCells = GridCells.Fixed(numberOfColumns)
 
-                                        LazyVerticalGrid(
-                                            columns = gridCells,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .wrapContentHeight()
-                                        ) {
-                                            items(mockProducts.size) {
-                                                Text(
-                                                    text = "Product $it",
-                                                    modifier = Modifier
-                                                        .padding(all = 16.dp)
-                                                        .clickable {
-                                                            backStack.addProductRoute(it)
-                                                        })
-                                            }
-                                        }
-
-                                        Button(
-                                            onClick = { backStack.addToolbar() },
-                                            modifier = Modifier.padding(top = 32.dp)
-                                        ) {
-                                            Text("Open toolbar")
-                                        }
-                                    }
-                                }
-                            }
-                            entry<Product>(
-                                metadata = ListDetailNoPlaceholderSceneStrategy.detail()
-                            ) { product ->
-                                ContentBase(
-                                    "Product ${product.id} ",
-                                    Modifier.background(colors[product.id % colors.size])
+                                LazyVerticalGrid(
+                                    columns = gridCells,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .wrapContentHeight()
                                 ) {
-                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        Button(onClick = {
-                                            backStack.addProductRoute(product.id + 1)
-                                        }) {
-                                            Text("View the next product")
-                                        }
-                                        Button(onClick = {
-                                            backStack.add(Profile)
-                                        }) {
-                                            Text("View profile")
-                                        }
+                                    items(mockProducts.size) {
+                                        Text(
+                                            text = "Product $it",
+                                            modifier = Modifier
+                                                .padding(all = 16.dp)
+                                                .clickable {
+                                                    backStack.addProductRoute(it)
+                                                })
                                     }
                                 }
-                            }
-                            entry<Profile>(
-                                metadata = ListDetailNoPlaceholderSceneStrategy.thirdPanel()
-                            ) {
-                                ContentGreen("Profile")
-                            }
 
-                            entry<Toolbar>(
-                                metadata = ListDetailNoPlaceholderSceneStrategy.support()
-                            ) {
-                                ContentBlue("Toolbar")
+                                Button(
+                                    onClick = { backStack.addToolbar() },
+                                    modifier = Modifier.padding(top = 32.dp)
+                                ) {
+                                    Text("Open toolbar")
+                                }
                             }
                         }
-                    )
+                    }
+                    entry<Product>(
+                        metadata = ListDetailNoPlaceholderSceneStrategy.detail()
+                    ) { product ->
+                        ContentBase(
+                            "Product ${product.id} ",
+                            Modifier.background(colors[product.id % colors.size])
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Button(onClick = {
+                                    backStack.addProductRoute(product.id + 1)
+                                }) {
+                                    Text("View the next product")
+                                }
+                                Button(onClick = {
+                                    backStack.add(Profile)
+                                }) {
+                                    Text("View profile")
+                                }
+                            }
+                        }
+                    }
+                    entry<Profile>(
+                        metadata = ListDetailNoPlaceholderSceneStrategy.thirdPanel()
+                    ) {
+                        ContentGreen("Profile")
+                    }
+
+                    entry<Toolbar>(
+                        metadata = ListDetailNoPlaceholderSceneStrategy.support()
+                    ) {
+                        ContentBlue("Toolbar")
+                    }
                 }
-            }
+            )
         }
     }
 
