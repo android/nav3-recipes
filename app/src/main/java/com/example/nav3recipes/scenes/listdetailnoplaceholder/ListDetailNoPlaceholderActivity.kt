@@ -96,7 +96,7 @@ class ListDetailNoPlaceholderActivity : ComponentActivity() {
             val backStack = rememberNavBackStack(Home)
 
             /**
-             * A [SceneWeightsDefaults] that wraps variable initial weights to customise the appearance
+             * A [SceneDefaults] that wraps variable initial weights to customise the appearance
              * of each panel
              */
             val defaults = ListDetailNoPlaceholderSceneStrategy.SceneDefaults()
