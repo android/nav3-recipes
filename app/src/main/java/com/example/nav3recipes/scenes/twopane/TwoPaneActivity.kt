@@ -22,6 +22,10 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.animateBounds
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -63,8 +67,10 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 private object Home : NavKey
+
 @Serializable
 private data class Product(val id: Int) : NavKey
+
 @Serializable
 private data object Profile : NavKey
 
@@ -76,84 +82,64 @@ class TwoPaneActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val localNavSharedTransitionScope: ProvidableCompositionLocal<SharedTransitionScope> =
-                compositionLocalOf {
-                    throw IllegalStateException(
-                        "Unexpected access to LocalNavSharedTransitionScope. You must provide a " +
-                                "SharedTransitionScope from a call to SharedTransitionLayout() or " +
-                                "SharedTransitionScope()"
-                    )
-                }
-
-            /**
-             * A [NavEntryDecorator] that wraps each entry in a shared element that is controlled by the
-             * [Scene].
-             */
-            val sharedEntryInSceneNavEntryDecorator = navEntryDecorator<NavKey> { entry ->
-                with(localNavSharedTransitionScope.current) {
-                    Box(
-                        Modifier.sharedElement(
-                            rememberSharedContentState(entry.contentKey),
-                            animatedVisibilityScope = LocalNavAnimatedContentScope.current,
-                        ),
-                    ) {
-                        entry.Content()
-                    }
-                }
-            }
-
-
             val backStack = rememberNavBackStack(Home)
             val twoPaneStrategy = remember { TwoPaneSceneStrategy<NavKey>() }
 
             SharedTransitionLayout {
-                CompositionLocalProvider(localNavSharedTransitionScope provides this) {
-                    NavDisplay(
-                        backStack = backStack,
-                        onBack = { keysToRemove -> repeat(keysToRemove) { backStack.removeLastOrNull() } },
-                        entryDecorators = listOf(
-                            sharedEntryInSceneNavEntryDecorator,
-                            rememberSceneSetupNavEntryDecorator(),
-                            rememberSavedStateNavEntryDecorator()
-                        ),
-                        sceneStrategy = twoPaneStrategy,
-                        entryProvider = entryProvider {
-                            entry<Home>(
-                                metadata = TwoPaneScene.twoPane()
-                            ) {
-                                ContentRed("Welcome to Nav3") {
-                                    Button(onClick = { backStack.addProductRoute(1) }) {
-                                        Text("View the first product")
-                                    }
+
+                NavDisplay(
+                    backStack = backStack,
+                    onBack = { keysToRemove -> repeat(keysToRemove) { backStack.removeLastOrNull() } },
+                    sceneStrategy = twoPaneStrategy,
+                    entryProvider = entryProvider {
+                        entry<Home>(
+                            metadata = TwoPaneScene.twoPane()
+                        ) {
+                            ContentRed("Welcome to Nav3", modifier = Modifier.animateBounds(this@SharedTransitionLayout)) {
+                                Button(onClick = { backStack.addProductRoute(1) }) {
+                                    Text("View the first product")
                                 }
-                            }
-                            entry<Product>(
-                                metadata = TwoPaneScene.twoPane()
-                            ) { product ->
-                                ContentBase(
-                                    "Product ${product.id} ",
-                                    Modifier.background(colors[product.id % colors.size])
-                                ) {
-                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        Button(onClick = {
-                                            backStack.addProductRoute(product.id + 1)
-                                        }) {
-                                            Text("View the next product")
-                                        }
-                                        Button(onClick = {
-                                            backStack.add(Profile)
-                                        }) {
-                                            Text("View profile")
-                                        }
-                                    }
-                                }
-                            }
-                            entry<Profile> {
-                                ContentGreen("Profile (single pane only)")
                             }
                         }
-                    )
-                }
+                        entry<Product>(
+                            metadata = TwoPaneScene.twoPane()
+                        ) { product ->
+                            ContentBase(
+                                "Product ${product.id} ",
+                                Modifier.background(colors[product.id % colors.size])
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Button(onClick = {
+                                        backStack.addProductRoute(product.id + 1)
+                                    }) {
+                                        Text("View the next product")
+                                    }
+                                    Button(onClick = {
+                                        backStack.add(Profile)
+                                    }) {
+                                        Text("View profile")
+                                    }
+                                }
+                            }
+                        }
+                        entry<Profile> {
+                            ContentGreen("Profile (single pane only)")
+                        }
+                    },
+                    transitionSpec = {
+                        slideInHorizontally(initialOffsetX = { it }) togetherWith
+                                slideOutHorizontally(targetOffsetX = { -it })
+                    },
+                    popTransitionSpec = {
+                        slideInHorizontally(initialOffsetX = { -it }) togetherWith
+                                slideOutHorizontally(targetOffsetX = { it })
+                    },
+                    predictivePopTransitionSpec = {
+                        slideInHorizontally(initialOffsetX = { -it }) togetherWith
+                                slideOutHorizontally(targetOffsetX = { it })
+                    }
+                )
+
             }
         }
     }
