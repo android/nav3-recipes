@@ -23,7 +23,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.nav3recipes.content.ContentBlue
 import com.example.nav3recipes.content.ContentGreen
@@ -47,10 +49,8 @@ class BasicDslActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val backStack = rememberNavBackStack(RouteA)
-
-            NavDisplay(
+            val entries = rememberDecoratedNavEntries(
                 backStack = backStack,
-                onBack = { backStack.removeLastOrNull() },
                 entryProvider = entryProvider {
                     entry<RouteA> {
                         ContentGreen("Welcome to Nav3") {
@@ -64,7 +64,15 @@ class BasicDslActivity : ComponentActivity() {
                     entry<RouteB> { key ->
                         ContentBlue("Route id: ${key.id} ")
                     }
-                }
+                },
+                entryDecorators = listOf(
+                    rememberSaveableStateHolderNavEntryDecorator()
+                )
+            )
+
+            NavDisplay(
+                entries = entries,
+                onBack = { backStack.removeLastOrNull() },
             )
         }
     }

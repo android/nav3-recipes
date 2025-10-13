@@ -37,6 +37,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberDecoratedNavEntries
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.nav3recipes.content.ContentBlue
 import com.example.nav3recipes.content.ContentGreen
@@ -74,6 +76,31 @@ class CommonUiActivity : ComponentActivity() {
         setContent {
             val topLevelBackStack = remember { TopLevelBackStack<Any>(Home) }
 
+            val entries = rememberDecoratedNavEntries(
+                backStack = topLevelBackStack.backStack,
+                entryDecorators = listOf(
+                    rememberSaveableStateHolderNavEntryDecorator()
+                ),
+                entryProvider = entryProvider {
+                    entry<Home>{
+                        ContentRed("Home screen")
+                    }
+                    entry<ChatList>{
+                        ContentGreen("Chat list screen"){
+                            Button(onClick = { topLevelBackStack.add(ChatDetail) }) {
+                                Text("Go to conversation")
+                            }
+                        }
+                    }
+                    entry<ChatDetail>{
+                        ContentBlue("Chat detail screen")
+                    }
+                    entry<Camera>{
+                        ContentPurple("Camera screen")
+                    }
+                },
+            )
+
             Scaffold(
                 bottomBar = {
                     NavigationBar {
@@ -97,26 +124,8 @@ class CommonUiActivity : ComponentActivity() {
                 }
             ) { _ ->
                 NavDisplay(
-                    backStack = topLevelBackStack.backStack,
+                    entries = entries,
                     onBack = { topLevelBackStack.removeLast() },
-                    entryProvider = entryProvider {
-                        entry<Home>{
-                            ContentRed("Home screen")
-                        }
-                        entry<ChatList>{
-                            ContentGreen("Chat list screen"){
-                                Button(onClick = { topLevelBackStack.add(ChatDetail) }) {
-                                    Text("Go to conversation")
-                                }
-                            }
-                        }
-                        entry<ChatDetail>{
-                            ContentBlue("Chat detail screen")
-                        }
-                        entry<Camera>{
-                            ContentPurple("Camera screen")
-                        }
-                    },
                 )
             }
         }

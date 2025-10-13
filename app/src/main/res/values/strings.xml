@@ -16,4 +16,8 @@
 
 <resources>
     <string name="app_name">Nav3Recipes</string>
+    <string name="profile">Profile</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="scrollable">Scrollable</string>
+    <string name="dialog">Dialog</string>
 </resources>
