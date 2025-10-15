@@ -37,7 +37,6 @@
             android:theme="@style/Theme.Nav3Recipes">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -141,6 +140,48 @@
             android:name=".migration.step7.Step7MigrationActivity"
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes"/>
+        <activity
+            android:name=".deeplink.parseintent.singleModule.ParseIntentLandingActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Nav3Recipes">
+        </activity>
+        <activity
+            android:name=".deeplink.parseintent.singleModule.ParseIntentActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Nav3Recipes">
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https"
+                    android:host="www.nav3recipes.com"/>
+                <!-- filter for exact url -->
+                <uri-relative-filter-group android:allow="true">
+                    <data android:path="/home" />
+                </uri-relative-filter-group>
+                <!-- filter for exactly two path arguments -->
+                <uri-relative-filter-group android:allow="true">
+                    <data android:pathPattern="/users/include/[^/]+$" />
+                </uri-relative-filter-group>
+                <!-- filter for optional query arguments -->
+                <uri-relative-filter-group android:allow="true">
+                    <data android:path="/users/search" />
+                    <data android:query="firstName=value!" />
+                </uri-relative-filter-group>
+                <uri-relative-filter-group android:allow="true">
+                    <data android:path="/users/search" />
+                    <data android:query="minAge=value!" />
+                </uri-relative-filter-group>
+                <uri-relative-filter-group android:allow="true">
+                    <data android:path="/users/search" />
+                    <data android:query="maxAge=value!" />
+                </uri-relative-filter-group>
+                <uri-relative-filter-group android:allow="true">
+                    <data android:path="/users/search" />
+                    <data android:query="location=value!" />
+                </uri-relative-filter-group>
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
