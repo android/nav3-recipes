@@ -42,10 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.EntryProviderScope
-import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberDecoratedNavEntries
-import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import com.example.nav3recipes.content.ContentBlue
@@ -99,7 +96,11 @@ class TopLevelStacksActivity : ComponentActivity() {
 
         setContent {
 
-            val navigator = rememberNavigator(startRoute = RouteA, shouldPrintDebugInfo = true)
+            val navigator = rememberNavigator(
+                startRoute = RouteA,
+                topLevelRoutes = TOP_LEVEL_ROUTES.keys,
+                shouldPrintDebugInfo = true
+            )
 
             val entryProvider = entryProvider<Route> {
                 featureASection(
@@ -123,21 +124,6 @@ class TopLevelStacksActivity : ComponentActivity() {
                     )
                 }
             }
-
-
-
-/*
-
-            val decorators = listOf<NavEntryDecorator<Route>>(
-                rememberSaveableStateHolderNavEntryDecorator()
-            )
-
-            val decoratedEntries = rememberDecoratedNavEntries(
-                backStack = navigator.backStack,
-                entryDecorators = decorators,
-                entryProvider = entryProvider
-            )
-*/
 
             Scaffold(bottomBar = {
                 NavigationBar {

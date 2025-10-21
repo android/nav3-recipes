@@ -6,15 +6,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavEntryDecorator
-import androidx.navigation3.runtime.SaveableStateHolderNavEntryDecorator
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.savedstate.SavedState
@@ -23,14 +20,12 @@ import androidx.savedstate.serialization.decodeFromSavedState
 import androidx.savedstate.serialization.encodeToSavedState
 import androidx.savedstate.write
 import kotlinx.serialization.Serializable
-import kotlin.collections.component1
-import kotlin.collections.component2
-import kotlin.collections.iterator
 
 @SuppressLint("RestrictedApi")
 class Navigator(
     private var startRoute: Route,
-    private var shouldPrintDebugInfo: Boolean = true,
+    private var shouldPrintDebugInfo: Boolean = false,
+    private val topLevelDecorators: Map<Route, List<NavEntryDecorator<Route>>>,
 ) {
 
     val backStack = mutableStateListOf(startRoute)
@@ -40,34 +35,14 @@ class Navigator(
     // Maintain a stack for each top level route
     private val topLevelStacks = mutableMapOf(startRoute to mutableStateListOf(startRoute))
 
-    private val topLevelDecorators : MutableMap<Route, List<NavEntryDecorator<Route>>> = mutableMapOf()
-
-
     // Maintain a map of shared routes to their parent stacks
     private var sharedRoutes: MutableMap<Route, Route> = mutableMapOf()
 
     @Composable
-    fun entries(entryProvider: ((Route) -> NavEntry<Route>)) : List<NavEntry<Route>> {
+    fun entries(entryProvider: ((Route) -> NavEntry<Route>)): List<NavEntry<Route>> {
 
-        if (topLevelDecorators[startRoute].isNullOrEmpty()){
-            topLevelDecorators[startRoute] = listOf(
-                key(startRoute) {
-                    rememberSaveableStateHolderNavEntryDecorator()
-                }
-            )
-        }
-        val decorators = topLevelDecorators[topLevelRoute] ?: listOf(
-            key(topLevelRoute) {
-                rememberSaveableStateHolderNavEntryDecorator()
-            }
-        )
-        println("Top level route: $topLevelRoute")
-        println("Existing decorators: ${topLevelDecorators[topLevelRoute]}")
-        println("Decorators: $decorators")
-
-        topLevelDecorators[topLevelRoute] = decorators
-
-        val currentBackStack = topLevelStacks[topLevelRoute] ?: error("Error Current Backstack is null")
+        val currentBackStack = topLevelStacks[topLevelRoute] ?: error("Back stack for $topLevelRoute is null")
+        val decorators = topLevelDecorators[topLevelRoute] ?: error("No decorators found for $topLevelRoute")
 
         val entries =  key(topLevelRoute) {
             rememberDecoratedNavEntries(
@@ -82,7 +57,7 @@ class Navigator(
         } else {
 
             // Get the entries from the start route
-            val startDecorators = topLevelDecorators[startRoute] ?: error("Decorators for start route $startRoute was null")
+            val startDecorators = topLevelDecorators[startRoute] ?: error("No decorators found for start route $startRoute")
             val startEntries = rememberDecoratedNavEntries(
                 backStack = topLevelStacks[startRoute]!!,
                 entryDecorators = startDecorators,
@@ -239,12 +214,13 @@ class Navigator(
 
                     println("restoredStartRoute is $restoredStartRoute")
 
-                    val navigator = Navigator(
+                    /*val navigator = Navigator(
                         startRoute = restoredStartRoute,
                         shouldPrintDebugInfo = restoredShouldPrintDebugInfo
-                    )
+                    )*/
+                    val navigator : Navigator? = null
 
-                    navigator.topLevelRoute =
+                    navigator!!.topLevelRoute =
                         decodeFromSavedState(getSavedState(KEY_TOP_LEVEL_ROUTE))
 
                     val ids = getIntList(KEY_TOP_LEVEL_STACK_IDS)
@@ -284,13 +260,29 @@ class Navigator(
 @Composable
 fun rememberNavigator(
     startRoute: Route,
-    shouldPrintDebugInfo: Boolean = false
-) = rememberSaveable(saver = Navigator.Saver) {
-    Navigator(
-        startRoute = startRoute,
-        shouldPrintDebugInfo = shouldPrintDebugInfo
-    )
+    shouldPrintDebugInfo: Boolean = false,
+    topLevelRoutes: Set<Route>,
+) : Navigator {
+
+    // Create a list of decorators for each top level stack
+    val decorators = topLevelRoutes.associateWith { route ->
+        key(route) {
+            listOf(
+                rememberSaveableStateHolderNavEntryDecorator<Route>()
+            )
+        }
+    }
+
+    return rememberSaveable(saver = Navigator.Saver
+    ) {
+        Navigator(
+            startRoute = startRoute,
+            topLevelDecorators = decorators,
+            shouldPrintDebugInfo = shouldPrintDebugInfo,
+        )
+    }
 }
+
 
 @Serializable
 sealed class Route {
