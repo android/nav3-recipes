@@ -2,6 +2,7 @@ package com.example.nav3recipes.deeplink.parseintent.singleModule
 
 import android.net.Uri
 import android.util.Log
+import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -40,11 +41,11 @@ internal class DeepLinkRequest(
      *
      * returns a [DeepLinkMatchResult] if this matches the candidate, returns null otherwise
      */
-    fun <T : NavRecipeKey> match(deepLink: DeepLink<T>): DeepLinkMatchResult<T>? {
-        if (pathSegments.size != deepLink.pathSegments.size) return null
+    fun <T : NavKey> match(deepLinkMapper: DeepLinkMapper<T>): DeepLinkMatchResult<T>? {
+        if (pathSegments.size != deepLinkMapper.pathSegments.size) return null
         // exact match (url does not contain any arguments)
-        if (uri == deepLink.uriPattern)
-            return DeepLinkMatchResult(deepLink.serializer, mapOf())
+        if (uri == deepLinkMapper.uriPattern)
+            return DeepLinkMatchResult(deepLinkMapper.serializer, mapOf())
 
         val args = mutableMapOf<String, Any>()
         // match the path
@@ -52,7 +53,7 @@ internal class DeepLinkRequest(
             .asSequence()
             // zip to compare the two objects side by side, order matters here so we
             // need to make sure the compared segments are at the same position within the url
-            .zip(deepLink.pathSegments.asSequence())
+            .zip(deepLinkMapper.pathSegments.asSequence())
             .forEach { it ->
                 // retrieve the two path segments to compare
                 val requestedSegment = it.first
@@ -75,7 +76,7 @@ internal class DeepLinkRequest(
         // match queries (if any)
         queries.forEach { query ->
             val name = query.key
-            val queryStringParser = deepLink.queryValueParsers[name]
+            val queryStringParser = deepLinkMapper.queryValueParsers[name]
             val queryParsedValue = try {
                 queryStringParser!!.invoke(query.value)
             } catch (e: IllegalArgumentException) {
@@ -85,7 +86,7 @@ internal class DeepLinkRequest(
             args[name] = queryParsedValue
         }
         // provide the serializer of the matching key and map of arg names to parsed arg values
-        return DeepLinkMatchResult(deepLink.serializer, args)
+        return DeepLinkMatchResult(deepLinkMapper.serializer, args)
     }
 }
 
@@ -98,13 +99,13 @@ internal class DeepLinkRequest(
  * supports deeplink. This means that if this deeplink contains any arguments (path or query),
  * the argument name must match any of [T] member field name.
  *
- * One [DeepLink] should be created for each supported deeplink. This means if [T]
+ * One [DeepLinkMapper] should be created for each supported deeplink. This means if [T]
  * supports two deeplink patterns:
  * ```
  *  val deeplink1 = www.nav3recipes.com/home
  *  val deeplink2 = www.nav3recipes.com/profile/{userId}
  *  ```
- * Then two [DeepLink] should be created
+ * Then two [DeepLinkMapper] should be created
  * ```
  * val parsedDeeplink1 = DeepLinkCandidate(T.serializer(), deeplink1)
  * val parsedDeeplink2 = DeepLinkCandidate(T.serializer(), deeplink2)
@@ -118,7 +119,7 @@ internal class DeepLinkRequest(
  * @param serializer the serializer of [T]
  * @param uriPattern the supported deeplink's uri pattern, i.e. "abc.com/home/{pathArg}"
  */
-internal class DeepLink<T : NavRecipeKey>(
+internal class DeepLinkMapper<T : NavKey>(
     val serializer: KSerializer<T>,
     val uriPattern: Uri
 ) {
@@ -185,7 +186,7 @@ internal class DeepLink<T : NavRecipeKey>(
  * been parsed from the raw url string back into its proper KType as declared in [T].
  * Includes arguments for all parts of the uri - path, query, etc.
  * */
-internal data class DeepLinkMatchResult<T : NavRecipeKey>(
+internal data class DeepLinkMatchResult<T : NavKey>(
     val serializer: KSerializer<T>,
     val args: Map<String, Any>
 )

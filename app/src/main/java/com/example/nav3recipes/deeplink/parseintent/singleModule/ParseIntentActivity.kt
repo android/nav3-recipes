@@ -10,12 +10,13 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
+import kotlinx.serialization.Serializable
 
 /**
  * Parses a target deeplink into a NavKey. There are several crucial steps involved:
  *
  * STEP 1.Parse supported deeplinks (URLs that can be deeplinked into) into a readily readable
- *  format (see [DeepLink])
+ *  format (see [DeepLinkMapper])
  * STEP 2. Parse the requested deeplink into a readily readable, format (see [DeepLinkRequest])
  *  **note** the parsed requested deeplink and parsed supported deeplinks should be cohesive with each
  *  other to facilitate comparison and finding a match
@@ -35,16 +36,56 @@ import androidx.navigation3.ui.NavDisplay
  *  - Up button ves Back Button
  *
  */
+
+@Serializable
+internal object HomeKey: DeepLink, NavKey {
+    override val name: String = STRING_LITERAL_HOME
+}
+
+@Serializable
+internal data class UsersKey(
+    val filter: String,
+): NavKey {
+    companion object : DeepLink {
+        const val FILTER_KEY = STRING_LITERAL_FILTER
+        const val FILTER_OPTION_RECENTLY_ADDED = "recentlyAdded"
+        const val FILTER_OPTION_ALL = "all"
+
+        override val name: String = STRING_LITERAL_USERS
+    }
+}
+
+@Serializable
+internal data class SearchKey(
+    val firstName: String? = null,
+    val ageMin: Int? = null,
+    val ageMax: Int? = null,
+    val location: String? = null,
+): NavKey {
+    companion object : DeepLink {
+        override val name: String = STRING_LITERAL_SEARCH
+    }
+}
+
+@Serializable
+internal data class User(
+    val firstName: String,
+    val age: Int,
+    val location: String,
+)
+
+
 class ParseIntentActivity : ComponentActivity() {
     /** STEP 1. Parse supported deeplinks */
-    private val deepLinkCandidates: List<DeepLink<out NavRecipeKey>> = listOf(
+    private val deepLinkMapperCandidates: List<DeepLinkMapper<out NavKey>> = listOf(
         // "https://www.nav3recipes.com/home"
-        DeepLink(HomeKey.serializer(), (URL_HOME_EXACT).toUri()),
+        DeepLinkMapper(HomeKey.serializer(), (URL_HOME_EXACT).toUri()),
         // "https://www.nav3recipes.com/users/with/{filter}"
-        DeepLink(UsersKey.serializer(), (URL_USERS_WITH_FILTER).toUri()),
+        DeepLinkMapper(UsersKey.serializer(), (URL_USERS_WITH_FILTER).toUri()),
         // "https://www.nav3recipes.com/users/search?{firstName}&{age}&{location}"
-        DeepLink(SearchKey.serializer(), (URL_SEARCH.toUri())),
+        DeepLinkMapper(SearchKey.serializer(), (URL_SEARCH.toUri())),
     )
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,11 +93,11 @@ class ParseIntentActivity : ComponentActivity() {
         // retrieve the target Uri
         val uri: Uri? = intent.data
         // associate the target with the correct backstack key
-        val key: NavKey = uri?.let {
+        val startingKey: NavKey = uri?.let {
             /** STEP 2. Parse requested deeplink */
             val target = DeepLinkRequest(uri)
             /** STEP 3. Compared requested with supported deeplink to find match*/
-            val match = deepLinkCandidates.firstNotNullOfOrNull { candidate ->
+            val match = deepLinkMapperCandidates.firstNotNullOfOrNull { candidate ->
                 target.match(candidate)
             }
             /** STEP 4. If match is found, associate match to the correct key*/
@@ -66,24 +107,24 @@ class ParseIntentActivity : ComponentActivity() {
                     KeyDecoder(match.args)
                         .decodeSerializableValue(match.serializer)
             }
-        } ?: HomeKey // fallback if intent.uri is null or match is not found
+        } ?: HomeKey
 
         /**
          * Then pass starting key to backstack
          */
         setContent {
-            val backStack: NavBackStack<NavKey> = rememberNavBackStack(key)
+            val backStack: NavBackStack<NavKey> = rememberNavBackStack(startingKey)
             NavDisplay(
                 backStack = backStack,
                 onBack = { backStack.removeLastOrNull() },
                 entryProvider = entryProvider {
                     entry<HomeKey> { key ->
-                        EntryScreen(key.name) {
+                        EntryScreen("Home") {
                             TextContent("<matches exact url>")
                         }
                     }
                     entry<UsersKey> { key ->
-                        EntryScreen("${key.name} : ${key.filter}") {
+                        EntryScreen("Users : ${key.filter}") {
                             TextContent("<matches path argument>")
                             val list = when {
                                 key.filter.isEmpty() -> LIST_USERS
@@ -94,7 +135,7 @@ class ParseIntentActivity : ComponentActivity() {
                         }
                     }
                     entry<SearchKey> { search ->
-                        EntryScreen(search.name) {
+                        EntryScreen("Search") {
                             TextContent("<matches query parameters, if any>")
                             val matchingUsers = LIST_USERS.filter { user ->
                                 (search.firstName == null || user.firstName == search.firstName) &&
