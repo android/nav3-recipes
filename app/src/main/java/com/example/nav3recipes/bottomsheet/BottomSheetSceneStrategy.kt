@@ -8,6 +8,7 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.scene.OverlayScene
 import androidx.navigation3.scene.Scene
 import androidx.navigation3.scene.SceneStrategy
+import androidx.navigation3.scene.SceneStrategyScope
 
 /** An [OverlayScene] that renders an [entry] within a [ModalBottomSheet]. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -17,14 +18,14 @@ internal class BottomSheetScene<T : Any>(
     override val overlaidEntries: List<NavEntry<T>>,
     private val entry: NavEntry<T>,
     private val modalBottomSheetProperties: ModalBottomSheetProperties,
-    private val onBack: (count: Int) -> Unit,
+    private val onBack: () -> Unit,
 ) : OverlayScene<T> {
 
     override val entries: List<NavEntry<T>> = listOf(entry)
 
     override val content: @Composable (() -> Unit) = {
         ModalBottomSheet(
-            onDismissRequest = { onBack(1) },
+            onDismissRequest = { onBack() },
             properties = modalBottomSheetProperties,
         ) {
             entry.Content()
@@ -41,11 +42,7 @@ internal class BottomSheetScene<T : Any>(
 @OptIn(ExperimentalMaterial3Api::class)
 class BottomSheetSceneStrategy<T : Any> : SceneStrategy<T> {
 
-    @Composable
-    override fun calculateScene(
-        entries: List<NavEntry<T>>,
-        onBack: (Int) -> Unit
-    ): Scene<T>? {
+    override fun SceneStrategyScope<T>.calculateScene(entries: List<NavEntry<T>>): Scene<T>? {
         val lastEntry = entries.lastOrNull()
         val bottomSheetProperties = lastEntry?.metadata?.get(BOTTOM_SHEET_KEY) as? ModalBottomSheetProperties
         return bottomSheetProperties?.let { properties ->
