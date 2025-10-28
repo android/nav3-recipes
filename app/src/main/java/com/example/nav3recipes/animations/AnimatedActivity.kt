@@ -113,7 +113,7 @@ class AnimatedActivity : ComponentActivity() {
                         animationSpec = tween(1000)
                     )
                 },
-                predictivePopTransitionSpec = {
+                /*predictivePopTransitionSpec = {
                     // Slide in from left when navigating back
                     slideInHorizontally(
                         initialOffsetX = { -it },
@@ -122,7 +122,7 @@ class AnimatedActivity : ComponentActivity() {
                         targetOffsetX = { it },
                         animationSpec = tween(1000)
                     )
-                }
+                }*/
             )
         }
     }
