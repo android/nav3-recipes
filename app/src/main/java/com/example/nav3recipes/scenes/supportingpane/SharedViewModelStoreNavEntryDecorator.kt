@@ -42,7 +42,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.compose.LocalSavedStateRegistryOwner
 
 /**
- * Returns a [MediatorNavEntryDecorator] that is remembered across recompositions.
+ * Returns a [SharedViewModelStoreNavEntryDecorator] that is remembered across recompositions.
  *
  * @param [viewModelStoreOwner] The [ViewModelStoreOwner] that provides the [ViewModelStore] to
  *   NavEntries
@@ -51,16 +51,16 @@ import androidx.savedstate.compose.LocalSavedStateRegistryOwner
  *   entry's ViewModelStore will be removed.
  */
 @Composable
-public fun <T : Any> rememberMediatorNavEntryDecorator(
+public fun <T : Any> rememberSharedViewModelStoreNavEntryDecorator(
     viewModelStoreOwner: ViewModelStoreOwner =
         checkNotNull(LocalViewModelStoreOwner.current) {
             "No ViewModelStoreOwner was provided via LocalViewModelStoreOwner"
         },
     removeViewModelStoreOnPop: () -> Boolean = { true },
-): MediatorNavEntryDecorator<T> {
+): SharedViewModelStoreNavEntryDecorator<T> {
     val currentRemoveViewModelStoreOnPop = rememberUpdatedState(removeViewModelStoreOnPop)
     return remember(viewModelStoreOwner, currentRemoveViewModelStoreOnPop) {
-        MediatorNavEntryDecorator(
+        SharedViewModelStoreNavEntryDecorator(
             viewModelStoreOwner.viewModelStore,
             removeViewModelStoreOnPop,
         )
@@ -81,7 +81,7 @@ public fun <T : Any> rememberMediatorNavEntryDecorator(
  *   entry's ViewModelStore will be removed.
  * @see NavEntryDecorator.onPop for more details on when this callback is invoked
  */
-public class MediatorNavEntryDecorator<T : Any>(
+public class SharedViewModelStoreNavEntryDecorator<T : Any>(
     viewModelStore: ViewModelStore,
     removeViewModelStoreOnPop: () -> Boolean,
 ) :

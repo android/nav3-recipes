@@ -19,28 +19,23 @@ package com.example.nav3recipes.scenes.supportingpane
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
-import androidx.navigation3.scene.SinglePaneSceneStrategy
 import androidx.navigation3.ui.NavDisplay
-import com.example.nav3recipes.bottomsheet.BottomSheetSceneStrategy
 import com.example.nav3recipes.content.ContentBase
 import com.example.nav3recipes.content.ContentGreen
 import com.example.nav3recipes.content.ContentRed
@@ -74,7 +69,7 @@ class SupportingPaneActivity : ComponentActivity() {
                 onBack = { backStack.removeLastOrNull() },
                 entryDecorators = listOf(
                     rememberSaveableStateHolderNavEntryDecorator(),
-                    rememberMediatorNavEntryDecorator(),
+                    rememberSharedViewModelStoreNavEntryDecorator(),
                 ),
                 sceneStrategy = supportingPaneStrategy, //then bottomSheetStrategy,
                 entryProvider = entryProvider {
@@ -99,7 +94,7 @@ class SupportingPaneActivity : ComponentActivity() {
                     }
                     entry<Product>(
                         metadata = SupportingPaneSceneStrategy.supportingPane()
-                        + MediatorNavEntryDecorator.viewModelParent(Home.toString()),
+                        + SharedViewModelStoreNavEntryDecorator.viewModelParent(Home.toString()),
                     ) { product ->
 
                         val viewModel = viewModel(modelClass = MediatorViewModel::class)
