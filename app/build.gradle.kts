@@ -83,6 +83,8 @@ dependencies {
     implementation(libs.androidx.navigation2)
 
     implementation(libs.hilt.android)
+    implementation(libs.androidx.navigationevent)
+    implementation(libs.androidx.navigationevent.compose)
     ksp(libs.hilt.compiler)
     implementation(libs.koin.compose.viewmodel)
 
