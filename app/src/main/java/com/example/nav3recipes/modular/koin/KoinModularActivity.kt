@@ -22,16 +22,16 @@ import org.koin.mp.KoinPlatform
 /**
  * This recipe demonstrates how to use a modular approach with Navigation 3,
  * where different parts of the application are defined in separate modules and injected
- * into the main app using Dagger/Hilt.
+ * into the main app using Koin.
  * 
- * Features (Conversation and Profile) are split into two modules: 
- * - api: defines the public facing routes for this feature
- * - impl: defines the entryProviders for this feature, these are injected into the app's main activity
- * The common module defines:
- * - a common navigator class that exposes a back stack and methods to modify that back stack
- * - a type that should be used by feature modules to inject entryProviders into the app's main activity
- * The app module creates the navigator by supplying a start destination and provides this navigator
- * to the rest of the app module (i.e. MainActivity) and the feature modules.
+ * Features (Conversation and Profile) are defined in their own Koin modules:
+ * - `ConversationModule` and `ProfileModule` declare navigation entries for their screens.
+ *
+ * A shared `Navigator` class manages the backstack.
+ *
+ * The `appModule` includes the feature modules, creates the `Navigator` with a start destination,
+ * and makes it available for injection into the `KoinModularActivity` and feature modules.
+ *
  */
 @OptIn(KoinExperimentalAPI::class)
 class KoinModularActivity : ComponentActivity(), AndroidScopeComponent {
