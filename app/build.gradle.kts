@@ -85,6 +85,7 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.koin.compose.viewmodel)
+    implementation(libs.koin.navigation3)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

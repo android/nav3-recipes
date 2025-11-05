@@ -26,7 +26,8 @@ Examples showing how to use the layouts provided by the [Compose Material3 Adapt
 - **[Conditional navigation](app/src/main/java/com/example/nav3recipes/conditional)**: Switch to a different navigation flow when a condition is met. For example, for authentication or first-time user onboarding.
 
 ### Architecture
-- **[Modularized navigation code](app/src/main/java/com/example/nav3recipes/modular/hilt)**: Demonstrates how to decouple navigation code into separate modules (uses Dagger/Hilt for DI). 
+- **[Hilt - Modularized navigation code](app/src/main/java/com/example/nav3recipes/modular/hilt)**: Demonstrates how to decouple navigation code into separate modules (uses Dagger/Hilt for DI). 
+- **[Koin - Modularized navigation code](app/src/main/java/com/example/nav3recipes/modular/koin)**: Demonstrates how to decouple navigation code into separate modules (uses Koin for DI).
 
 ### Passing navigation arguments to ViewModels
 - **[Basic ViewModel](app/src/main/java/com/example/nav3recipes/passingarguments/viewmodels/basic)**: Navigation arguments are passed to a ViewModel constructed using `viewModel()`

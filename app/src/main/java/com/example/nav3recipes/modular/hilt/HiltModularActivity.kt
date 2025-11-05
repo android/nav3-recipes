@@ -27,7 +27,7 @@ import javax.inject.Inject
  * to the rest of the app module (i.e. MainActivity) and the feature modules.
  */
 @AndroidEntryPoint
-class ModularActivity : ComponentActivity() {
+class HiltModularActivity : ComponentActivity() {
 
     @Inject
     lateinit var navigator: Navigator

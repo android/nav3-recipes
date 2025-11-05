@@ -20,9 +20,12 @@ import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 import org.koin.android.ext.koin.androidContext
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.context.GlobalContext
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
+import org.koin.mp.KoinPlatform
 
 /**
  * Passing navigation arguments to a Koin injected ViewModel
@@ -37,16 +40,18 @@ class KoinViewModelsActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
+        //prevent any already launched Koin instance with other config
+        if (KoinPlatform.getKoinOrNull() != null) {
+            stopKoin()
+        }
         // The startKoin block should be placed in Application.onCreate.
-        if (GlobalContext.getOrNull() == null) {
-            GlobalContext.startKoin {
-                androidContext(this@KoinViewModelsActivity)
-                modules(
-                    module {
-                        viewModelOf(::RouteBViewModel)
-                    }
-                )
-            }
+        startKoin {
+            androidContext(this@KoinViewModelsActivity)
+            modules(
+                module {
+                    viewModelOf(::RouteBViewModel)
+                }
+            )
         }
 
         setEdgeToEdgeConfig()
