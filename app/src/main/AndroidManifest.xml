@@ -30,6 +30,11 @@
         android:enableOnBackInvokedCallback="true"
         android:name=".content.Nav3RecipesApplication"
         tools:targetApi="31">
+
+        <property
+            android:name="android.window.PROPERTY_XR_ACTIVITY_START_MODE"
+            android:value="XR_ACTIVITY_START_MODE_FULL_SPACE_MANAGED" />
+
         <activity
             android:name=".RecipePickerActivity"
             android:exported="true"
@@ -147,6 +152,10 @@
             android:theme="@style/Theme.Nav3Recipes"/>
         <activity
             android:name=".scenes.listdetail.ListDetailActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Nav3Recipes"/>
+        <activity
+            android:name=".scenes.xr.XrTwoPaneActivity"
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes"/>
         <activity

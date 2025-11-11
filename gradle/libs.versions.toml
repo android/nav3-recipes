@@ -33,6 +33,9 @@ ksp = "2.2.10-2.0.2"
 hilt = "2.57.1"
 hiltNavigationCompose = "1.3.0"
 koin = "4.1.1"
+xr = "1.0.0-alpha08"
+xrRuntime = "1.0.0-alpha07"
+materialXr = "1.0.0-alpha12"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -63,6 +66,10 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 androidx-material3-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version.ref = "nav3Material" }
 koin-compose-viewmodel = {group = "io.insert-koin", name = "koin-compose-viewmodel", version.ref = "koin"}
+androidx-xr-runtime = {group = "androidx.xr.runtime", name = "runtime", version.ref = "xrRuntime" }
+androidx-xr-scenecore = {group =  "androidx.xr.scenecore", name = "scenecore", version.ref = "xr" }
+androidx-xr-compose = {group = "androidx.xr.compose", name = "compose", version.ref = "xr" }
+androidx-xr-compose-material3 = {group = "androidx.xr.compose.material3", name = "material3", version.ref="materialXr" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
