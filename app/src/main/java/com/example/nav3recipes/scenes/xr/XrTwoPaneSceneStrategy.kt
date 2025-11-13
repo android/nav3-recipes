@@ -15,10 +15,12 @@
  */
 package com.example.nav3recipes.scenes.xr
 
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.DpSize
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.scene.Scene
 import androidx.navigation3.scene.SceneStrategy
@@ -30,7 +32,7 @@ import androidx.xr.compose.subspace.SpatialPanel
 import androidx.xr.compose.subspace.SpatialRow
 import androidx.xr.compose.subspace.layout.SubspaceModifier
 import androidx.xr.compose.subspace.layout.fillMaxHeight
-import androidx.xr.compose.subspace.layout.width
+import androidx.xr.compose.subspace.layout.fillMaxWidth
 import com.example.nav3recipes.scenes.xr.XrNavigationKeys.FIRST_PANE_KEY
 import com.example.nav3recipes.scenes.xr.XrNavigationKeys.SECOND_PANE_KEY
 
@@ -39,12 +41,11 @@ class XrTwoPaneScene<T : Any>(
     override val previousEntries: List<NavEntry<T>>,
     val firstEntry: NavEntry<T>,
     val secondEntry: NavEntry<T>,
-    val width: Dp,
 ) : Scene<T> {
     override val entries: List<NavEntry<T>> = listOf(firstEntry, secondEntry)
     override val content: @Composable (() -> Unit) = {
         ApplicationSubspace {
-            SpatialRow(SubspaceModifier.width(width = width)) {
+            SpatialRow(SubspaceModifier.fillMaxWidth()) {
                 SpatialPanel(
                     modifier = SubspaceModifier
                         .weight(1f)
@@ -64,23 +65,26 @@ class XrTwoPaneScene<T : Any>(
     }
 }
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun <T : Any> rememberXrTwoPaneStrategy(): XrTwoPaneSceneStrategy<T> {
     val isSpatialUiEnabled = LocalSpatialCapabilities.current.isSpatialUiEnabled
     val xrBounds = LocalSpatialConfiguration.current.bounds
 
-    return remember(isSpatialUiEnabled, xrBounds) {
+    val wsc = WindowSizeClass.calculateFromSize(size = DpSize(xrBounds.width, xrBounds.height))
+
+    return remember(isSpatialUiEnabled, wsc) {
         XrTwoPaneSceneStrategy(
             isSpatialUiEnabled = isSpatialUiEnabled,
-            xrWidth = xrBounds.width
+            wsc = wsc
         )
     }
 }
 
-class XrTwoPaneSceneStrategy<T : Any>(val isSpatialUiEnabled: Boolean, val xrWidth: Dp) :
+class XrTwoPaneSceneStrategy<T : Any>(val isSpatialUiEnabled: Boolean, val wsc: WindowSizeClass) :
     SceneStrategy<T> {
     override fun SceneStrategyScope<T>.calculateScene(entries: List<NavEntry<T>>): Scene<T>? {
-        if (!isSpatialUiEnabled || xrWidth < 600.dp) return null
+        if (!isSpatialUiEnabled || wsc.widthSizeClass == WindowWidthSizeClass.Compact) return null
 
         val secondPane =
             entries.lastOrNull()?.takeIf { it.metadata.containsKey(SECOND_PANE_KEY) }
@@ -97,8 +101,7 @@ class XrTwoPaneSceneStrategy<T : Any>(val isSpatialUiEnabled: Boolean, val xrWid
             key = sceneKey,
             previousEntries = entries.dropLast(1),
             firstPane,
-            secondPane,
-            width = xrWidth
+            secondPane
         )
     }
 
