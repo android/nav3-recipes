@@ -21,10 +21,12 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.scene.Scene
 import androidx.navigation3.scene.SceneStrategy
 import androidx.navigation3.scene.SceneStrategyScope
+import androidx.xr.compose.platform.LocalSession
 import androidx.xr.compose.platform.LocalSpatialCapabilities
 import androidx.xr.compose.platform.LocalSpatialConfiguration
 import androidx.xr.compose.spatial.ApplicationSubspace
@@ -33,9 +35,11 @@ import androidx.xr.compose.subspace.SpatialRow
 import androidx.xr.compose.subspace.layout.SubspaceModifier
 import androidx.xr.compose.subspace.layout.fillMaxHeight
 import androidx.xr.compose.subspace.layout.fillMaxWidth
+import androidx.xr.scenecore.scene
 import com.example.nav3recipes.scenes.xr.XrNavigationKeys.FIRST_PANE_KEY
 import com.example.nav3recipes.scenes.xr.XrNavigationKeys.SECOND_PANE_KEY
 
+private const val METERS_TO_DP = 1000f
 class XrTwoPaneScene<T : Any>(
     override val key: Any,
     override val previousEntries: List<NavEntry<T>>,
@@ -69,9 +73,8 @@ class XrTwoPaneScene<T : Any>(
 @Composable
 fun <T : Any> rememberXrTwoPaneStrategy(): XrTwoPaneSceneStrategy<T> {
     val isSpatialUiEnabled = LocalSpatialCapabilities.current.isSpatialUiEnabled
-    val xrBounds = LocalSpatialConfiguration.current.bounds
 
-    val wsc = WindowSizeClass.calculateFromSize(size = DpSize(xrBounds.width, xrBounds.height))
+    val wsc = WindowSizeClass.calculateFromSize(size = fetchXrWindowBounds())
 
     return remember(isSpatialUiEnabled, wsc) {
         XrTwoPaneSceneStrategy(
@@ -79,6 +82,22 @@ fun <T : Any> rememberXrTwoPaneStrategy(): XrTwoPaneSceneStrategy<T> {
             wsc = wsc
         )
     }
+}
+
+@Composable
+private fun fetchXrWindowBounds(): DpSize {
+    val xrSession = LocalSession.current
+
+    if (xrSession == null) {
+        val xrBounds = LocalSpatialConfiguration.current.bounds
+        return DpSize(xrBounds.width, xrBounds.height)
+    }
+
+    val boundingBox = xrSession.scene.activitySpace.recommendedContentBoxInFullSpace
+    val xrWidth = (boundingBox.max.x - boundingBox.min.x) * METERS_TO_DP
+    val xrHeight = (boundingBox.max.y - boundingBox.min.y) * METERS_TO_DP
+
+    return DpSize(width = xrWidth.dp, height = xrHeight.dp)
 }
 
 class XrTwoPaneSceneStrategy<T : Any>(val isSpatialUiEnabled: Boolean, val wsc: WindowSizeClass) :
