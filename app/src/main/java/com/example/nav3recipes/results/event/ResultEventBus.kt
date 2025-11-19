@@ -37,7 +37,7 @@ object LocalResultEventBus {
      */
     val current: ResultEventBus
         @Composable
-        get() = LocalResultEventBus.current ?: error("No ResultStore has been provided")
+        get() = LocalResultEventBus.current ?: error("No ResultEventBus has been provided")
 
     /**
      * Provides a [ResultEventBus] to the composition
