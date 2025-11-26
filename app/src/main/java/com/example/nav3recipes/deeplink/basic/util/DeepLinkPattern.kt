@@ -92,6 +92,14 @@ internal class DeepLinkPattern<T : NavKey>(
         val isParamArg: Boolean,
         val typeParser: TypeParser
     )
+
+    /**
+     * Metadata about a supported query parameter
+     */
+    class QueryParameter(
+        val serialName: String?,
+        val typeParser: TypeParser,
+    )
 }
 
 /**
