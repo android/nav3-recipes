@@ -20,6 +20,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
@@ -51,7 +52,8 @@ data class ConversationDetail(
     val colorId: Int
 ) : NavKey
 
-@Serializable data object Profile : NavKey
+@Serializable
+data object Profile : NavKey
 
 class ListDetailActivity : ComponentActivity() {
 
@@ -67,35 +69,38 @@ class ListDetailActivity : ComponentActivity() {
                 val backStack = rememberNavBackStack(ConversationList)
                 val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
 
-                NavDisplay(
-                    backStack = backStack,
-                    onBack = { backStack.removeLastOrNull() },
-                    sceneStrategy = listDetailStrategy,
-                    modifier = Modifier.padding(paddingValues),
-                    entryProvider = entryProvider {
-                        entry<ConversationList>(
-                            metadata = ListDetailScene.listPane()
-                        ) {
-                            ConversationListScreen(
-                                onConversationClicked = { detailRoute ->
-                                    backStack.addDetail(detailRoute)
-                                }
-                            )
+                SharedTransitionLayout {
+                    NavDisplay(
+                        backStack = backStack,
+                        onBack = { backStack.removeLastOrNull() },
+                        sceneStrategy = listDetailStrategy,
+                        modifier = Modifier.padding(paddingValues),
+                        sharedTransitionScope = this,
+                        entryProvider = entryProvider {
+                            entry<ConversationList>(
+                                metadata = ListDetailScene.listPane()
+                            ) {
+                                ConversationListScreen(
+                                    onConversationClicked = { detailRoute ->
+                                        backStack.addDetail(detailRoute)
+                                    }
+                                )
+                            }
+                            entry<ConversationDetail>(
+                                metadata = ListDetailScene.detailPane()
+                            ) { conversationDetail ->
+                                ConversationDetailScreen(
+                                    conversationDetail = conversationDetail,
+                                    onBack = { backStack.removeLastOrNull() },
+                                    onProfileClicked = { backStack.add(Profile) }
+                                )
+                            }
+                            entry<Profile> {
+                                ProfileScreen()
+                            }
                         }
-                        entry<ConversationDetail>(
-                            metadata = ListDetailScene.detailPane()
-                        ) { conversationDetail ->
-                            ConversationDetailScreen(
-                                conversationDetail = conversationDetail,
-                                onBack = { backStack.removeLastOrNull() },
-                                onProfileClicked = { backStack.add(Profile) }
-                            )
-                        }
-                        entry<Profile> {
-                            ProfileScreen()
-                        }
-                    }
-                )
+                    )
+                }
             }
         }
     }
