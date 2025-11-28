@@ -22,6 +22,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -74,7 +75,7 @@ class ListDetailActivity : ComponentActivity() {
                     modifier = Modifier.padding(paddingValues),
                     entryProvider = entryProvider {
                         entry<ConversationList>(
-                            metadata = ListDetailScene.listPane()
+                            metadata = ListDetailSceneStrategy.listPane()
                         ) {
                             ConversationListScreen(
                                 onConversationClicked = { detailRoute ->
@@ -83,12 +84,23 @@ class ListDetailActivity : ComponentActivity() {
                             )
                         }
                         entry<ConversationDetail>(
-                            metadata = ListDetailScene.detailPane()
+                            metadata = ListDetailSceneStrategy.detailPane()
                         ) { conversationDetail ->
+
+                            // If we're not being shown in a detail pane, show a back button
+                            val backButtonContent : @Composable (Modifier) -> Unit = { modifier ->
+                                if (LocalSceneRole.current !is ListDetailSceneStrategy.Role.Detail){
+                                    BackButton(
+                                        onBack = { backStack.removeLastOrNull() },
+                                        modifier = modifier
+                                    )
+                                }
+                            }
+
                             ConversationDetailScreen(
                                 conversationDetail = conversationDetail,
-                                onBack = { backStack.removeLastOrNull() },
-                                onProfileClicked = { backStack.add(Profile) }
+                                onProfileClicked = { backStack.add(Profile) },
+                                backButtonContent = backButtonContent
                             )
                         }
                         entry<Profile> {

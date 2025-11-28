@@ -76,10 +76,26 @@ fun ConversationListScreen(
 }
 
 @Composable
+fun BackButton(
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier
+){
+    IconButton(
+        onClick = onBack,
+        modifier = modifier
+    ) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = "Back"
+        )
+    }
+}
+
+@Composable
 fun ConversationDetailScreen(
     conversationDetail: ConversationDetail,
-    onBack: () -> Unit,
-    onProfileClicked: () -> Unit
+    onProfileClicked: () -> Unit,
+    backButtonContent: @Composable (Modifier) -> Unit = {},
 ) {
     Box(
         modifier = Modifier
@@ -87,20 +103,9 @@ fun ConversationDetailScreen(
             .background(colors[conversationDetail.colorId])
             .padding(16.dp)
     ) {
-        if (LocalBackButtonVisibility.current) {
-            IconButton(
-                onClick = onBack,
-                modifier = Modifier.align(Alignment.TopStart)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back"
-                )
-            }
-        }
+        backButtonContent(Modifier.align(Alignment.TopStart))
         Column(
-            modifier = Modifier
-                .fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
