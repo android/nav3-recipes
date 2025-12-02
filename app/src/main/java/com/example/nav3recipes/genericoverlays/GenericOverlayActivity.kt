@@ -36,6 +36,12 @@ private data class RouteC(val id: String) : NavKey
 @Serializable
 private data class RouteD(val id: String) : NavKey
 class GenericOverlayActivity : ComponentActivity() {
+    companion object {
+        private const val DIALOG_ID = "123"
+        private const val ALERT_DIALOG_ID = "1234"
+        private const val BOTTOM_SHEET_ID = "12345"
+        private const val CHAINED_BOTTOM_SHEET_ID = "123456"
+    }
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -51,9 +57,9 @@ class GenericOverlayActivity : ComponentActivity() {
                 entryProvider = entryProvider {
                     entry<RouteA> {
                         ContentGreen("Welcome to Nav3") {
-                            Button(onClick = { backStack.add(RouteB("123")) }) { Text("Click to open dialog") }
-                            Button(onClick = { backStack.add(RouteC("1234")) }) { Text("Click to open alert dialog") }
-                            Button(onClick = { backStack.add(RouteD("12345")) }) { Text("Click to open bottom sheet") }
+                            Button(onClick = { backStack.add(RouteB(DIALOG_ID)) }) { Text("Click to open dialog") }
+                            Button(onClick = { backStack.add(RouteC(ALERT_DIALOG_ID)) }) { Text("Click to open alert dialog") }
+                            Button(onClick = { backStack.add(RouteD(BOTTOM_SHEET_ID)) }) { Text("Click to open bottom sheet") }
                         }
                     }
                     entry<RouteB>(
@@ -77,7 +83,7 @@ class GenericOverlayActivity : ComponentActivity() {
                         AlertDialog(
                             onDismissRequest = { backStack.removeLastOrNull() },
                             confirmButton = {
-                                Button(onClick = { backStack.add(RouteD("123456")) }) { Text("Click to open bottom sheet") }
+                                Button(onClick = { backStack.add(RouteD(CHAINED_BOTTOM_SHEET_ID)) }) { Text("Click to open bottom sheet") }
                             },
                             dismissButton = {
                                 Button(onClick = { backStack.removeLastOrNull() }) { Text("Cancel") }

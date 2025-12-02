@@ -39,7 +39,7 @@ private class OverlayScene<T : Any>(
                 overlaidEntries.hashCode() * 31
 
     override fun toString(): String =
-        "OverlayScene(key=$key, entry=$entry, previousEntries=$previousEntries, overlaidEntries=$overlaidEntries"
+        "OverlayScene(key=$key, entry=$entry, previousEntries=$previousEntries, overlaidEntries=$overlaidEntries)"
 }
 
 /**
@@ -47,7 +47,7 @@ private class OverlayScene<T : Any>(
  *
  * This allows the entry itself to render dialogs, alert dialogs, or bottom sheets directly.
  */
-class OverlaySceneStrategy<T : Any>() : SceneStrategy<T> {
+class OverlaySceneStrategy<T : Any> : SceneStrategy<T> {
     override fun SceneStrategyScope<T>.calculateScene(entries: List<NavEntry<T>>): Scene<T>? {
         val lastEntry = entries.last()
         if (lastEntry.metadata[OVERLAY_KEY] != true) {
