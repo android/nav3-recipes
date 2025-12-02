@@ -69,6 +69,10 @@
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes"/>
         <activity
+            android:name=".genericoverlays.GenericOverlayActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Nav3Recipes"/>
+        <activity
             android:name=".material.listdetail.MaterialListDetailActivity"
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes"/>
