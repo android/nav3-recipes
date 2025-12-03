@@ -130,6 +130,10 @@
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes"/>
         <activity
+            android:name=".scenes.threepane.ThreePaneActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Nav3Recipes"/>
+        <activity
             android:name=".scenes.listdetail.ListDetailActivity"
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes"/>

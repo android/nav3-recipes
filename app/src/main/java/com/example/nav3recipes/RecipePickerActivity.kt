@@ -64,6 +64,7 @@ import com.example.nav3recipes.scenes.listdetail.ListDetailActivity
 import com.example.nav3recipes.scenes.twopane.TwoPaneActivity
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 import com.example.nav3recipes.deeplink.advanced.AdvancedCreateDeepLinkActivity
+import com.example.nav3recipes.scenes.threepane.ThreePaneActivity
 
 /**
  * Activity to show all available recipes and allow users to launch each one.
@@ -84,6 +85,7 @@ private val recipes = listOf(
     Heading("Layouts using Scenes"),
     Recipe("List-detail", ListDetailActivity::class.java),
     Recipe("Two pane", TwoPaneActivity::class.java),
+    Recipe("Three pane", ThreePaneActivity::class.java),
     Recipe("Bottom Sheet", BottomSheetActivity::class.java),
     Recipe("Dialog", DialogActivity::class.java),
 
