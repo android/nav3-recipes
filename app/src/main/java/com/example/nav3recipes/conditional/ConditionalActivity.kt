@@ -22,22 +22,35 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSerializable
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.serialization.NavBackStackSerializer
+import androidx.navigation3.runtime.serialization.NavKeySerializer
 import androidx.navigation3.ui.NavDisplay
 import com.example.nav3recipes.content.ContentBlue
 import com.example.nav3recipes.content.ContentGreen
 import com.example.nav3recipes.content.ContentYellow
+import kotlinx.serialization.Serializable
 
-private data object Home
 
-// A marker interface is used to mark any routes that require login
-private data object Profile : AppBackStack.RequiresLogin
-private data object Login
+// We use a sealed class for the route supertype because KotlinX Serialization handles polymorphic
+// serialization of sealed classes automatically.
+@Serializable
+sealed class Route(val requiresLogin: Boolean = false) : NavKey
+
+@Serializable
+private data object Home : Route()
+
+@Serializable
+private data object Profile : Route(requiresLogin = true)
+
+@Serializable
+private data object Login : Route()
 
 class ConditionalActivity : ComponentActivity() {
 
@@ -45,22 +58,28 @@ class ConditionalActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
 
-
-            val appBackStack = remember {
-                AppBackStack(startRoute = Home, loginRoute = Login)
+            val backStack = rememberNavBackStack<Route>(Home)
+            val isLoggedInState = rememberSaveable {
+                mutableStateOf(false)
             }
 
+            val navigator = Navigator(
+                backStack = backStack,
+                loginRoute = Login,
+                isLoggedInState = isLoggedInState
+            )
+
             NavDisplay(
-                backStack = appBackStack.backStack,
-                onBack = { appBackStack.remove() },
+                backStack = backStack,
+                onBack = { navigator.goBack() },
                 entryProvider = entryProvider {
                     entry<Home> {
-                        ContentGreen("Welcome to Nav3. Logged in? ${appBackStack.isLoggedIn}") {
+                        ContentGreen("Welcome to Nav3. Logged in? ${isLoggedInState.value}") {
                             Column {
-                                Button(onClick = { appBackStack.add(Profile) }) {
+                                Button(onClick = { navigator.navigate(Profile) }) {
                                     Text("Profile")
                                 }
-                                Button(onClick = { appBackStack.add(Login) }) {
+                                Button(onClick = { navigator.navigate(Login) }) {
                                     Text("Login")
                                 }
                             }
@@ -69,16 +88,16 @@ class ConditionalActivity : ComponentActivity() {
                     entry<Profile> {
                         ContentBlue("Profile screen (only accessible once logged in)") {
                             Button(onClick = {
-                                appBackStack.logout()
+                                navigator.logout()
                             }) {
                                 Text("Logout")
                             }
                         }
                     }
                     entry<Login> {
-                        ContentYellow("Login screen. Logged in? ${appBackStack.isLoggedIn}") {
+                        ContentYellow("Login screen. Logged in? ${isLoggedInState.value}") {
                             Button(onClick = {
-                                appBackStack.login()
+                                navigator.login()
                             }) {
                                 Text("Login")
                             }
@@ -90,52 +109,16 @@ class ConditionalActivity : ComponentActivity() {
     }
 }
 
-/**
- * A back stack that can handle routes that require login.
- *
- * @param startRoute The starting route
- * @param loginRoute The route that users should be taken to when they attempt to access a route
- * that requires login
- */
-class AppBackStack<T : Any>(startRoute: T, private val loginRoute: T) {
 
-    interface RequiresLogin
 
-    private var onLoginSuccessRoute: T? = null
-
-    var isLoggedIn by mutableStateOf(false)
-        private set
-
-    val backStack = mutableStateListOf(startRoute)
-
-    fun add(route: T) {
-        if (route is RequiresLogin && !isLoggedIn) {
-            // Store the intended destination and redirect to login
-            onLoginSuccessRoute = route
-            backStack.add(loginRoute)
-        } else {
-            backStack.add(route)
-        }
-
-        // If the user explicitly requested the login route, don't redirect them after login
-        if (route == loginRoute) {
-            onLoginSuccessRoute = null
-        }
-    }
-
-    fun remove() = backStack.removeLastOrNull()
-
-    fun login() {
-        isLoggedIn = true
-
-        onLoginSuccessRoute?.let {
-            backStack.add(it)
-            backStack.remove(loginRoute)
-        }
-    }
-
-    fun logout() {
-        isLoggedIn = false
-        backStack.removeAll { it is RequiresLogin }
+// An overload of `rememberNavBackStack` that returns a subtype of `NavKey`.
+// If you would like to see this included in the Nav3 library please upvote the following issue:
+// https://issuetracker.google.com/issues/463382671
+@Composable
+fun <T : NavKey> rememberNavBackStack(vararg elements: T): NavBackStack<T> {
+    return rememberSerializable(
+        serializer = NavBackStackSerializer(elementSerializer = NavKeySerializer())
+    ) {
+        NavBackStack(*elements)
     }
 }
