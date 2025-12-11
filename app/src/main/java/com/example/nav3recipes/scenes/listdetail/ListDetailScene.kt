@@ -139,7 +139,7 @@ class ListDetailSceneStrategy<T : Any>(val windowSizeClass: WindowSizeClass) : S
 
         return ListDetailScene(
             key = sceneKey,
-            previousEntries = entries.dropLast(1),
+            previousEntries = entries.dropLast(2),
             listEntry = listEntry,
             detailEntry = detailEntry
         )
