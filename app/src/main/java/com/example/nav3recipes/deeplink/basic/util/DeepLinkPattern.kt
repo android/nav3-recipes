@@ -72,15 +72,16 @@ internal class DeepLinkPattern<T : NavKey>(
     }
 
     /**
-     * Parse supported queries into a map of queryParameterNames to [TypeParser]
+     * Parse supported queries into a map of queryParameterNames to [QueryParameter]
      *
      * This will be used later on to parse a provided query value into the correct KType
      */
-    val queryValueParsers: Map<String, TypeParser> = buildMap {
+    val queryParameters: Map<String, QueryParameter> = buildMap {
         uriPattern.queryParameterNames.forEach { paramName ->
-            val elementIndex = serializer.descriptor.getElementIndex(paramName)
+            val paramValue = uriPattern.getQueryParameter(paramName)?.removePrefix("{")?.removeSuffix("}")
+            val elementIndex = serializer.descriptor.getElementIndex(paramValue ?: paramName)
             val elementDescriptor = serializer.descriptor.getElementDescriptor(elementIndex)
-            this[paramName] = getTypeParser(elementDescriptor.kind)
+            this[paramName] = QueryParameter(paramValue, getTypeParser(elementDescriptor.kind))
         }
     }
 
@@ -91,6 +92,14 @@ internal class DeepLinkPattern<T : NavKey>(
         val stringValue: String,
         val isParamArg: Boolean,
         val typeParser: TypeParser
+    )
+
+    /**
+     * Metadata about a supported query parameter
+     */
+    class QueryParameter(
+        val serialName: String?,
+        val typeParser: TypeParser,
     )
 }
 

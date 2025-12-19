@@ -48,14 +48,14 @@ internal class DeepLinkMatcher<T : NavKey>(
         // match queries (if any)
         request.queries.forEach { query ->
             val name = query.key
-            val queryStringParser = deepLinkPattern.queryValueParsers[name]
-            val queryParsedValue = try {
-                queryStringParser!!.invoke(query.value)
+            val queryParameter = deepLinkPattern.queryParameters[name]!!
+            val (argName, parsedValue) = try {
+                Pair(queryParameter.serialName ?: name, queryParameter.typeParser.invoke(query.value))
             } catch (e: IllegalArgumentException) {
                 Log.e(TAG_LOG_ERROR, "Failed to parse query name:[$name] value:[${query.value}].", e)
                 return null
             }
-            args[name] = queryParsedValue
+            args[argName] = parsedValue
         }
         // provide the serializer of the matching key and map of arg names to parsed arg values
         return DeepLinkMatchResult(deepLinkPattern.serializer, args)
