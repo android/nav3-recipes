@@ -18,7 +18,7 @@ These are the recipes and what they demonstrate.
 - **[Entry provider DSL](app/src/main/java/com/example/nav3recipes/basicdsl)**: As above, using the entryProvider DSL.
 
 ### Deep links
-Read the [guide to deeplinking](docs/deeplink-guide.md).
+Read the [guide to deeplinking](docs/deeplink-guide.md). Upvote [this issue](https://issuetracker.google.com/470282247) if you would like an API for deeplinks.
 - **[Basic](app/src/main/java/com/example/nav3recipes/deeplink/basic)**: Shows how to parse a deep link URL from an Android Intent into a navigation key.
 - **[Advanced](app/src/main/java/com/example/nav3recipes/deeplink/advanced)**: Shows how to handle deep links with a synthetic back stack and correct "Up" navigation behavior.
 

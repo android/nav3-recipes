@@ -9,19 +9,14 @@ import androidx.compose.ui.Modifier
 import androidx.navigation3.ui.NavDisplay
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 import org.koin.android.ext.android.inject
-import org.koin.android.ext.koin.androidContext
-import org.koin.android.ext.koin.androidLogger
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.compose.navigation3.getEntryProvider
 import org.koin.androidx.scope.activityRetainedScope
-import org.koin.androidx.scope.activityScope
+import org.koin.core.Koin
 import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.core.component.KoinComponent
-import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
-import org.koin.core.logger.Level
 import org.koin.core.scope.Scope
-import org.koin.mp.KoinPlatform
+import org.koin.dsl.koinApplication
 
 /**
  * This recipe demonstrates how to use a modular approach with Navigation 3,
@@ -38,15 +33,20 @@ import org.koin.mp.KoinPlatform
  * to the rest of the app module (i.e. MainActivity) and the feature modules.
  */
 @OptIn(KoinExperimentalAPI::class)
-class KoinModularActivity : ComponentActivity(), AndroidScopeComponent {
-
+class KoinModularActivity : ComponentActivity(), AndroidScopeComponent, KoinComponent {
+    // Local Koin Context Instance
+    companion object {
+        private val localKoin = koinApplication {
+            modules(appModule)
+        }.koin
+    }
+    // Override default Koin context to use the local one
+    override fun getKoin(): Koin = localKoin
     override val scope : Scope by activityRetainedScope()
     val navigator: Navigator by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        initKoin()
 
         setEdgeToEdgeConfig()
         setContent {
@@ -61,14 +61,4 @@ class KoinModularActivity : ComponentActivity(), AndroidScopeComponent {
         }
     }
 
-    private fun initKoin() {
-        if (KoinPlatform.getKoinOrNull() == null) {
-            // The startKoin block should be placed in Application.onCreate.
-            startKoin {
-                androidContext(this@KoinModularActivity)
-                androidLogger(Level.DEBUG)
-                modules(appModule)
-            }
-        }
-    }
 }

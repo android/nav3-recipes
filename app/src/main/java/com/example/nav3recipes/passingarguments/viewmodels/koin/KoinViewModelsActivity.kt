@@ -18,12 +18,14 @@ import com.example.nav3recipes.content.ContentBlue
 import com.example.nav3recipes.content.ContentGreen
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 import org.koin.android.ext.koin.androidContext
+import org.koin.compose.KoinApplication
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.parameter.parametersOf
+import org.koin.dsl.koinConfiguration
 import org.koin.dsl.module
 import org.koin.mp.KoinPlatform
 
@@ -34,61 +36,59 @@ class KoinViewModelsActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
-        //prevent any already launched Koin instance with other config
-        if (KoinPlatform.getKoinOrNull() != null) {
-            stopKoin()
-        }
-        // The startKoin block should be placed in Application.onCreate.
-        startKoin {
-            androidContext(this@KoinViewModelsActivity)
-            modules(
-                module {
-                    viewModelOf(::RouteBViewModel)
-                }
-            )
-        }
-
         setEdgeToEdgeConfig()
         super.onCreate(savedInstanceState)
         setContent {
             val backStack = remember { mutableStateListOf<Any>(RouteA) }
 
-            NavDisplay(
-                backStack = backStack,
-                onBack = { backStack.removeLastOrNull() },
+            // Koin Compose Entry point
+            KoinApplication(
+                configuration = koinConfiguration {
+                    modules(appModule)
+                }
+            ) {
+                NavDisplay(
+                    backStack = backStack,
+                    onBack = { backStack.removeLastOrNull() },
 
-                // In order to add the `ViewModelStoreNavEntryDecorator` (see comment below for why)
-                // we also need to add the default `NavEntryDecorator`s as well. These provide
-                // extra information to the entry's content to enable it to display correctly
-                // and save its state.
-                entryDecorators = listOf(
-                    rememberSaveableStateHolderNavEntryDecorator(),
-                    rememberViewModelStoreNavEntryDecorator()
-                ),
-                entryProvider = entryProvider {
-                    entry<RouteA> {
-                        ContentGreen("Welcome to Nav3") {
-                            LazyColumn {
-                                items(10) { i ->
-                                    Button(onClick = {
-                                        backStack.add(RouteB("$i"))
-                                    }) {
-                                        Text("$i")
+                    // In order to add the `ViewModelStoreNavEntryDecorator` (see comment below for why)
+                    // we also need to add the default `NavEntryDecorator`s as well. These provide
+                    // extra information to the entry's content to enable it to display correctly
+                    // and save its state.
+                    entryDecorators = listOf(
+                        rememberSaveableStateHolderNavEntryDecorator(),
+                        rememberViewModelStoreNavEntryDecorator()
+                    ),
+                    entryProvider = entryProvider {
+                        entry<RouteA> {
+                            ContentGreen("Welcome to Nav3") {
+                                LazyColumn {
+                                    items(10) { i ->
+                                        Button(onClick = {
+                                            backStack.add(RouteB("$i"))
+                                        }) {
+                                            Text("$i")
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                    entry<RouteB> { key ->
-                        val viewModel = koinViewModel<RouteBViewModel> {
-                            parametersOf(key)
+                        entry<RouteB> { key ->
+                            val viewModel = koinViewModel<RouteBViewModel> {
+                                parametersOf(key)
+                            }
+                            ScreenB(viewModel = viewModel)
                         }
-                        ScreenB(viewModel = viewModel)
                     }
-                }
-            )
+                )
+            }
         }
     }
+}
+
+// Local Koin Module
+private val appModule = module {
+    viewModelOf(::RouteBViewModel)
 }
 
 @Composable
