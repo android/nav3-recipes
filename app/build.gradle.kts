@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 /*
  * Copyright 2025 The Android Open Source Project
  *
@@ -23,6 +25,11 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+kotlin{
+    compilerOptions{
+        jvmTarget = JvmTarget.fromTarget("11")
+    }
+}
 android {
     namespace = "com.example.nav3recipes"
     compileSdk = 36
@@ -50,9 +57,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
+
     buildFeatures {
         compose = true
     }
