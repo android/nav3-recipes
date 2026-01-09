@@ -19,22 +19,36 @@ package com.example.nav3recipes.commonui
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
@@ -42,17 +56,29 @@ import com.example.nav3recipes.content.ContentBlue
 import com.example.nav3recipes.content.ContentGreen
 import com.example.nav3recipes.content.ContentPurple
 import com.example.nav3recipes.content.ContentRed
+import com.example.nav3recipes.scenes.listdetail.ConversationDetail
+import com.example.nav3recipes.scenes.listdetail.rememberListDetailSceneStrategy
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
+import com.example.nav3recipes.ui.theme.colors
 
-private sealed interface TopLevelRoute {
+sealed interface TopLevelRoute {
     val icon: ImageVector
 }
-private data object Home : TopLevelRoute { override val icon = Icons.Default.Home }
-private data object ChatList : TopLevelRoute { override val icon = Icons.Default.Face }
-private data object ChatDetail
-private data object Camera : TopLevelRoute { override val icon = Icons.Default.PlayArrow }
 
-private val TOP_LEVEL_ROUTES : List<TopLevelRoute> = listOf(Home, ChatList, Camera)
+private data object Home : TopLevelRoute {
+    override val icon = Icons.Default.Home
+}
+
+private data object ChatList : TopLevelRoute {
+    override val icon = Icons.Default.Face
+}
+
+private data object ChatDetail
+private data object Camera : TopLevelRoute {
+    override val icon = Icons.Default.PlayArrow
+}
+
+val TOP_LEVEL_ROUTES: List<TopLevelRoute> = listOf(Home, ChatList, Camera)
 
 class CommonUiActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,59 +87,47 @@ class CommonUiActivity : ComponentActivity() {
         setContent {
             val topLevelBackStack = remember { TopLevelBackStack<Any>(Home) }
 
-            Scaffold(
-                bottomBar = {
-                    NavigationBar {
-                        TOP_LEVEL_ROUTES.forEach { topLevelRoute ->
+            val navBarSceneStrategy = remember { NavBarSceneStrategy<Any>(topLevelBackStack) }
 
-                            val isSelected = topLevelRoute == topLevelBackStack.topLevelKey
-                            NavigationBarItem(
-                                selected = isSelected,
-                                onClick = {
-                                    topLevelBackStack.addTopLevel(topLevelRoute)
-                                },
-                                icon = {
-                                    Icon(
-                                        imageVector = topLevelRoute.icon,
-                                        contentDescription = null
-                                    )
-                                }
-                            )
-                        }
+            NavDisplay(
+                sceneStrategy = navBarSceneStrategy,
+                backStack = topLevelBackStack.backStack,
+                onBack = { topLevelBackStack.removeLast() },
+                entryProvider = entryProvider {
+                    entry<Home> {
+                        ContentRed("Home screen")
                     }
-                }
-            ) { _ ->
-                NavDisplay(
-                    backStack = topLevelBackStack.backStack,
-                    onBack = { topLevelBackStack.removeLast() },
-                    entryProvider = entryProvider {
-                        entry<Home>{
-                            ContentRed("Home screen")
-                        }
-                        entry<ChatList>{
-                            ContentGreen("Chat list screen"){
-                                Button(onClick = { topLevelBackStack.add(ChatDetail) }) {
-                                    Text("Go to conversation")
-                                }
+                    entry<ChatList>() {
+
+                        ContentGreen("Chat list screen"){
+                            Button(onClick = {
+                                navBarSceneStrategy.isNavBarVisible.value = !navBarSceneStrategy.isNavBarVisible.value
+                            }) {
+                                Text("Toggle NavBar")
                             }
                         }
-                        entry<ChatDetail>{
-                            ContentBlue("Chat detail screen")
-                        }
-                        entry<Camera>{
-                            ContentPurple("Camera screen")
-                        }
-                    },
-                )
-            }
+                    }
+                    entry<ChatDetail> {
+                        ContentBlue("Chat detail screen")
+                    }
+                    entry<Camera>(
+                        metadata = NavBarSceneStrategy.isVisible(false)
+                    ) {
+                        navBarSceneStrategy.isNavBarVisible.value = false
+
+                        ContentPurple("Camera screen")
+                    }
+                },
+            )
+
         }
     }
 }
 
-class TopLevelBackStack<T: Any>(startKey: T) {
+class TopLevelBackStack<T : Any>(startKey: T) {
 
     // Maintain a stack for each top level route
-    private var topLevelStacks : LinkedHashMap<T, SnapshotStateList<T>> = linkedMapOf(
+    private var topLevelStacks: LinkedHashMap<T, SnapshotStateList<T>> = linkedMapOf(
         startKey to mutableStateListOf(startKey)
     )
 
@@ -130,10 +144,10 @@ class TopLevelBackStack<T: Any>(startKey: T) {
             addAll(topLevelStacks.flatMap { it.value })
         }
 
-    fun addTopLevel(key: T){
+    fun addTopLevel(key: T) {
 
         // If the top level doesn't exist, add it
-        if (topLevelStacks[key] == null){
+        if (topLevelStacks[key] == null) {
             topLevelStacks.put(key, mutableStateListOf(key))
         } else {
             // Otherwise just move it to the end of the stacks
@@ -147,12 +161,12 @@ class TopLevelBackStack<T: Any>(startKey: T) {
         updateBackStack()
     }
 
-    fun add(key: T){
+    fun add(key: T) {
         topLevelStacks[topLevelKey]?.add(key)
         updateBackStack()
     }
 
-    fun removeLast(){
+    fun removeLast() {
         val removedKey = topLevelStacks[topLevelKey]?.removeLastOrNull()
         // If the removed key was a top level key, remove the associated top level stack
         topLevelStacks.remove(removedKey)
@@ -161,3 +175,40 @@ class TopLevelBackStack<T: Any>(startKey: T) {
     }
 }
 
+
+@Composable
+fun ConversationListScreen(
+    lazyListState: LazyListState,
+    onConversationClicked: (ConversationDetail) -> Unit
+
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        state = lazyListState,
+    ) {
+
+        items(10) { index ->
+            val conversationId = index + 1
+            val conversationDetail = ConversationDetail(
+                id = conversationId,
+                colorId = conversationId % colors.size
+            )
+            val backgroundColor = colors[conversationDetail.colorId]
+            ListItem(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = { onConversationClicked(conversationDetail) }),
+                headlineContent = {
+                    Text(
+                        text = "Conversation $conversationId",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
+                colors = ListItemDefaults.colors(
+                    containerColor = backgroundColor // Set container color directly
+                )
+            )
+        }
+    }
+}
