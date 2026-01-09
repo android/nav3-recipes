@@ -184,6 +184,11 @@
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes">
         </activity>
+        <activity
+            android:name=".sharedviewmodel.SharedViewModelActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Nav3Recipes">
+        </activity>
     </application>
 
 </manifest>
