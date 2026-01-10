@@ -41,7 +41,6 @@ import com.example.nav3recipes.migration.content.ScreenB1
 import com.example.nav3recipes.migration.content.ScreenC
 import com.example.nav3recipes.multiplestacks.Navigator
 import com.example.nav3recipes.multiplestacks.rememberNavigationState
-import com.example.nav3recipes.multiplestacks.toEntries
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 
 
@@ -103,7 +102,7 @@ class EndAtomicMigrationActivity : ComponentActivity() {
 
             { paddingValues ->
                 NavDisplay(
-                    entries = navigationState.toEntries(entryProvider),
+                    entries = navigationState.toDecoratedEntries(entryProvider),
                     onBack = { navigator.goBack() },
                     sceneStrategy = remember { DialogSceneStrategy() },
                     modifier = Modifier.padding(paddingValues)
