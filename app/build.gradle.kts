@@ -56,6 +56,9 @@ android {
     buildFeatures {
         compose = true
     }
+    lintOptions {
+        baseline(file("lint-baseline.xml"))
+    }
 }
 
 dependencies {
@@ -95,4 +98,5 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     testImplementation(kotlin("test"))
+    lintChecks(project(":lint-rules"))
 }
