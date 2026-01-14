@@ -16,10 +16,10 @@
 
 package com.example.nav3recipes.multiplestacks
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.Face
@@ -30,7 +30,6 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -69,6 +68,7 @@ data class NavBarItem(
 )
 
 class MultipleStacksActivity : ComponentActivity() {
+    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         setEdgeToEdgeConfig()
         super.onCreate(savedInstanceState)
@@ -103,11 +103,10 @@ class MultipleStacksActivity : ComponentActivity() {
                         )
                     }
                 }
-            }) { paddingValues ->
+            }) {
                 NavDisplay(
-                    entries = navigationState.toEntries(entryProvider),
-                    onBack = { navigator.goBack() },
-                    modifier = Modifier.padding(paddingValues)
+                    entries = navigationState.toDecoratedEntries(entryProvider),
+                    onBack = { navigator.goBack() }
                 )
             }
         }

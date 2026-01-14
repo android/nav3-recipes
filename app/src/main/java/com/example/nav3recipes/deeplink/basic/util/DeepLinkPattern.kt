@@ -5,6 +5,7 @@ import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.SerialKind
+import kotlinx.serialization.encoding.CompositeDecoder
 import java.io.Serializable
 
 /**
@@ -52,7 +53,7 @@ internal class DeepLinkPattern<T : NavKey>(
      * order matters here - path segments need to match in value and order when matching
      * requested deeplink to supported deeplink
      */
-    val pathSegments: List<PathSegment>  = buildList {
+    val pathSegments: List<PathSegment> = buildList {
         uriPattern.pathSegments.forEach { segment ->
             // first, check if it is a path arg
             var result = regexPatternFillIn.find(segment)
@@ -61,12 +62,18 @@ internal class DeepLinkPattern<T : NavKey>(
                 val argName = result.groups[1]!!.value
                 // from [T], read the primitive type of this argument to get the correct type parser
                 val elementIndex = serializer.descriptor.getElementIndex(argName)
+                if (elementIndex == CompositeDecoder.UNKNOWN_NAME) {
+                    throw IllegalArgumentException(
+                        "Path parameter '{$argName}' defined in the DeepLink $uriPattern does not exist in the Serializable class '${serializer.descriptor.serialName}'."
+                    )
+                }
+
                 val elementDescriptor = serializer.descriptor.getElementDescriptor(elementIndex)
                 // finally, add the arg name and its respective type parser to the map
-                add(PathSegment(argName, true,getTypeParser(elementDescriptor.kind)))
+                add(PathSegment(argName, true, getTypeParser(elementDescriptor.kind)))
             } else {
                 // if its not a path arg, then its just a static string path segment
-                add(PathSegment(segment,false, getTypeParser(PrimitiveKind.STRING)))
+                add(PathSegment(segment, false, getTypeParser(PrimitiveKind.STRING)))
             }
         }
     }
@@ -79,6 +86,11 @@ internal class DeepLinkPattern<T : NavKey>(
     val queryValueParsers: Map<String, TypeParser> = buildMap {
         uriPattern.queryParameterNames.forEach { paramName ->
             val elementIndex = serializer.descriptor.getElementIndex(paramName)
+            if (elementIndex == CompositeDecoder.UNKNOWN_NAME) {
+                throw IllegalArgumentException(
+                    "Query parameter '$paramName' defined in the DeepLink $uriPattern does not exist in the Serializable class '${serializer.descriptor.serialName}'."
+                )
+            }
             val elementDescriptor = serializer.descriptor.getElementDescriptor(elementIndex)
             this[paramName] = getTypeParser(elementDescriptor.kind)
         }

@@ -8,7 +8,7 @@ The app's navigation state is held in the `NavigationState` class. The state its
 
 Navigation events are handled by the `Navigator`. It updates the navigation state.
 
-The navigation state is converted into `NavEntry`s with `NavigationState.toEntries`. These entries are then displayed by `NavDisplay`. 
+The navigation state is converted into `NavEntry`s with `NavigationState.toDecoratedEntries`. These entries are then displayed by `NavDisplay`. 
 
 Key behaviors: 
 
