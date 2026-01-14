@@ -24,10 +24,10 @@ Read the [guide to deeplinking](docs/deeplink-guide.md). Upvote [this issue](htt
 
 ### Scenes
 #### Use built-in Scenes
-- **[BottomSheet](app/src/main/java/com/example/nav3recipes/bottomsheet)**: Shows how to create a BottomSheet destination.
 - **[Dialog](app/src/main/java/com/example/nav3recipes/dialog)**: Shows how to create a Dialog.
 
 #### Create custom Scenes
+- **[BottomSheet](app/src/main/java/com/example/nav3recipes/bottomsheet)**: Shows how to create a BottomSheet destination.
 - **[List-Detail Scene](app/src/main/java/com/example/nav3recipes/scenes/listdetail)**: Shows how to create a custom, list-detail layout using a `Scene` and `SceneStrategy` (see video of UI behavior below).
 - **[Two pane Scene](app/src/main/java/com/example/nav3recipes/scenes/twopane)**: Shows how to create a custom, 2-pane layout.
 
@@ -41,7 +41,7 @@ Note: If you find a bug or have a feature request for Material3 Adaptive Scenes 
 ### Animations
 - **[Animations](app/src/main/java/com/example/nav3recipes/animations)**: Shows how to override the default animations for all destinations and a single destination.
 
-### Multiple back stacks
+### Common back stack behavior
 - **[Common navigation UI](app/src/main/java/com/example/nav3recipes/commonui)**: A common navigation toolbar where each item in the toolbar navigates to a top level destination.
 - **[Multiple back stacks](app/src/main/java/com/example/nav3recipes/multiplestacks)**: Shows how to create multiple top level routes, each with its own back stack. Top level routes are displayed in a navigation bar allowing users to switch between them. State is retained for each top level route, and the navigation state persists config changes and process death.
 
