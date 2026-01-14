@@ -6,12 +6,12 @@
 The "basic" nature of Nav3 is **intentional**. While Nav2 provided a pre-packaged "box" of navigation components (like `NavController` and `NavHost`) that were difficult to replace, Nav3 focuses on providing flexible **building blocks** designed to be as "Compose-like" as possible.
 
 This approach allows developers to:
-*   Choose exactly which features (like decorators or `NavDisplay`) to include.
+*   Choose exactly which features (like `Scene`s, `NavEntryDecorator`s or a `NavDisplay`) to include.
 *   Use **recipes** as guides to implement common, but nuanced, use cases.
 *   Upvote specific recipes; popular recipes may be promoted into the Nav3 API or other libraries.
 
 ### Is Navigation 3 Compose Multiplatform (CMP) ready?
-**Yes.** The Navigation 3 runtime depends on the Compose Runtime so is supported on all platforms that the Compose runtime supports. The Navigation 3 UI depends on Compose UI so is supported on all platforms where there is a Compose UI implementation. 
+**Yes.** The Navigation 3 runtime depends on the Compose Runtime so is supported on all platforms that the Compose runtime supports. The Navigation 3 UI depends on Compose UI so is supported on all platforms where there is a Compose UI implementation. See [this article for more information](https://kotlinlang.org/docs/multiplatform/compose-navigation-3.html).
 
 ### Will Nav3 support Wear OS?
 **Yes.** The team is working with Wear OS partners to bring Nav3 to the platform soon.
@@ -19,7 +19,7 @@ This approach allows developers to:
 ### Can I nest a `NavDisplay` inside another `NavDisplay`?
 **Yes.** Since `NavDisplay` is just a composable, nesting works using standard Compose techniques.
 *   **Use Case:** This is useful if you want different **transitions** for top-level stacks (e.g., bottom bar navigation) versus deeper stack navigation.
-*   **Future Improvements:** For managing common UI elements like bottom navigation bars across screens, the team is developing **scene decorators** for version 1.1 to handle this without complex nesting.
+*   **Future Improvements:** For managing common UI elements like bottom navigation bars across screens, the team is developing a feature for version 1.1 to handle this without complex nesting.
 
 ---
 
@@ -27,7 +27,7 @@ This approach allows developers to:
 
 ### How do I share a ViewModel between two screens?
 You can achieve this in two main ways:
-1.  **Custom Entry Decorator:** A custom decorator can control a `NavEntry`'s access to one or more `ViewModel`s. For example, a decorator could create a `ViewModel` that is shared between all entries on a back stack. Alternatively, an child entry could get access to a parent's view model by specifying the id of the parent in `metadata`. The custom decorator could then read that ID and provide the child entry with the parent's `ViewModel`.  
+1.  **Custom Entry Decorator:** A custom decorator can control a `NavEntry`'s access to one or more `ViewModel`s. For example, a decorator could create a `ViewModel` that is shared between all entries on a back stack. Alternatively, a child entry could get access to a parent's view model by specifying the id of the parent in `metadata`. The custom decorator could then read that ID and provide the child entry with the parent's `ViewModel`. See [this recipe]() for an example.
 2.  **Hoisted State:** Use a shared state object accessible by the Nav entries.
 
 *Note:* Instead of looking for a direct 1:1 replacement for Nav2's "NavGraph scoped ViewModels," consider hoisting state to a backstack-level decorator that provides context to all screens in that stack.
@@ -36,7 +36,7 @@ You can achieve this in two main ways:
 The team decided to give control back to the developers. While most apps should use it, allowing manual placement ensures you can control **where** the state is held or substitute it with your own implementation if necessary.
 
 ### Why is `SaveStateConfiguration` needed?
-`SaveStateConfiguration` is used to store serializable values. A common use case is in multi-module apps where you need to inject a specific serializer for module-specific keys. In Nav3, the backstack primarily stores keys (identity), while actual state is stored in **decorators**.
+`SavedStateConfiguration` is mainly used to provide a [SerializersModule](https://kotlinlang.org/api/kotlinx.serialization/kotlinx-serialization-core/kotlinx.serialization.modules/-serializers-module/) for [contextual](https://kotlinlang.org/api/kotlinx.serialization/kotlinx-serialization-core/kotlinx.serialization/-contextual-serializer/) or [polymorphic](https://kotlinlang.org/api/kotlinx.serialization/kotlinx-serialization-core/kotlinx.serialization/-polymorphic-serializer/) serializers. A common case is a multi-module app with an unsealed abstract class that is inherited by classes in other modules. In this case, the modules need to register their subclasses with the `SerializersModule` and provide that `SerializersModule` to `SavedStateConfiguration` so that `SavedState` knows how to serialize and deserialize the class.
 
 ---
 
@@ -59,7 +59,8 @@ Not currently, as overlay scenes cannot currently signal animations back to the 
 ## Implementation Details
 
 ### When are Deep Links coming to Nav3?
-Deep link support is already available via **recipes** and a comprehensive guide. Because developers own the backstack in Nav3, deep linking is simply a matter of parsing the intent and building the correct backstack manually.
+Deep link support is already available via [**recipes**](https://github.com/android/nav3-recipes/tree/main?tab=readme-ov-file#deep-links) and [a comprehensive guide](https://github.com/android/nav3-recipes/blob/main/docs/deeplink-guide.md). Because developers own the backstack in Nav3, deep linking is simply a matter of parsing the intent and building the correct backstack manually.
 
 ### How can I combine different strategies (e.g., ListDetail, Dialog, BottomSheet)?
 You can use the **`then` infix operator** to chain multiple strategies together. This creates a single strategy that evaluates the individual strategies in order.
+
