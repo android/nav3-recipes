@@ -64,6 +64,7 @@ import com.example.nav3recipes.scenes.listdetail.ListDetailActivity
 import com.example.nav3recipes.scenes.twopane.TwoPaneActivity
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 import com.example.nav3recipes.deeplink.advanced.AdvancedCreateDeepLinkActivity
+import com.example.nav3recipes.multiplestacksandauthentication.MultipleStacksAndAuthenticationActivity
 
 /**
  * Activity to show all available recipes and allow users to launch each one.
@@ -97,6 +98,7 @@ private val recipes = listOf(
     Heading("Common use cases"),
     Recipe("Common UI", CommonUiActivity::class.java),
     Recipe("Multiple Stacks", MultipleStacksActivity::class.java),
+    Recipe("Multiple Stacks And Authentication", MultipleStacksAndAuthenticationActivity::class.java),
     Recipe("Conditional navigation", ConditionalActivity::class.java),
 
     Heading("Architecture"),
