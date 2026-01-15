@@ -137,12 +137,17 @@
             android:name=".multiplestacks.MultipleStacksActivity"
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes"/>
-        <activity
-            android:name=".deeplink.basic.CreateDeepLinkActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Nav3Recipes">
-        </activity>
-        <activity
+		<activity
+			android:name=".deeplink.basic.CreateDeepLinkActivity"
+			android:exported="true"
+			android:theme="@style/Theme.Nav3Recipes">
+		</activity>
+		<activity
+			android:name=".supportingpane.SupportingPaneActivity"
+			android:exported="true"
+			android:theme="@style/Theme.Nav3Recipes">
+		</activity>
+		<activity
             android:name=".deeplink.basic.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes">
