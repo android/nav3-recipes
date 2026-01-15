@@ -138,6 +138,10 @@
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes"/>
         <activity
+            android:name=".multiplestacksandauthentication.MultipleStacksAndAuthenticationActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Nav3Recipes"/>
+        <activity
             android:name=".deeplink.basic.CreateDeepLinkActivity"
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes">
