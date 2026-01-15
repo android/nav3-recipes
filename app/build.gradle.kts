@@ -26,7 +26,7 @@ plugins {
 }
 
 kotlin{
-    compilerOptions{
+    compilerOptions {
         jvmTarget = JvmTarget.fromTarget("11")
     }
 }
