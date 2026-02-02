@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.ProvidedValue
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.mutableStateMapOf
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.BUFFERED
@@ -57,7 +58,7 @@ class ResultEventBus {
     /**
      * Map from the result key to a channel of results.
      */
-    val channelMap: MutableMap<String, Channel<Any?>> = mutableMapOf()
+    val channelMap = mutableStateMapOf<String, Channel<Any?>>()
 
     /**
      * Provides a flow for the given resultKey.
