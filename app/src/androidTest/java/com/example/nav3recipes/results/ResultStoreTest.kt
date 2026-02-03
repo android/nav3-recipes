@@ -35,17 +35,17 @@ class ResultStoreTest {
                 sceneStrategy = dialogStrategy,
                 entryProvider = entryProvider {
                     entry<Home> {
-                        val result = resultStore.getResultState<String?>("key")
-                        Text(result ?: "No Result")
+                        val result = resultStore.getResultState<String?>(key)
+                        Text(result ?: noResult)
                     }
                     entry<Dialog>(metadata = DialogSceneStrategy.dialog()) {
                         Button(onClick = {
                             resultStore.setResult<String>(
-                                resultKey = "key",
-                                result = "Result from Dialog"
+                                resultKey = key,
+                                result = resultFromDialog
                             )
                         }) {
-                            Text("Send Result")
+                            Text(sendResult)
                         }
                     }
                 }
@@ -54,7 +54,7 @@ class ResultStoreTest {
 
         composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithText("No Result").assertIsDisplayed()
+        composeTestRule.onNodeWithText(noResult).assertIsDisplayed()
 
         composeTestRule.runOnIdle {
             backStack.add(Dialog)
@@ -63,7 +63,7 @@ class ResultStoreTest {
         composeTestRule.waitForIdle()
 
         // Send Result
-        composeTestRule.onNodeWithText("Send Result").performClick()
+        composeTestRule.onNodeWithText(sendResult).performClick()
 
         composeTestRule.runOnIdle {
             backStack.removeLastOrNull()
@@ -72,6 +72,8 @@ class ResultStoreTest {
         composeTestRule.waitForIdle()
 
         // Verify Result
-        composeTestRule.onNodeWithText("Result from Dialog").assertIsDisplayed()
+        composeTestRule.onNodeWithText(resultFromDialog).assertIsDisplayed()
     }
 }
+
+private const val key = "key"

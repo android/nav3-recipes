@@ -40,7 +40,7 @@ class ResultEventBusTest {
                 sceneStrategy = dialogStrategy,
                 entryProvider = entryProvider {
                     entry<Home> {
-                        var result by remember { mutableStateOf("No Result") }
+                        var result by remember { mutableStateOf(noResult) }
                         ResultEffect<String>(resultEventBus) {
                             result = it
                         }
@@ -48,9 +48,9 @@ class ResultEventBusTest {
                     }
                     entry<Dialog>(metadata = DialogSceneStrategy.dialog()) {
                         Button(onClick = {
-                            resultEventBus.sendResult<String>(result = "Result from Dialog")
+                            resultEventBus.sendResult<String>(result = resultFromDialog)
                         }) {
-                            Text("Send Result")
+                            Text(sendResult)
                         }
                     }
                 }
@@ -59,7 +59,7 @@ class ResultEventBusTest {
 
         composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithText("No Result").assertIsDisplayed()
+        composeTestRule.onNodeWithText(noResult).assertIsDisplayed()
 
         composeTestRule.runOnIdle {
             backStack.add(Dialog)
@@ -68,7 +68,7 @@ class ResultEventBusTest {
         composeTestRule.waitForIdle()
 
         // Send Result
-        composeTestRule.onNodeWithText("Send Result").performClick()
+        composeTestRule.onNodeWithText(sendResult).performClick()
 
         composeTestRule.runOnIdle {
             backStack.removeLastOrNull()
@@ -77,7 +77,7 @@ class ResultEventBusTest {
         composeTestRule.waitForIdle()
 
         // Verify Result
-        composeTestRule.onNodeWithText("Result from Dialog").assertIsDisplayed()
+        composeTestRule.onNodeWithText(resultFromDialog).assertIsDisplayed()
     }
 }
 
@@ -86,3 +86,7 @@ internal data object Home : NavKey
 
 @Serializable
 internal data object Dialog : NavKey
+
+internal const val noResult = "No Result"
+internal const val resultFromDialog = "Result from Dialog"
+internal const val sendResult = "Send Result"
