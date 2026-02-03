@@ -80,6 +80,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.navigation2)
+    implementation(libs.androidx.fragment.compose)
     implementation(project(":common"))
 
     implementation(libs.hilt.android)
