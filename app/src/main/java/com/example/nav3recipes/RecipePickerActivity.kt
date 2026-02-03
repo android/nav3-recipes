@@ -41,6 +41,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.dropUnlessResumed
 import com.example.nav3recipes.animations.AnimatedActivity
 import com.example.nav3recipes.basic.BasicActivity
 import com.example.nav3recipes.basicdsl.BasicDslActivity
@@ -153,9 +154,9 @@ class RecipePickerActivity : ComponentActivity() {
                     is Recipe -> {
                         ListItem(
                             headlineContent = { Text(item.name) },
-                            modifier = Modifier.clickable {
+                            modifier = Modifier.clickable(onClick = dropUnlessResumed {
                                 item.start()
-                            }
+                            })
                         )
                     }
                     is Heading -> {

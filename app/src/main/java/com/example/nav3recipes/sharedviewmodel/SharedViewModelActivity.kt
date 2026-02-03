@@ -26,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -71,10 +72,10 @@ class SharedViewModelActivity : ComponentActivity() {
                         val viewModel = viewModel(modelClass = CounterViewModel::class)
 
                         ContentRed("Parent screen") {
-                            Button(onClick = { viewModel.count++ }) {
+                            Button(onClick = dropUnlessResumed { viewModel.count++ }) {
                                 Text("Count: ${viewModel.count}")
                             }
-                            Button(onClick = { backStack.add(ChildScreen) }) {
+                            Button(onClick = dropUnlessResumed { backStack.add(ChildScreen) }) {
                                 Text("View child screen")
                             }
                         }
@@ -88,10 +89,10 @@ class SharedViewModelActivity : ComponentActivity() {
                         val parentViewModel = viewModel(modelClass = CounterViewModel::class)
 
                         ContentBlue("Child screen") {
-                            Button(onClick = { parentViewModel.count++ }) {
+                            Button(onClick = dropUnlessResumed { parentViewModel.count++ }) {
                                 Text("Parent count: ${parentViewModel.count}")
                             }
-                            Button(onClick = {
+                            Button(onClick = dropUnlessResumed {
                                 backStack.add(StandaloneScreen)
                             }) {
                                 Text("View standalone screen")
@@ -102,7 +103,7 @@ class SharedViewModelActivity : ComponentActivity() {
                         val viewModel = viewModel(modelClass = CounterViewModel::class)
 
                         ContentGreen("Standalone screen") {
-                            Button(onClick = {
+                            Button(onClick = dropUnlessResumed {
                                 viewModel.count++
                             }) {
                                 Text("Count: ${viewModel.count}")

@@ -14,6 +14,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -50,14 +51,14 @@ class AnimatedActivity : ComponentActivity() {
                 entryProvider = entryProvider {
                     entry<ScreenA> {
                         ContentOrange("This is Screen A") {
-                            Button(onClick = { backStack.add(ScreenB) }) {
+                            Button(onClick = dropUnlessResumed { backStack.add(ScreenB) }) {
                                 Text("Go to Screen B")
                             }
                         }
                     }
                     entry<ScreenB> {
                         ContentMauve("This is Screen B") {
-                            Button(onClick = { backStack.add(ScreenC) }) {
+                            Button(onClick = dropUnlessResumed { backStack.add(ScreenC) }) {
                                 Text("Go to Screen C")
                             }
                         }

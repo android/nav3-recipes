@@ -40,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.dropUnlessResumed
 import com.example.nav3recipes.ui.theme.colors
 
 @Composable
@@ -59,7 +60,9 @@ fun ConversationListScreen(
             ListItem(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable(onClick = { onConversationClicked(conversationDetail) }),
+                    .clickable(onClick = dropUnlessResumed {
+                        onConversationClicked(conversationDetail)
+                    }),
                 headlineContent = {
                     Text(
                         text = "Conversation $conversationId",
@@ -110,7 +113,7 @@ fun ConversationDetailScreen(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = onProfileClicked) {
+            Button(onClick = dropUnlessResumed(block = onProfileClicked)) {
                 Text("View Profile")
             }
         }

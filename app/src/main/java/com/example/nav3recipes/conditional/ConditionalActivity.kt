@@ -29,6 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSerializable
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -100,10 +101,10 @@ class ConditionalActivity : ComponentActivity() {
                     entry<Home> {
                         ContentGreen("Welcome to Nav3. Logged in? ${isLoggedIn}") {
                             Column {
-                                Button(onClick = { navigator.navigate(Profile) }) {
+                                Button(onClick = dropUnlessResumed { navigator.navigate(Profile) }) {
                                     Text("Profile")
                                 }
-                                Button(onClick = { navigator.navigate(Login()) }) {
+                                Button(onClick = dropUnlessResumed { navigator.navigate(Login()) }) {
                                     Text("Login")
                                 }
                             }
@@ -111,7 +112,7 @@ class ConditionalActivity : ComponentActivity() {
                     }
                     entry<Profile> {
                         ContentBlue("Profile screen (only accessible once logged in)") {
-                            Button(onClick = {
+                            Button(onClick = dropUnlessResumed {
                                 isLoggedIn = false
                                 navigator.navigate(Home)
                             }) {
@@ -121,7 +122,7 @@ class ConditionalActivity : ComponentActivity() {
                     }
                     entry<Login> { key ->
                         ContentYellow("Login screen. Logged in? $isLoggedIn") {
-                            Button(onClick = {
+                            Button(onClick = dropUnlessResumed {
                                 isLoggedIn = true
                                 key.redirectToKey?.let { targetKey ->
                                     backStack.remove(key)

@@ -31,6 +31,7 @@ import androidx.compose.material3.adaptive.navigation3.rememberSupportingPaneSce
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -85,7 +86,7 @@ class MaterialSupportingPaneActivity : ComponentActivity() {
                         metadata = SupportingPaneSceneStrategy.mainPane()
                     ) {
                         ContentRed("Video content") {
-                            Button(onClick = {
+                            Button(onClick = dropUnlessResumed {
                                 backStack.add(RelatedVideos)
                             }) {
                                 Text("View related videos")
@@ -97,7 +98,7 @@ class MaterialSupportingPaneActivity : ComponentActivity() {
                     ) {
                         ContentBlue("Related videos") {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Button(onClick = {
+                                Button(onClick = dropUnlessResumed {
                                     backStack.add(Profile)
                                 }) {
                                     Text("View profile")

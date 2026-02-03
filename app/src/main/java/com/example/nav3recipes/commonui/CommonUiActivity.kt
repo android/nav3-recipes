@@ -36,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.example.nav3recipes.content.ContentBlue
@@ -92,7 +93,9 @@ class CommonUiActivity : ComponentActivity() {
                         }
                         entry<ChatList>{
                             ContentGreen("Chat list screen"){
-                                Button(onClick = { topLevelBackStack.add(ChatDetail) }) {
+                                Button(onClick = dropUnlessResumed {
+                                    topLevelBackStack.add(ChatDetail)
+                                }) {
                                     Text("Go to conversation")
                                 }
                             }

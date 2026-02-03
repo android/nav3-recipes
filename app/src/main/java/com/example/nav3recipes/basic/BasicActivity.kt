@@ -23,6 +23,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
 import com.example.nav3recipes.content.ContentBlue
@@ -48,7 +49,7 @@ class BasicActivity : ComponentActivity() {
                     when (key) {
                         is RouteA -> NavEntry(key) {
                             ContentGreen("Welcome to Nav3") {
-                                Button(onClick = {
+                                Button(onClick = dropUnlessResumed {
                                     backStack.add(RouteB("123"))
                                 }) {
                                     Text("Click to navigate")
