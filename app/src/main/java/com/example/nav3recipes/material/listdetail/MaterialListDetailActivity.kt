@@ -30,6 +30,7 @@ import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneSt
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -83,7 +84,7 @@ class MaterialListDetailActivity : ComponentActivity() {
                         )
                     ) {
                         ContentRed("Welcome to Nav3") {
-                            Button(onClick = {
+                            Button(onClick = dropUnlessResumed {
                                 backStack.add(ConversationDetail("ABC"))
                             }) {
                                 Text("View conversation")
@@ -95,7 +96,7 @@ class MaterialListDetailActivity : ComponentActivity() {
                     ) { conversation ->
                         ContentBlue("Conversation ${conversation.id} ") {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Button(onClick = {
+                                Button(onClick = dropUnlessResumed {
                                     backStack.add(Profile)
                                 }) {
                                     Text("View profile")

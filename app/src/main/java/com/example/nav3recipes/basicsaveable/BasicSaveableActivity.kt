@@ -21,6 +21,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -51,7 +52,7 @@ class BasicSaveableActivity : ComponentActivity() {
                     when (key) {
                         is RouteA -> NavEntry(key) {
                             ContentGreen("Welcome to Nav3") {
-                                Button(onClick = {
+                                Button(onClick = dropUnlessResumed {
                                     backStack.add(RouteB("123"))
                                 }) {
                                     Text("Click to navigate")

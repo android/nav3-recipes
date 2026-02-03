@@ -21,6 +21,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.lifecycle.compose.dropUnlessResumed
 import com.example.nav3recipes.content.ContentGreen
 import com.example.nav3recipes.content.ContentMauve
 import com.example.nav3recipes.content.ContentPink
@@ -32,10 +33,10 @@ import com.example.nav3recipes.content.ContentRed
 fun ScreenA(onSubRouteClick: () -> Unit, onDialogClick: () -> Unit) {
     ContentRed("Route A title") {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Button(onClick = onSubRouteClick) {
+            Button(onClick = dropUnlessResumed(block = onSubRouteClick)) {
                 Text("Go to A1")
             }
-            Button(onClick = onDialogClick) {
+            Button(onClick = dropUnlessResumed(block = onDialogClick)) {
                 Text("Open dialog D")
             }
         }
@@ -54,10 +55,10 @@ fun ScreenB(
 ) {
     ContentGreen("Route B title") {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Button(onClick = { onDetailClick("ABC") }) {
+            Button(onClick = dropUnlessResumed { onDetailClick("ABC") }) {
                 Text("Go to B1")
             }
-            Button(onClick = onDialogClick) {
+            Button(onClick = dropUnlessResumed(block = onDialogClick)) {
                 Text("Open dialog D")
             }
         }
@@ -73,7 +74,7 @@ fun ScreenB1(id: String) {
 fun ScreenC(onDialogClick: () -> Unit) {
     ContentMauve("Route C title") {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Button(onClick = onDialogClick) {
+            Button(onClick = dropUnlessResumed(block = onDialogClick)) {
                 Text("Open dialog D")
             }
         }

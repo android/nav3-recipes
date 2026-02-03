@@ -24,6 +24,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.example.nav3recipes.content.ContentGreen
@@ -39,7 +40,7 @@ fun EntryProviderScope<NavKey>.featureASection(
     entry<RouteA> {
         ContentRed("Route A") {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Button(onClick = onSubRouteClick) {
+                Button(onClick = dropUnlessResumed(block = onSubRouteClick)) {
                     Text("Go to A1")
                 }
             }
@@ -51,7 +52,7 @@ fun EntryProviderScope<NavKey>.featureASection(
                 mutableIntStateOf(0)
             }
 
-            Button(onClick = { count++ }) {
+            Button(onClick = dropUnlessResumed { count++ }) {
                 Text("Value: $count")
             }
         }
@@ -64,7 +65,7 @@ fun EntryProviderScope<NavKey>.featureBSection(
     entry<RouteB> {
         ContentGreen("Route B") {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Button(onClick = onSubRouteClick) {
+                Button(onClick = dropUnlessResumed(block = onSubRouteClick)) {
                     Text("Go to B1")
                 }
             }
@@ -75,7 +76,7 @@ fun EntryProviderScope<NavKey>.featureBSection(
             var count by rememberSaveable {
                 mutableIntStateOf(0)
             }
-            Button(onClick = { count++ }) {
+            Button(onClick = dropUnlessResumed { count++ }) {
                 Text("Value: $count")
             }
         }
@@ -88,7 +89,7 @@ fun EntryProviderScope<NavKey>.featureCSection(
     entry<RouteC> {
         ContentMauve("Route C") {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Button(onClick = onSubRouteClick) {
+                Button(onClick = dropUnlessResumed(block = onSubRouteClick)) {
                     Text("Go to C1")
                 }
             }
@@ -100,7 +101,7 @@ fun EntryProviderScope<NavKey>.featureCSection(
                 mutableIntStateOf(0)
             }
 
-            Button(onClick = { count++ }) {
+            Button(onClick = dropUnlessResumed { count++ }) {
                 Text("Value: $count")
             }
         }
