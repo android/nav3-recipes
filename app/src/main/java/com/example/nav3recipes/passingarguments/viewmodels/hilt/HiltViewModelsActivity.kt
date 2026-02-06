@@ -27,6 +27,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
@@ -70,7 +71,7 @@ class HiltViewModelsActivity : ComponentActivity() {
                         ContentGreen("Welcome to Nav3") {
                             LazyColumn {
                                 items(10) { i ->
-                                    Button(onClick = {
+                                    Button(onClick = dropUnlessResumed {
                                         backStack.add(RouteB("$i"))
                                     }) {
                                         Text("$i")

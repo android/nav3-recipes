@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.core.net.toUri
+import androidx.lifecycle.compose.dropUnlessResumed
 import com.example.nav3recipes.deeplink.common.EntryScreen
 import com.example.nav3recipes.deeplink.common.LIST_FIRST_NAMES
 import com.example.nav3recipes.deeplink.common.LIST_LOCATIONS
@@ -86,7 +87,7 @@ class AdvancedCreateDeepLinkActivity: ComponentActivity() {
                 TextContent(intentString)
 
                 // deeplink to target
-                PaddedButton("Deeplink Away!") {
+                PaddedButton("Deeplink Away!", onClick = dropUnlessResumed {
                     val intent = Intent().apply {
                         data = finalUrl.toUri()
                         action = Intent.ACTION_VIEW
@@ -96,7 +97,7 @@ class AdvancedCreateDeepLinkActivity: ComponentActivity() {
                     }
 
                     startActivity(intent)
-                }
+                })
             }
         }
     }

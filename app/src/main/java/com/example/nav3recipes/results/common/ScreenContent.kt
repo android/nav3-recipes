@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.dropUnlessResumed
 import com.example.nav3recipes.content.ContentBlue
 import com.example.nav3recipes.content.ContentGreen
 
@@ -40,7 +41,7 @@ fun HomeScreen(
         }
 
         Spacer(Modifier.height(16.dp))
-        Button(onClick = onNext) {
+        Button(onClick = dropUnlessResumed(block = onNext)) {
             Text("Tell us about yourself")
         }
     }
@@ -65,7 +66,7 @@ fun PersonDetailsScreen(
         )
 
         Button(
-            onClick = {
+            onClick = dropUnlessResumed {
                 val person = Person(
                     name = nameTextState.text.toString(),
                     favoriteColor = favoriteColorTextState.text.toString()

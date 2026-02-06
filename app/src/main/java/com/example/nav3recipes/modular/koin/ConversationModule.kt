@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.dropUnlessResumed
 import com.example.nav3recipes.ui.theme.colors
 import org.koin.androidx.scope.dsl.activityRetainedScope
 import org.koin.core.annotation.KoinExperimentalAPI
@@ -66,7 +67,9 @@ private fun ConversationListScreen(
             ListItem(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable(onClick = { onConversationClicked(conversationDetail) }),
+                    .clickable(onClick = dropUnlessResumed {
+                        onConversationClicked(conversationDetail)
+                    }),
                 headlineContent = {
                     Text(
                         text = "Conversation $conversationId",
@@ -101,7 +104,7 @@ private fun ConversationDetailScreen(
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = onProfileClicked) {
+        Button(onClick = dropUnlessResumed(block = onProfileClicked)) {
             Text("View Profile")
         }
     }

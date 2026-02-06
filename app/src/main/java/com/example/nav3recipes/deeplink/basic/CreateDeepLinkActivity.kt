@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.core.net.toUri
+import androidx.lifecycle.compose.dropUnlessResumed
 import com.example.nav3recipes.deeplink.common.PaddedButton
 import com.example.nav3recipes.deeplink.common.EMPTY
 import com.example.nav3recipes.deeplink.common.EntryScreen
@@ -149,7 +150,7 @@ class CreateDeepLinkActivity : ComponentActivity() {
                 val finalUrl = "${PATH_BASE}/${selectedPath.value}$arguments"
                 TextContent("Final url:\n$finalUrl")
                 // deeplink to target
-                PaddedButton("Deeplink Away!") {
+                PaddedButton("Deeplink Away!", onClick = dropUnlessResumed {
                     val intent = Intent(
                         this@CreateDeepLinkActivity,
                         MainActivity::class.java
@@ -157,7 +158,7 @@ class CreateDeepLinkActivity : ComponentActivity() {
                     // start activity with the url
                     intent.data = finalUrl.toUri()
                     startActivity(intent)
-                }
+                })
             }
         }
     }

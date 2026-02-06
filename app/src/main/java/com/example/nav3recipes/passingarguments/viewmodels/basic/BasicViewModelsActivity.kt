@@ -27,6 +27,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
@@ -64,7 +65,7 @@ class BasicViewModelsActivity : ComponentActivity() {
                         ContentGreen("Welcome to Nav3") {
                             LazyColumn {
                                 items(10) { i ->
-                                    Button(onClick = {
+                                    Button(onClick = dropUnlessResumed {
                                         backStack.add(RouteB("$i"))
                                     }) {
                                         Text("$i")
