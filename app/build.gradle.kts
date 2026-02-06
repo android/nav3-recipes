@@ -25,9 +25,10 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
-kotlin {
-    compilerOptions {
-        jvmTarget = JvmTarget.fromTarget("11")
+kotlin{
+    compilerOptions{
+//        jvmTarget = JvmTarget.fromTarget("11")
+        jvmTarget = JvmTarget.JVM_11
     }
 }
 android {
