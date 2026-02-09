@@ -34,6 +34,7 @@ data class ConversationDetail(val id: Int) {
         get() = colors[id % colors.size]
 }
 
+// IMPL
 @OptIn(KoinExperimentalAPI::class)
 val conversationModule = module {
     activityRetainedScope {
