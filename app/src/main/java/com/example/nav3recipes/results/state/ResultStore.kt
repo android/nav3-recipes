@@ -21,6 +21,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.ProvidedValue
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -69,7 +70,7 @@ class ResultStore {
     /**
      * Map from the result key to a mutable state of the result.
      */
-    val resultStateMap: MutableMap<String, MutableState<Any?>> = mutableMapOf()
+    val resultStateMap = mutableStateMapOf<String, MutableState<Any?>>()
 
     /**
      * Retrieves the current result of the given resultKey.
