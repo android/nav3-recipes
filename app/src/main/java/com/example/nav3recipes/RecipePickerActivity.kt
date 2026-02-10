@@ -63,6 +63,7 @@ import com.example.nav3recipes.results.event.ResultEventActivity
 import com.example.nav3recipes.results.state.ResultStateActivity
 import com.example.nav3recipes.scenes.listdetail.ListDetailActivity
 import com.example.nav3recipes.scenes.twopane.TwoPaneActivity
+import com.example.nav3recipes.sharedviewmodel.SharedViewModelActivity
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 import com.example.nav3recipes.deeplink.advanced.AdvancedCreateDeepLinkActivity
 
@@ -99,6 +100,7 @@ private val recipes = listOf(
     Recipe("Common UI", CommonUiActivity::class.java),
     Recipe("Multiple Stacks", MultipleStacksActivity::class.java),
     Recipe("Conditional navigation", ConditionalActivity::class.java),
+    Recipe("Shared ViewModel", SharedViewModelActivity::class.java),
 
     Heading("Architecture"),
     Recipe("Hilt - Modular Navigation", HiltModularActivity::class.java),
