@@ -29,11 +29,13 @@ import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.metadata
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.example.nav3recipes.content.ContentBase
 import com.example.nav3recipes.content.ContentGreen
 import com.example.nav3recipes.content.ContentRed
+import com.example.nav3recipes.scenes.twopane.TwoPaneScene.Companion.twoPane
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 import com.example.nav3recipes.ui.theme.colors
 import kotlinx.serialization.Serializable
@@ -63,7 +65,9 @@ class TwoPaneActivity : ComponentActivity() {
                 sceneStrategy = twoPaneStrategy,
                 entryProvider = entryProvider {
                     entry<Home>(
-                        metadata = TwoPaneScene.twoPane()
+                        metadata = metadata {
+                            twoPane()
+                        }
                     ) {
                         ContentRed("Welcome to Nav3") {
                             Button(onClick = { backStack.addProductRoute(1) }) {
@@ -72,7 +76,9 @@ class TwoPaneActivity : ComponentActivity() {
                         }
                     }
                     entry<Product>(
-                        metadata = TwoPaneScene.twoPane()
+                        metadata = metadata {
+                            twoPane()
+                        }
                     ) { product ->
                         ContentBase(
                             "Product ${product.id} ",

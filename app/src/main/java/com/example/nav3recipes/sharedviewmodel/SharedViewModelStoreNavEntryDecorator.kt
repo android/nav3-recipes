@@ -1,5 +1,3 @@
-package com.example.nav3recipes.sharedviewmodel
-
 /*
  * Copyright 2025 The Android Open Source Project
  *
@@ -16,6 +14,7 @@ package com.example.nav3recipes.sharedviewmodel
  * limitations under the License.
  */
 
+package com.example.nav3recipes.sharedviewmodel
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -36,8 +35,11 @@ import androidx.lifecycle.viewmodel.MutableCreationExtras
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation3.runtime.MetadataScope
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavEntryDecorator
+import androidx.navigation3.runtime.NavMetadataKey
+import androidx.navigation3.runtime.get
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.compose.LocalSavedStateRegistryOwner
 
@@ -100,7 +102,9 @@ class SharedViewModelStoreNavEntryDecorator<T : Any>(
         decorate = { entry ->
 
             // If the entry indicates it has a parent, use its parent's ViewModelStore.
-            val contentKey = entry.metadata[PARENT_CONTENT_KEY] ?: entry.contentKey
+            val contentKey =
+                entry.metadata[ViewModelStoreKey]
+                    ?: entry.contentKey
             val viewModelStore =
                 viewModelStore.getEntryViewModel().viewModelStoreForKey(contentKey)
 
@@ -140,18 +144,18 @@ class SharedViewModelStoreNavEntryDecorator<T : Any>(
         },
     ) {
 
-        companion object {
-
-            private const val PARENT_CONTENT_KEY = "shared_decorator_parent_content_key"
-
-            /**
-             * Use this function to specify a `NavEntry`'s parent. The parent's
-             * `ViewModelStoreOwner` will be supplied using `LocalViewModelStoreOwner` rather than
-             * creating a new `ViewModelStoreOwner` for this `NavEntry`.
-             */
-            fun parent(contentKey: Any) = mapOf(PARENT_CONTENT_KEY to contentKey)
+    companion object {
+        /**
+         * Use this function to specify a `NavEntry`'s parent. The parent's
+         * `ViewModelStoreOwner` will be supplied using `LocalViewModelStoreOwner` rather than
+         * creating a new `ViewModelStoreOwner` for this `NavEntry`.
+         */
+        fun MetadataScope.viewModelStoreKey(contentKey: Any) {
+            put(ViewModelStoreKey, contentKey)
         }
+    }
 
+    object ViewModelStoreKey : NavMetadataKey<Any>
 }
 
 private class EntryViewModel : ViewModel() {

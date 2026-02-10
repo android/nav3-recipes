@@ -22,6 +22,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheetProperties
 import androidx.compose.material3.Text
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -30,8 +31,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.metadata
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
+import com.example.nav3recipes.bottomsheet.BottomSheetSceneStrategy.Companion.bottomSheet
 import com.example.nav3recipes.content.ContentBlue
 import com.example.nav3recipes.content.ContentGreen
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
@@ -68,7 +71,9 @@ class BottomSheetActivity : ComponentActivity() {
                         }
                     }
                     entry<RouteB>(
-                        metadata = BottomSheetSceneStrategy.bottomSheet()
+                        metadata = metadata {
+                            bottomSheet()
+                        }
                     ) { key ->
                         ContentBlue(
                             title = "Route id: ${key.id}",
