@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 
@@ -16,10 +15,8 @@ class MyCustomFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return FrameLayout(requireContext()).apply {
-            addView(TextView(requireContext()).apply {
-                text = "My Fragment"
-            })
+        return TextView(requireContext()).apply {
+            text = "My Fragment"
         }
     }
 }
