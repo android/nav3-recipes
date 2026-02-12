@@ -65,6 +65,9 @@ Note: If you find a bug or have a feature request for Material3 Adaptive Scenes 
 - **[Returning Results as Events](app/src/main/java/com/example/nav3recipes/results/event)**: Returning results as events to content in another NavEntry.
 - **[Returning Results as State](app/src/main/java/com/example/nav3recipes/results/state)**: Returning results as state stored in a CompositionLocal.
 
+### Interop
+- **[Fragment and View Interop](app/src/main/java/com/example/nav3recipes/interop)**: Demonstrates how to use Fragment and Views in Navigation3.
+
 ### Future recipes
 The most upvoted [recipe requests]([url](https://github.com/android/nav3-recipes/issues?q=is%3Aissue%20state%3Aopen%20label%3Arecipe-request)) will be considered for implementation. Don't see your recipe? [File a request for one here](https://github.com/android/nav3-recipes/issues/new?template=1-recipe-request.md)
 

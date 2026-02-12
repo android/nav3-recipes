@@ -66,6 +66,7 @@ import com.example.nav3recipes.scenes.twopane.TwoPaneActivity
 import com.example.nav3recipes.sharedviewmodel.SharedViewModelActivity
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 import com.example.nav3recipes.deeplink.advanced.AdvancedCreateDeepLinkActivity
+import com.example.nav3recipes.interop.InteropActivity
 
 /**
  * Activity to show all available recipes and allow users to launch each one.
@@ -118,6 +119,9 @@ private val recipes = listOf(
     Heading("Deeplink"),
     Recipe("Parse Intent", CreateDeepLinkActivity::class.java),
     Recipe("Synthetic BackStack", AdvancedCreateDeepLinkActivity::class.java),
+
+    Heading("Interop"),
+    Recipe("Fragment and View Interop", InteropActivity::class.java),
 )
 
 class RecipePickerActivity : ComponentActivity() {

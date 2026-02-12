@@ -24,6 +24,7 @@ lifecycleRuntimeKtx = "2.10.0"
 lifecycleViewmodel = "2.10.0"
 activityCompose = "1.12.0"
 composeBom = "2025.11.00"
+fragment =  "1.8.9"
 navigation2 = "2.9.6"
 navigation3 = "1.0.0"
 material3 = "1.4.0"
@@ -51,6 +52,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3",
 androidx-material3-windowsizeclass = { group = "androidx.compose.material3", name = "material3-window-size-class", version.ref = "material3" }
 androidx-adaptive-layout = { group = "androidx.compose.material3.adaptive", name = "adaptive-layout" }
 androidx-hilt-navigation-compose         = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+androidx-fragment-compose = { module = "androidx.fragment:fragment-compose", version.ref = "fragment" }
 androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycleViewmodel" }
 androidx-navigation2 = { module = "androidx.navigation:navigation-compose", version.ref = "navigation2" }
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
