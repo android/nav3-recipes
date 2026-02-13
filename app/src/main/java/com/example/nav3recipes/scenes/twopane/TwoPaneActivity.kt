@@ -19,6 +19,8 @@ package com.example.nav3recipes.scenes.twopane
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
@@ -57,46 +59,49 @@ class TwoPaneActivity : ComponentActivity() {
             val backStack = rememberNavBackStack(Home)
             val twoPaneStrategy = rememberTwoPaneSceneStrategy<NavKey>()
 
-            NavDisplay(
-                backStack = backStack,
-                onBack = { backStack.removeLastOrNull() },
-                sceneStrategy = twoPaneStrategy,
-                entryProvider = entryProvider {
-                    entry<Home>(
-                        metadata = TwoPaneScene.twoPane()
-                    ) {
-                        ContentRed("Welcome to Nav3") {
-                            Button(onClick = { backStack.addProductRoute(1) }) {
-                                Text("View the first product")
-                            }
-                        }
-                    }
-                    entry<Product>(
-                        metadata = TwoPaneScene.twoPane()
-                    ) { product ->
-                        ContentBase(
-                            "Product ${product.id} ",
-                            Modifier.background(colors[product.id % colors.size])
+            SharedTransitionLayout {
+                NavDisplay(
+                    backStack = backStack,
+                    onBack = { backStack.removeLastOrNull() },
+                    sceneStrategy = twoPaneStrategy,
+                    sharedTransitionScope = this,
+                    entryProvider = entryProvider {
+                        entry<Home>(
+                            metadata = TwoPaneScene.twoPane()
                         ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Button(onClick = dropUnlessResumed {
-                                    backStack.addProductRoute(product.id + 1)
-                                }) {
-                                    Text("View the next product")
-                                }
-                                Button(onClick = dropUnlessResumed {
-                                    backStack.add(Profile)
-                                }) {
-                                    Text("View profile")
+                            ContentRed("Welcome to Nav3") {
+                                Button(onClick = { backStack.addProductRoute(1) }) {
+                                    Text("View the first product")
                                 }
                             }
                         }
+                        entry<Product>(
+                            metadata = TwoPaneScene.twoPane()
+                        ) { product ->
+                            ContentBase(
+                                "Product ${product.id} ",
+                                Modifier.background(colors[product.id % colors.size])
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Button(onClick = dropUnlessResumed {
+                                        backStack.addProductRoute(product.id + 1)
+                                    }) {
+                                        Text("View the next product")
+                                    }
+                                    Button(onClick = dropUnlessResumed {
+                                        backStack.add(Profile)
+                                    }) {
+                                        Text("View profile")
+                                    }
+                                }
+                            }
+                        }
+                        entry<Profile> {
+                            ContentGreen("Profile (single pane only)")
+                        }
                     }
-                    entry<Profile> {
-                        ContentGreen("Profile (single pane only)")
-                    }
-                }
-            )
+                )
+            }
         }
     }
 }
