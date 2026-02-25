@@ -9,9 +9,10 @@ import kotlinx.serialization.encoding.CompositeDecoder
 import java.io.Serializable
 
 /**
- * Parse a supported deeplink and stores its metadata as a easily readable format
+ * Create a URI pattern for a `NavKey`.
  *
- * The following notes applies specifically to this particular sample implementation:
+ *
+ * Parse a URI and store its metadata in an easily readable format
  *
  * The supported deeplink is expected to be built from a serializable backstack key [T] that
  * supports deeplink. This means that if this deeplink contains any arguments (path or query),
@@ -37,7 +38,7 @@ import java.io.Serializable
  * @param serializer the serializer of [T]
  * @param uriPattern the supported deeplink's uri pattern, i.e. "abc.com/home/{pathArg}"
  */
-internal class DeepLinkPattern<T : NavKey>(
+data class DeepLinkPattern<T : NavKey>(
     val serializer: KSerializer<T>,
     val uriPattern: Uri
 ) {

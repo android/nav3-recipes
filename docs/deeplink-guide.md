@@ -1,70 +1,41 @@
 # Deep Link Guide
 
-This guide covers the basic principles of deep linking and demonstrates how to apply them
-in Navigation 3. 
+This guide shows you how to add [deep links](https://developer.android.com/training/app-links/create-deeplinks) using Navigation 3. To add deep links:
 
-The implementation covers parsing intents into navigation keys and managing synthetic backStacks for 
-proper "Back" and "Up" navigation behavior.
+- Specify URI patterns for navigation keys
+- Parse a URI from an Intent into a navigation key
+- Add the navigation key to the back stack
 
-But first, let's go over some key concepts of navigation and deep linking.
+## A simple example
+```mermaid
+flowchart TD
+A[myapp://product?id=123] --> B["ProductKey(id=123)"]
+```
 
-# Principles of Navigation
-[Princples of Navigation](https://developer.android.com/guide/navigation/principles) highlights
-key concepts for implementing navigation systems that provide a consistent and pleasant user
-experience. 
+## Specify a URI pattern for a navigation key
+In Navigation 3, screens are represented by navigation keys. To deep link to a specific screen, specify a URI pattern that can be resolved to a navigation key.
 
-**Important Terms & Concepts**: Consider familiarizing with terms and
-concepts [here](#important-terms--concepts) before continuing with this guide.
+For example, a product screen deep link could look like this: `example://gizmos?product?id=123`.
 
-Three principles are particularly relevant for deep linking.
+In this example, the product ID is `123` so the deep link is actually a URI _pattern_: `example://gizmos?product?id={$PRODUCT_ID}` where `PRODUCT_ID` represents the product ID.
 
-## Up and Back are identical within your app's task
-When deep linking to your app's Task, Up and Back should both return 
-to a screen that the user would most likely have seen before the current screen. 
 
-This implies that Up and Back behaves differently when your Activity is started in another 
-App's Task. The Back button should return to the screen before deep linking, which is likely the 
-screen of the other App. The Up button should redirect to a screen *within your app* that the 
-user would most likely have seen before the current screen.
 
-## The Up button never exits your app
-The Up button should always navigate within your App's screens and never exit to another app 
-or to the device's home screen. This means the Up button should be
-disabled on your App's start destination.
 
-## Deep linking simulates manual navigation
-Deep linking jumps directly to any destination on your App, with the backStack populated with
-just the one destination. To support natural Up/Back to the start destination, you should 
-build a *synthetic back stack* that simulates the path the user would have taken to reach 
-that destination manually.
+## Parsing an Intent into a navigation key
 
-# Implementing Deep Links in Navigation 3
+When your app receives a deep link, convert the incoming `Intent` into a navigation key, such as an object that implements `NavKey`.
 
-This guide applies the [Principles of Navigation](#principles-of-navigation) to demonstrate how to
-handle deep links in your app.
+This process involves the following steps:
 
-Note that each step of this guide can be implemented in various ways depending on your app's
-architecture and requirements. The approach shown here is just one possible way to handle deep links
-with Navigation 3.
-
-Let's start with the basics: how to parse an Intent's URL into a navigation key.
-
-## Parsing an intent into a navigation key
-
-When your app receives a deep link, you need to convert the incoming `Intent`
-(specifically the data URI) into a `NavKey` that your navigation system can
-understand.
-
-This process involves four main steps:
-
-1.  **Define Supported Deep Links**: Create `DeepLinkPattern` objects that
+1.  **Define the URI patterns for each navigation key**: Create `DeepLinkPattern` objects that
     describe the URLs your app supports. These patterns link a URI structure to
-    a specific `NavKey` class.
-2.  **Parse the Request**: Convert the incoming `Intent`'s data URI into a
+    a specific `NavKey`.
+2.  **Parse the request**: Convert the incoming `Intent`'s data URI into a
     readable format, such as a `DeepLinkRequest`.
-3.  **Match Request to Pattern**: Compare the incoming request against your list
+3.  **Match the request to the pattern**: Compare the incoming request with your list
     of supported patterns to find a match.
-4.  **Decode to Key**: Use the match result to extract arguments and create an
+4.  **Decode to the navigation key**: Use the match result to extract arguments and create an
     instance of the corresponding `NavKey`.
 
 ### Example Implementation
@@ -85,10 +56,10 @@ For example:
 internal val deepLinkPatterns: List<DeepLinkPattern<out NavKey>> = listOf(
     // URL pattern with exact match: "https://www.nav3recipes.com/home"
     DeepLinkPattern(HomeKey.serializer(), (URL_HOME_EXACT).toUri()),
-    
+
     // URL pattern with Path arguments: "https://www.nav3recipes.com/users/with/{filter}"
     DeepLinkPattern(UsersKey.serializer(), (URL_USERS_WITH_FILTER).toUri()),
-    
+
     // URL pattern with Query arguments: "https://www.nav3recipes.com/users/search?{firstName}&{age}..."
     DeepLinkPattern(SearchKey.serializer(), (URL_SEARCH.toUri())),
 )
@@ -123,16 +94,16 @@ override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
     val uri: Uri? = intent.data
-    
+
     val key: NavKey = uri?.let {
         // Step 2: Parse request
         val request = DeepLinkRequest(uri)
-        
+
         // Step 3: Find match
         val match = deepLinkPatterns.firstNotNullOfOrNull { pattern ->
             DeepLinkMatcher(request, pattern).match()
         }
-        
+
         // Step 4: Decode to NavKey
         match?.let {
             KeyDecoder(match.args).decodeSerializableValue(match.serializer)
@@ -140,7 +111,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
     } ?: HomeKey // Fallback to home if no match or no URI
 
     setContent {
-        val backStack = rememberNavBackStack(key)
+        val backStack= rememberNavBackStack(key)
         // ... setup NavDisplay
     }
 }
@@ -149,7 +120,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
 For more details, refer to the [Basic Deep Link Recipe](../app/src/main/java/com/example/nav3recipes/deeplink/basic/README.md)
 and the helper functions in the [util](../app/src/main/java/com/example/nav3recipes/deeplink/basic/util) package.
 
-## Synthetic backStack & managing Tasks
+## Synthetic back stack & managing Tasks
 
 Now we are ready to apply the Principles of Navigation. Their application is demonstrated
 in the [deeplink.advanced](../app/src/main/java/com/example/nav3recipes/deeplink/advanced) and [deeplink.app](/advanceddeeplinkapp/src/main/java/com/example/nav3recipes/deeplink/advanced)
@@ -177,7 +148,7 @@ is started in the current Task.
 
 ### Applying Principle 1: Up and Back in New Task
 
-If the Activity is started in a new Task, you will need to build a synthetic backStack to support
+If the Activity is started in a new Task, you will need to build a synthetic back stack to support
 both Up and Back.
 
 First, create an interface with a `parent` field that all deep link keys inherit.
@@ -198,7 +169,7 @@ class UserDetailKey(user: User): DeepLinkKey {
 }
 ```
 
-After you parse the deep link url into a key, build a synthetic backStack by iterating
+After you parse the deep link url into a key, build a synthetic back stack by iterating
 up the key's parents.
 
 ```kotlin
@@ -223,7 +194,7 @@ fun buildSyntheticBackStack(
 be the screen that is most natural / likely to come before the child key if the user
 had manually navigated to the child key.
 
-Now pass that returned backStack to the NavDisplay
+Now pass that returned back stack to the NavDisplay
 
 ```kotlin
 val syntheticBackStack = buildBackStack(deeplinkKey)
@@ -231,7 +202,7 @@ val syntheticBackStack = buildBackStack(deeplinkKey)
 setContent {
     val backStack: NavBackStack<NavKey> = rememberNavBackStack(*(syntheticBackStack.toTypedArray()))
     NavDisplay(
-        backStack = backStack,
+        backStack= backStack,
         // ...
     ) {
         // ...
@@ -244,30 +215,30 @@ setContent {
 If the Activity is started in the current Task, Up and Back buttons are handled differently.
 
 #### Back button
-You simply need to add the deeplink key to the backStack
+You simply need to add the deeplink key to the back stack
 
 ```kotlin
 setContent {
     // val deeplinkKey = parse deep link into key...
     val backStack: NavBackStack<NavKey> = rememberNavBackStack(deeplinkKey)
     NavDisplay(
-        backStack = backStack,
+        backStack= backStack,
         // ...
     )
 }
 ```
 
-Optionally you can also create a synthetic backStack appropriate to your app's needs.
+Optionally you can also create a synthetic back stack appropriate to your app's needs.
 
 #### Up button
 Up button should never exit your app or return to the previous app. So you need to restart your
-App in a new Task and then build a synthetic backStack as demonstrated above.
+App in a new Task and then build a synthetic back stack as demonstrated above.
 
 To restart the App, you will need a few things:
 1.  the Context of the Activity
 2.  the Activity itself
 3.  the deep link url of the current screen's parent (remember, the current screen is technically
-    already popped from the backStack once the user clicked Up)
+    already popped from the back stack once the user clicked Up)
 
 Then build a TaskStackBuilder with an Intent containing the deep link url:
 
@@ -317,7 +288,7 @@ fun navigateUp(
 ```
 
 You Activity should see that the `Intent.FLAG_ACTIVITY_NEW_TASK` is present and build a
-synthetic backStack as demonstrated above.
+synthetic back stack as demonstrated above.
 
 ### Applying Principle 2: The Up button never exits your app
 
@@ -343,7 +314,7 @@ TopAppBar(
 ```
 ### Applying Principle 3: Deep linking simulates manual navigation
 
-In general this means simulating a backStack as if the user had manually navigated from the
+In general this means simulating a back stack as if the user had manually navigated from the
 start destination to the deep linked destination, which is demonstrated in the above sections.
 
 There is no hard definition for what the "correct" parent but some possible considerations
@@ -355,22 +326,22 @@ include:
 
 ## Summary
 
-To summarize, the tables below show the recommended behavior of Up and Back buttons 
+To summarize, the tables below show the recommended behavior of Up and Back buttons
 depending on the Task.
 
 **Existing Task**
 
-| Task        | Target                      | Synthetic backStack                             |
+| Task        | Target                      | Synthetic back stack                             |
 |-------------|-----------------------------|-------------------------------------------------|
-| Up Button   | Deep linked Screen's Parent | Restart Activity on new Task & build backStack  |
+| Up Button   | Deep linked Screen's Parent | Restart Activity on new Task & build back stack  |
 | Back Button | Screen before deep linking  | None                                            |
 
 **New Task**
 
-| Task        | Target                      | Synthetic backStack                            |
+| Task        | Target                      | Synthetic back stack                            |
 |-------------|-----------------------------|------------------------------------------------|
-| Up Button   | Deep linked Screen's Parent | Build backStack on Activity creation           |
-| Back Button | Deep linked Screen's Parent | Build backStack on Activity creation           |
+| Up Button   | Deep linked Screen's Parent | Build back stack on Activity creation           |
+| Back Button | Deep linked Screen's Parent | Build back stack on Activity creation           |
 
 
 ### Important Terms & Concepts
@@ -378,12 +349,12 @@ depending on the Task.
 **Task**: A collection of Activities arranged in a stack. A cohesive unit that can move from
 the foreground to the background and vice versa. On a mobile device, each Task is represented by
 one of the windows in the "recent apps" view when you swipe up from the bottom
-of the screen. Each one of these windows (or Task) is usually marked with the launcher icon of 
+of the screen. Each one of these windows (or Task) is usually marked with the launcher icon of
 the App that is at the root of the Task stack. For more info see [this doc](https://developer.android.com/guide/components/activities/tasks-and-back-stack).
 
 **BackStack**: Can be used to described a Task's stack. More commonly used to describe a stack of
-destinations (or representations of destinations) that the user navigates through, starting from 
-the app's start destination to the current destination. Common operations on a backStack 
+destinations (or representations of destinations) that the user navigates through, starting from
+the app's start destination to the current destination. Common operations on a back stack
 include pushing new destinations onto the top of the stack (navigating forward), and popping
 off destinations from the top of the stack (navigating back).
 
@@ -400,7 +371,7 @@ Activities that the user can navigate to.
 **Task vs App vs Activity** As mentioned, a Task is a stack of Activities. You can think of the
 App of the root Activity as the owner of this Task. It is also possible to start the Activity of
 *another* app within this Task, such as when you deep link. For example *App A* owns *Task A*, and
-App A deep links into *App B*'s Activity. In this scenario if you go to the "recept apps" 
+App A deep links into *App B*'s Activity. In this scenario if you go to the "recent apps"
 view (swipe up from the bottom of the screen), you will see that even though you are seeing
 App B's screen, the launcher icon attached to the window is App A's. You will need to launch
 App B's Activity in a brand new Task with App B as the root in order to be in App B's own Task.
