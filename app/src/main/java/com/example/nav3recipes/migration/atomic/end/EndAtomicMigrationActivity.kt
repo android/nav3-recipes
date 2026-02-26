@@ -101,10 +101,12 @@ class EndAtomicMigrationActivity : ComponentActivity() {
             })
 
             { paddingValues ->
+                val dialogSceneStrategy = remember { DialogSceneStrategy<NavKey>() }
+
                 NavDisplay(
                     entries = navigationState.toDecoratedEntries(entryProvider),
                     onBack = { navigator.goBack() },
-                    sceneStrategy = remember { DialogSceneStrategy() },
+                    sceneStrategies = listOf(dialogSceneStrategy),
                     modifier = Modifier.padding(paddingValues)
                 )
             }

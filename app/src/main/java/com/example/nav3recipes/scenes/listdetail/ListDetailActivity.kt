@@ -51,7 +51,8 @@ data class ConversationDetail(
     val colorId: Int
 ) : NavKey
 
-@Serializable data object Profile : NavKey
+@Serializable
+data object Profile : NavKey
 
 class ListDetailActivity : ComponentActivity() {
 
@@ -70,7 +71,7 @@ class ListDetailActivity : ComponentActivity() {
                 NavDisplay(
                     backStack = backStack,
                     onBack = { backStack.removeLastOrNull() },
-                    sceneStrategy = listDetailStrategy,
+                    sceneStrategies = listOf(listDetailStrategy),
                     modifier = Modifier.padding(paddingValues),
                     entryProvider = entryProvider {
                         entry<ConversationList>(

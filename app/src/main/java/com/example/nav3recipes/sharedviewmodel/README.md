@@ -28,15 +28,14 @@ To enable sharing, the `ChildScreen` entry explicitly defines its parent using m
 
 ```kotlin
 entry<ChildScreen>(
-    metadata = SharedViewModelStoreNavEntryDecorator.parent(
-        ParentScreen.toContentKey()
-    ),
+    metadata = metadata {
+        viewModelStoreKey(ParentScreen.toContentKey())
+    },
 ) {
     // ...
 }
-
-The `toContentKey()` extension function is used to standardize how the parent `NavEntry`'s `contentKey` is specified, both when defining the parent and when referenced in metadata by the child.
 ```
+The `toContentKey()` extension function is used to standardize how the parent `NavEntry`'s `contentKey` is specified, both when defining the parent and when referenced in metadata by the child.
 
 When `ChildScreen` requests a `CounterViewModel`:
 ```kotlin
