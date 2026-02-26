@@ -56,7 +56,7 @@ class DialogActivity : ComponentActivity() {
             NavDisplay(
                 backStack = backStack,
                 onBack = { backStack.removeLastOrNull() },
-                sceneStrategy = dialogStrategy,
+                sceneStrategies = listOf(dialogStrategy),
                 entryProvider = entryProvider {
                     entry<RouteA> {
                         ContentGreen("Welcome to Nav3") {
