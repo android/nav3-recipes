@@ -35,11 +35,11 @@ import androidx.lifecycle.viewmodel.MutableCreationExtras
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.navigation3.runtime.MetadataScope
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.NavMetadataKey
 import androidx.navigation3.runtime.get
+import androidx.navigation3.runtime.metadata
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.compose.LocalSavedStateRegistryOwner
 
@@ -150,7 +150,7 @@ class SharedViewModelStoreNavEntryDecorator<T : Any>(
          * `ViewModelStoreOwner` will be supplied using `LocalViewModelStoreOwner` rather than
          * creating a new `ViewModelStoreOwner` for this `NavEntry`.
          */
-        fun MetadataScope.viewModelStoreKey(contentKey: Any) {
+        fun viewModelStoreKey(contentKey: Any) = metadata {
             put(ViewModelStoreKey, contentKey)
         }
     }

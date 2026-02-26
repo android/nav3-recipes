@@ -29,10 +29,10 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.navigation3.runtime.MetadataScope
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavMetadataKey
-import androidx.navigation3.runtime.get
+import androidx.navigation3.runtime.contains
+import androidx.navigation3.runtime.metadata
 import androidx.navigation3.scene.Scene
 import androidx.navigation3.scene.SceneStrategy
 import androidx.navigation3.scene.SceneStrategyScope
@@ -81,7 +81,7 @@ class ListDetailScene<T : Any>(
          * Helper function to add metadata to a [NavEntry] indicating it can be displayed
          * in the list pane of a [ListDetailScene].
          */
-        fun MetadataScope.listPane() {
+        fun listPane() = metadata {
             put(ListKey, true)
         }
 
@@ -89,7 +89,7 @@ class ListDetailScene<T : Any>(
          * Helper function to add metadata to a [NavEntry] indicating it can be displayed
          * in the detail pane of a the [ListDetailScene].
          */
-        fun MetadataScope.detailPane() {
+        fun detailPane() = metadata {
             put(DetailKey, true)
         }
     }
@@ -134,10 +134,10 @@ class ListDetailSceneStrategy<T : Any>(val windowSizeClass: WindowSizeClass) : S
         }
 
         val detailEntry =
-            entries.lastOrNull()?.takeIf { it.metadata[ListDetailScene.DetailKey] ?: false }
+            entries.lastOrNull()?.takeIf { it.metadata.contains(ListDetailScene.DetailKey) }
                 ?: return null
         val listEntry =
-            entries.findLast { it.metadata[ListDetailScene.ListKey] ?: false } ?: return null
+            entries.findLast { it.metadata.contains(ListDetailScene.ListKey) } ?: return null
 
         // We use the list's contentKey to uniquely identify the scene.
         // This allows the detail panes to be animated in and out by the scene, rather than

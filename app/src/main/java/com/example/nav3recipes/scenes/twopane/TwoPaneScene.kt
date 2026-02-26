@@ -7,10 +7,10 @@ import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.navigation3.runtime.MetadataScope
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavMetadataKey
-import androidx.navigation3.runtime.get
+import androidx.navigation3.runtime.contains
+import androidx.navigation3.runtime.metadata
 import androidx.navigation3.scene.Scene
 import androidx.navigation3.scene.SceneStrategy
 import androidx.navigation3.scene.SceneStrategyScope
@@ -45,7 +45,7 @@ class TwoPaneScene<T : Any>(
          * Helper function to add metadata to a [NavEntry] indicating it can be displayed
          * in a two-pane layout.
          */
-        fun MetadataScope.twoPane() {
+        fun twoPane() = metadata {
             put(TwoPaneKey, true)
         }
     }
@@ -83,7 +83,7 @@ class TwoPaneSceneStrategy<T : Any>(val windowSizeClass: WindowSizeClass) : Scen
         // Condition 2: Only return a Scene if there are two entries, and both have declared
         // they can be displayed in a two pane scene.
         return if (lastTwoEntries.size == 2
-            && lastTwoEntries.all { it.metadata[TwoPaneScene.TwoPaneKey] ?: false }
+            && lastTwoEntries.all { it.metadata.contains(TwoPaneScene.TwoPaneKey) }
         ) {
             val firstEntry = lastTwoEntries.first()
             val secondEntry = lastTwoEntries.last()

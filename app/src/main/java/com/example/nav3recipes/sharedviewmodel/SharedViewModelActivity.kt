@@ -29,14 +29,12 @@ import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.metadata
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.nav3recipes.content.ContentBlue
 import com.example.nav3recipes.content.ContentGreen
 import com.example.nav3recipes.content.ContentRed
-import com.example.nav3recipes.sharedviewmodel.SharedViewModelStoreNavEntryDecorator.Companion.viewModelStoreKey
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 import kotlinx.serialization.Serializable
 
@@ -82,9 +80,9 @@ class SharedViewModelActivity : ComponentActivity() {
                         }
                     }
                     entry<ChildScreen>(
-                        metadata = metadata {
-                            viewModelStoreKey(ParentScreen.toContentKey())
-                        }
+                        metadata = SharedViewModelStoreNavEntryDecorator.viewModelStoreKey(
+                            ParentScreen.toContentKey()
+                        )
                     ) {
                         val parentViewModel = viewModel(modelClass = CounterViewModel::class)
 

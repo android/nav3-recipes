@@ -26,11 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.metadata
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-import com.example.nav3recipes.scenes.listdetail.ListDetailScene.Companion.detailPane
-import com.example.nav3recipes.scenes.listdetail.ListDetailScene.Companion.listPane
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 import kotlinx.serialization.Serializable
 
@@ -78,9 +75,7 @@ class ListDetailActivity : ComponentActivity() {
                     modifier = Modifier.padding(paddingValues),
                     entryProvider = entryProvider {
                         entry<ConversationList>(
-                            metadata = metadata {
-                                listPane()
-                            }
+                            metadata = ListDetailScene.listPane()
                         ) {
                             ConversationListScreen(
                                 onConversationClicked = { detailRoute ->
@@ -89,9 +84,7 @@ class ListDetailActivity : ComponentActivity() {
                             )
                         }
                         entry<ConversationDetail>(
-                            metadata = metadata {
-                                detailPane()
-                            }
+                            metadata = ListDetailScene.detailPane()
                         ) { conversationDetail ->
                             ConversationDetailScreen(
                                 conversationDetail = conversationDetail,
