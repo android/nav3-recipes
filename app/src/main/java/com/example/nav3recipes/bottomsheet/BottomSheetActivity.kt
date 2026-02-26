@@ -59,7 +59,7 @@ class BottomSheetActivity : ComponentActivity() {
             NavDisplay(
                 backStack = backStack,
                 onBack = { backStack.removeLastOrNull() },
-                sceneStrategy = bottomSheetStrategy,
+                sceneStrategies = listOf(bottomSheetStrategy),
                 entryProvider = entryProvider {
                     entry<RouteA> {
                         ContentGreen("Welcome to Nav3") {

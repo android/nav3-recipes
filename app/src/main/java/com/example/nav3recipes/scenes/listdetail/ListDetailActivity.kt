@@ -74,7 +74,7 @@ class ListDetailActivity : ComponentActivity() {
                 NavDisplay(
                     backStack = backStack,
                     onBack = { backStack.removeLastOrNull() },
-                    sceneStrategy = listDetailStrategy,
+                    sceneStrategies = listOf(listDetailStrategy),
                     modifier = Modifier.padding(paddingValues),
                     entryProvider = entryProvider {
                         entry<ConversationList>(
