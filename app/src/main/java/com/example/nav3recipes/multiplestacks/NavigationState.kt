@@ -18,6 +18,7 @@ package com.example.nav3recipes.multiplestacks
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,6 +32,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.runtime.serialization.NavKeySerializer
 import androidx.savedstate.compose.serialization.serializers.MutableStateSerializer
+import kotlin.collections.buildList
 
 /**
  * Create a navigation state that persists config changes and process death.
@@ -93,41 +95,48 @@ class NavigationState(
     fun toDecoratedEntries(
         entryProvider: (NavKey) -> NavEntry<NavKey>
     ): List<NavEntry<NavKey>> {
-
-        // For each back stack, create a `SaveableStateHolder` decorator and use it to decorate
-        // the entries from that stack. When backStacks changes, `rememberDecoratedNavEntries` will
-        // be recomposed and a new list of decorated entries is returned.
-        val decoratedEntries = backStacks.mapValues { (_, stack) ->
-            val decorators = listOf(
-                rememberSaveableStateHolderNavEntryDecorator<NavKey>(),
-            )
-            rememberDecoratedNavEntries(
-                backStack = stack,
-                entryDecorators = decorators,
-                entryProvider = entryProvider
-            )
+        // Identify the top level routes that are currently in use.
+        // The start route is always active to ensure the "exit through home" pattern.
+        val activeRoutes by remember {
+            derivedStateOf {
+                listOf(startRoute, topLevelRoute).distinct()
+            }
         }
 
-        // Only return the entries for the stacks that are currently in use.
-        return getTopLevelRoutesInUse()
-            .flatMap { decoratedEntries[it] ?: emptyList() }
+        // Combine all back stacks into a single list in the order of [inactive..., active...].
+        val allBackStack by remember {
+            derivedStateOf {
+                buildList {
+                    // add inactive back stacks
+                    backStacks.forEach { (route, backStack) ->
+                        if (route !in activeRoutes) {
+                            addAll(backStack)
+                        }
+                    }
+
+                    // add active back stacks
+                    activeRoutes.forEach { route ->
+                        addAll(backStacks.getValue(route))
+                    }
+                }
+            }
+        }
+
+        // Decorate all entries across all back stacks.
+        // This ensures that all entries are known to the `SaveableStateHolder` decorator,
+        // allowing state to be preserved even when a back stack is not currently active.
+        val allEntries = rememberDecoratedNavEntries(
+            backStack = allBackStack,
+            entryDecorators = listOf(
+                rememberSaveableStateHolderNavEntryDecorator(),
+            ),
+            entryProvider = entryProvider
+        )
+
+        // Only return the entries for the active back stacks.
+        return remember(allEntries, activeRoutes) {
+            val activeEntriesSize = activeRoutes.sumOf { route -> backStacks.getValue(route).size }
+            allEntries.takeLast(activeEntriesSize)
+        }
     }
-
-    /**
-     * Get the top level routes that are currently in use. The start route is always the first route
-     * in the list. This means the user will always exit the app through the starting route
-     * ("exit through home" pattern). The list will contain a maximum of one other route. This is a
-     * design decision. In your app, you may wish to allow more than two top level routes to be
-     * active.
-     *
-     * Note that even if a top level route is not in use its state is still retained.
-     *
-     * @return the current top level routes that are in use.
-     */
-    private fun getTopLevelRoutesInUse() : List<NavKey> =
-		if (topLevelRoute == startRoute) {
-            listOf(startRoute)
-        } else {
-            listOf(startRoute, topLevelRoute)
-        }
 }
