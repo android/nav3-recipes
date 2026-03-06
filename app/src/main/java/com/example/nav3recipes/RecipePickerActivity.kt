@@ -51,6 +51,7 @@ import com.example.nav3recipes.commonui.CommonUiActivity
 import com.example.nav3recipes.conditional.ConditionalActivity
 import com.example.nav3recipes.deeplink.basic.CreateDeepLinkActivity
 import com.example.nav3recipes.dialog.DialogActivity
+import com.example.nav3recipes.dialogscenedecorator.DialogSceneDecoratorActivity
 import com.example.nav3recipes.material.listdetail.MaterialListDetailActivity
 import com.example.nav3recipes.material.supportingpane.MaterialSupportingPaneActivity
 import com.example.nav3recipes.multiplestacks.MultipleStacksActivity
@@ -89,6 +90,9 @@ private val recipes = listOf(
     Recipe("Two pane", TwoPaneActivity::class.java),
     Recipe("Bottom Sheet", BottomSheetActivity::class.java),
     Recipe("Dialog", DialogActivity::class.java),
+
+    Heading("Scene decorators"),
+    Recipe("Dialog scene decorator", DialogSceneDecoratorActivity::class.java),
 
     Heading("Material adaptive layouts"),
     Recipe("Material list-detail layout", MaterialListDetailActivity::class.java),
