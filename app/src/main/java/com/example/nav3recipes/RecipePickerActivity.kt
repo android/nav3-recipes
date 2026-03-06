@@ -68,6 +68,7 @@ import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 import com.example.nav3recipes.deeplink.advanced.AdvancedCreateDeepLinkActivity
 import com.example.nav3recipes.interop.InteropActivity
 import com.example.nav3recipes.retain.RetainActivity
+import com.example.nav3recipes.navscenedecorator.NavigationSceneDecoratorActivity
 
 /**
  * Activity to show all available recipes and allow users to launch each one.
@@ -90,6 +91,9 @@ private val recipes = listOf(
     Recipe("Two pane", TwoPaneActivity::class.java),
     Recipe("Bottom Sheet", BottomSheetActivity::class.java),
     Recipe("Dialog", DialogActivity::class.java),
+
+    Heading("Scene decorators"),
+    Recipe("Responsive Navigation UI", NavigationSceneDecoratorActivity::class.java),
 
     Heading("Material adaptive layouts"),
     Recipe("Material list-detail layout", MaterialListDetailActivity::class.java),
