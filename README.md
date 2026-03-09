@@ -61,6 +61,9 @@ Note: If you find a bug or have a feature request for Material3 Adaptive Scenes 
 #### Sharing a ViewModel between screens
 - **[Shared ViewModel](app/src/main/java/com/example/nav3recipes/sharedviewmodel)**: Demonstrates how to share a `ViewModel` between different screens (entries) in Navigation 3 using a custom `NavEntryDecorator`.
 
+### Retain
+- **[Retain Values for Composables on the Back Stack](app/src/main/java/com/example/nav3recipes/retain)**: Demonstrates how to set up `retain` to persist values as their UI is hidden while on the back stack, and how to implement a custom NavEntryDecorator
+
 ### Returning Results
 - **[Returning Results as Events](app/src/main/java/com/example/nav3recipes/results/event)**: Returning results as events to content in another NavEntry.
 - **[Returning Results as State](app/src/main/java/com/example/nav3recipes/results/state)**: Returning results as state stored in a CompositionLocal.

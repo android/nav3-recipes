@@ -142,6 +142,10 @@
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes">
         </activity>
+        <activity android:name=".retain.RetainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Nav3Recipes">
+        </activity>
         <activity
             android:name=".deeplink.basic.MainActivity"
             android:exported="true"

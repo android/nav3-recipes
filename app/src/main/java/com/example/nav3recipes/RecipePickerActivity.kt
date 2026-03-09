@@ -67,6 +67,7 @@ import com.example.nav3recipes.sharedviewmodel.SharedViewModelActivity
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 import com.example.nav3recipes.deeplink.advanced.AdvancedCreateDeepLinkActivity
 import com.example.nav3recipes.interop.InteropActivity
+import com.example.nav3recipes.retain.RetainActivity
 
 /**
  * Activity to show all available recipes and allow users to launch each one.
@@ -102,6 +103,7 @@ private val recipes = listOf(
     Recipe("Multiple Stacks", MultipleStacksActivity::class.java),
     Recipe("Conditional navigation", ConditionalActivity::class.java),
     Recipe("Shared ViewModel", SharedViewModelActivity::class.java),
+    Recipe("Retain", RetainActivity::class.java),
 
     Heading("Architecture"),
     Recipe("Hilt - Modular Navigation", HiltModularActivity::class.java),
