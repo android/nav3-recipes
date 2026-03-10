@@ -77,6 +77,8 @@ class RetainActivity : ComponentActivity() {
     private fun retainValue() = retain { "Retained Value ${retainCount++}" }
 
     private companion object {
+        // Counter to track how many values have been retained
+        // Resets on process death.
         var retainCount = 0
     }
 }
@@ -100,39 +102,8 @@ class RetainActivity : ComponentActivity() {
 fun <T : Any> rememberRetainedValuesStoreNavEntryDecorator(
     registry: RetainedValuesStoreRegistry = retainRetainedValuesStoreRegistry()
 ): RetainedValuesStoreNavEntryDecorator<T> {
-    val activity = LocalActivity.current
-    return rememberRetainedValuesStoreNavEntryDecorator(registry) {
-        activity?.isChangingConfigurations != true
-    }
-}
-
-/**
- * Returns a [RetainedValuesStoreNavEntryDecorator] that is remembered across recompositions backed
- * by [registry].
- *
- * The underlying storage is controlled by the provided [registry]. By default, a new
- * [RetainedValuesStoreRegistry] is retained at this point in the composition hierarchy and will be
- * destroyed when the composition is permanently discarded or when the returned decorator is removed
- * from the composition hierarchy. If you need the backing storage of this decorator to have a
- * different lifespan, you can manually manage and provide a [RetainedValuesStoreRegistry] with the
- * intended lifespan.
- *
- * @param registry The underlying [RetainedValuesStoreRegistry] used to provide
- *   [RetainedValuesStore] instances to [NavEntries][NavEntry]. This instance should be retained to
- *   properly survive destruction and recreation scenarios.
- * @param removeRetainedValuesStoreOnPop A lambda that returns a Boolean indicating whether the
- *   [RetainedValuesStore] for a [NavEntry] should be removed when the [NavEntry] is popped from the
- *   back stack. If true, the entry's RetainedValuesStore will be removed, retiring all retained
- *   values for the removed content.
- */
-@Composable
-fun <T : Any> rememberRetainedValuesStoreNavEntryDecorator(
-    registry: RetainedValuesStoreRegistry = retainRetainedValuesStoreRegistry(),
-    removeRetainedValuesStoreOnPop: () -> Boolean,
-): RetainedValuesStoreNavEntryDecorator<T> {
-    val currentRemoveStoreOnPop = rememberUpdatedState(removeRetainedValuesStoreOnPop)
     return remember(registry) {
-        RetainedValuesStoreNavEntryDecorator(registry) { currentRemoveStoreOnPop.value.invoke() }
+        RetainedValuesStoreNavEntryDecorator(registry)
     }
 }
 
@@ -143,22 +114,14 @@ fun <T : Any> rememberRetainedValuesStoreNavEntryDecorator(
  * @param registry The underlying [RetainedValuesStoreRegistry] used to provide
  *   [RetainedValuesStore] instances to [NavEntries][NavEntry]. This instance should be retained to
  *   properly survive destruction and recreation scenarios.
- * @param removeStoreOnPop A lambda that returns a Boolean indicating whether the
- *   [RetainedValuesStore] for a [NavEntry] should be removed when the [NavEntry] is popped from the
- *   back stack. If true, the entry's RetainedValuesStore will be removed, retiring all retained
- *   values for the removed content.
  */
 class RetainedValuesStoreNavEntryDecorator<T : Any>(
     registry: RetainedValuesStoreRegistry,
-    removeStoreOnPop: () -> Boolean,
-) :
-    NavEntryDecorator<T>(
-        onPop = { key ->
-            if (removeStoreOnPop()) {
-                registry.clearChild(key)
-            }
-        },
-        decorate = { entry ->
-            registry.LocalRetainedValuesStoreProvider(entry.contentKey) { entry.Content() }
-        },
-    )
+) : NavEntryDecorator<T>(
+    onPop = { key ->
+        registry.clearChild(key)
+    },
+    decorate = { entry ->
+        registry.LocalRetainedValuesStoreProvider(entry.contentKey) { entry.Content() }
+    },
+)
