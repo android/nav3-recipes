@@ -102,9 +102,7 @@ class SharedViewModelStoreNavEntryDecorator<T : Any>(
         decorate = { entry ->
 
             // If the entry indicates it has a parent, use its parent's ViewModelStore.
-            val contentKey =
-                entry.metadata[ViewModelStoreKey]
-                    ?: entry.contentKey
+            val contentKey = entry.metadata[ParentKey] ?: entry.contentKey
             val viewModelStore =
                 viewModelStore.getEntryViewModel().viewModelStoreForKey(contentKey)
 
@@ -150,12 +148,12 @@ class SharedViewModelStoreNavEntryDecorator<T : Any>(
          * `ViewModelStoreOwner` will be supplied using `LocalViewModelStoreOwner` rather than
          * creating a new `ViewModelStoreOwner` for this `NavEntry`.
          */
-        fun viewModelStoreKey(contentKey: Any) = metadata {
-            put(ViewModelStoreKey, contentKey)
+        fun parent(key: Any) = metadata {
+            put(ParentKey, key)
         }
     }
 
-    object ViewModelStoreKey : NavMetadataKey<Any>
+    object ParentKey : NavMetadataKey<Any>
 }
 
 private class EntryViewModel : ViewModel() {

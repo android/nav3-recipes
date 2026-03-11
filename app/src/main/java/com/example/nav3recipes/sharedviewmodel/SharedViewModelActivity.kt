@@ -80,7 +80,7 @@ class SharedViewModelActivity : ComponentActivity() {
                         }
                     }
                     entry<ChildScreen>(
-                        metadata = SharedViewModelStoreNavEntryDecorator.viewModelStoreKey(
+                        metadata = SharedViewModelStoreNavEntryDecorator.parent(
                             ParentScreen.toContentKey()
                         )
                     ) {

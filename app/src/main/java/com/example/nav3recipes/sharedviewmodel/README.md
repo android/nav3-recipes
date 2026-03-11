@@ -28,9 +28,9 @@ To enable sharing, the `ChildScreen` entry explicitly defines its parent using m
 
 ```kotlin
 entry<ChildScreen>(
-    metadata = metadata {
-        viewModelStoreKey(ParentScreen.toContentKey())
-    },
+    metadata = SharedViewModelStoreNavEntryDecorator.parent(
+        ParentScreen.toContentKey()
+    )
 ) {
     // ...
 }

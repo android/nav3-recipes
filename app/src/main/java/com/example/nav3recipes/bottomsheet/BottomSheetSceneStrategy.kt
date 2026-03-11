@@ -63,6 +63,13 @@ class BottomSheetSceneStrategy<T : Any> : SceneStrategy<T> {
     }
 
     companion object {
+        /**
+         * Function to be called on the [NavEntry.metadata] to mark this entry as something that
+         * should be displayed within a [ModalBottomSheet].
+         *
+         * @param modalBottomSheetProperties properties that should be passed to the containing
+         * [ModalBottomSheet].
+         */
         fun bottomSheet(modalBottomSheetProperties: ModalBottomSheetProperties = ModalBottomSheetProperties()) =
             metadata {
                 put(BottomSheetKey, modalBottomSheetProperties)
