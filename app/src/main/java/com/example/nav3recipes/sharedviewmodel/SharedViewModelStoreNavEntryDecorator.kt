@@ -151,9 +151,10 @@ class SharedViewModelStoreNavEntryDecorator<T : Any>(
         fun parent(key: Any) = metadata {
             put(ParentKey, key)
         }
+
+        object ParentKey : NavMetadataKey<Any>
     }
 
-    object ParentKey : NavMetadataKey<Any>
 }
 
 private class EntryViewModel : ViewModel() {

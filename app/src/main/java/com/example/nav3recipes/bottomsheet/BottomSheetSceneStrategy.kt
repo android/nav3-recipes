@@ -74,7 +74,8 @@ class BottomSheetSceneStrategy<T : Any> : SceneStrategy<T> {
             metadata {
                 put(BottomSheetKey, modalBottomSheetProperties)
             }
+
+        object BottomSheetKey : NavMetadataKey<ModalBottomSheetProperties>
     }
 
-    object BottomSheetKey : NavMetadataKey<ModalBottomSheetProperties>
 }
