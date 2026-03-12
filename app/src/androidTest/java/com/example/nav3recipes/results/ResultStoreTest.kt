@@ -4,6 +4,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.remember
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -13,7 +14,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
-import com.example.nav3recipes.results.state.ResultStore
+import com.example.nav3recipes.results.state.rememberResultStore
 import org.junit.Rule
 import org.junit.Test
 
@@ -24,15 +25,16 @@ class ResultStoreTest {
     @Test
     fun testResultStoreWithDialog() {
         lateinit var backStack: NavBackStack<NavKey>
-        composeTestRule.setContent {
-            val resultStore = remember { ResultStore() }
+        val restorationTester = StateRestorationTester(composeTestRule)
+        restorationTester.setContent {
+            val resultStore = rememberResultStore()
             backStack = rememberNavBackStack(Home)
             val dialogStrategy = remember { DialogSceneStrategy<NavKey>() }
 
             NavDisplay(
                 backStack = backStack,
                 onBack = { backStack.removeLastOrNull() },
-                sceneStrategy = dialogStrategy,
+                sceneStrategies = listOf(dialogStrategy),
                 entryProvider = entryProvider {
                     entry<Home> {
                         val result = resultStore.getResultState<String?>(key)
@@ -70,6 +72,8 @@ class ResultStoreTest {
         }
 
         composeTestRule.waitForIdle()
+
+        restorationTester.emulateSavedInstanceStateRestore()
 
         // Verify Result
         composeTestRule.onNodeWithText(resultFromDialog).assertIsDisplayed()

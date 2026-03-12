@@ -16,4 +16,8 @@
 
 package com.example.nav3recipes.results.common
 
-data class Person(val name: String, val favoriteColor: String)
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
+data class Person(val name: String, val favoriteColor: String) : Parcelable
