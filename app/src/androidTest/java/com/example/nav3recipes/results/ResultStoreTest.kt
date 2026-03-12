@@ -4,6 +4,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.remember
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -24,7 +25,8 @@ class ResultStoreTest {
     @Test
     fun testResultStoreWithDialog() {
         lateinit var backStack: NavBackStack<NavKey>
-        composeTestRule.setContent {
+        val restorationTester = StateRestorationTester(composeTestRule)
+        restorationTester.setContent {
             val resultStore = rememberResultStore()
             backStack = rememberNavBackStack(Home)
             val dialogStrategy = remember { DialogSceneStrategy<NavKey>() }
@@ -70,6 +72,8 @@ class ResultStoreTest {
         }
 
         composeTestRule.waitForIdle()
+
+        restorationTester.emulateSavedInstanceStateRestore()
 
         // Verify Result
         composeTestRule.onNodeWithText(resultFromDialog).assertIsDisplayed()
