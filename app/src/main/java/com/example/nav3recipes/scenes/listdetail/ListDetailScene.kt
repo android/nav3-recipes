@@ -30,13 +30,14 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavMetadataKey
+import androidx.navigation3.runtime.contains
+import androidx.navigation3.runtime.metadata
 import androidx.navigation3.scene.Scene
 import androidx.navigation3.scene.SceneStrategy
 import androidx.navigation3.scene.SceneStrategyScope
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_MEDIUM_LOWER_BOUND
-import com.example.nav3recipes.scenes.listdetail.ListDetailScene.Companion.DETAIL_KEY
-import com.example.nav3recipes.scenes.listdetail.ListDetailScene.Companion.LIST_KEY
 
 /**
  * A [Scene] that displays a list and a detail [NavEntry] side-by-side in a 40/60 split.
@@ -56,7 +57,7 @@ class ListDetailScene<T : Any>(
             }
 
             // Let the detail entry know not to display a back button.
-            CompositionLocalProvider(LocalBackButtonVisibility provides false){
+            CompositionLocalProvider(LocalBackButtonVisibility provides false) {
                 Column(modifier = Modifier.weight(0.6f)) {
                     AnimatedContent(
                         targetState = detailEntry,
@@ -76,21 +77,25 @@ class ListDetailScene<T : Any>(
     }
 
     companion object {
-        internal const val LIST_KEY = "ListDetailScene-List"
-        internal const val DETAIL_KEY = "ListDetailScene-Detail"
-
         /**
          * Helper function to add metadata to a [NavEntry] indicating it can be displayed
          * in the list pane of a [ListDetailScene].
          */
-        fun listPane() = mapOf(LIST_KEY to true)
+        fun listPane() = metadata {
+            put(ListKey, true)
+        }
 
         /**
          * Helper function to add metadata to a [NavEntry] indicating it can be displayed
          * in the detail pane of a the [ListDetailScene].
          */
-        fun detailPane() = mapOf(DETAIL_KEY to true)
+        fun detailPane() = metadata {
+            put(DetailKey, true)
+        }
     }
+
+    object ListKey : NavMetadataKey<Boolean>
+    object DetailKey : NavMetadataKey<Boolean>
 }
 
 /**
@@ -98,7 +103,7 @@ class ListDetailScene<T : Any>(
  * a back button. Default is `true`. It is set to `false` for a detail `NavEntry` when being
  * displayed in a `ListDetailScene`.
  */
-val LocalBackButtonVisibility = compositionLocalOf{ true }
+val LocalBackButtonVisibility = compositionLocalOf { true }
 
 @Composable
 fun <T : Any> rememberListDetailSceneStrategy(): ListDetailSceneStrategy<T> {
@@ -129,8 +134,10 @@ class ListDetailSceneStrategy<T : Any>(val windowSizeClass: WindowSizeClass) : S
         }
 
         val detailEntry =
-            entries.lastOrNull()?.takeIf { it.metadata.containsKey(DETAIL_KEY) } ?: return null
-        val listEntry = entries.findLast { it.metadata.containsKey(LIST_KEY) } ?: return null
+            entries.lastOrNull()?.takeIf { it.metadata.contains(ListDetailScene.DetailKey) }
+                ?: return null
+        val listEntry =
+            entries.findLast { it.metadata.contains(ListDetailScene.ListKey) } ?: return null
 
         // We use the list's contentKey to uniquely identify the scene.
         // This allows the detail panes to be animated in and out by the scene, rather than
@@ -145,4 +152,3 @@ class ListDetailSceneStrategy<T : Any>(val windowSizeClass: WindowSizeClass) : S
         )
     }
 }
-
