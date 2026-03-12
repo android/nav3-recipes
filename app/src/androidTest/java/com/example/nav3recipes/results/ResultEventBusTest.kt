@@ -37,7 +37,7 @@ class ResultEventBusTest {
             NavDisplay(
                 backStack = backStack,
                 onBack = { backStack.removeLastOrNull() },
-                sceneStrategy = dialogStrategy,
+                sceneStrategies = listOf(dialogStrategy),
                 entryProvider = entryProvider {
                     entry<Home> {
                         var result by remember { mutableStateOf(noResult) }
