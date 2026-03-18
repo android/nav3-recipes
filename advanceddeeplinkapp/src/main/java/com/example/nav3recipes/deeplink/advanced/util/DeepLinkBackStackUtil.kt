@@ -14,7 +14,7 @@ import com.example.nav3recipes.deeplink.advanced.Home
 import com.example.nav3recipes.deeplink.advanced.NavDeepLinkRecipeKey
 import com.example.nav3recipes.deeplink.advanced.UserDetail
 import com.example.nav3recipes.deeplink.advanced.Users
-import com.example.nav3recipes.deeplink.common.LIST_USERS
+import com.example.nav3recipes.common.deeplink.LIST_USERS
 
 /**
  * A function that build a synthetic backStack.

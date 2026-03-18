@@ -10,12 +10,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.dropUnlessResumed
-import com.example.nav3recipes.deeplink.common.EntryScreen
-import com.example.nav3recipes.deeplink.common.LIST_FIRST_NAMES
-import com.example.nav3recipes.deeplink.common.LIST_LOCATIONS
-import com.example.nav3recipes.deeplink.common.MenuDropDown
-import com.example.nav3recipes.deeplink.common.PaddedButton
-import com.example.nav3recipes.deeplink.common.TextContent
+import com.example.nav3recipes.common.deeplink.EntryScreen
+import com.example.nav3recipes.common.deeplink.LIST_FIRST_NAMES
+import com.example.nav3recipes.common.deeplink.LIST_LOCATIONS
+import com.example.nav3recipes.common.deeplink.MenuDropDown
+import com.example.nav3recipes.common.deeplink.PaddedButton
+import com.example.nav3recipes.common.deeplink.TextContent
 
 internal const val ADVANCED_PATH_BASE = "https://www.nav3deeplink.com"
 

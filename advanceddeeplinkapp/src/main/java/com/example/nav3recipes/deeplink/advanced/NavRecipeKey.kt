@@ -1,7 +1,7 @@
 package com.example.nav3recipes.deeplink.advanced
 
 import androidx.navigation3.runtime.NavKey
-import com.example.nav3recipes.deeplink.common.User
+import com.example.nav3recipes.common.deeplink.User
 import kotlinx.serialization.Serializable
 import androidx.navigation3.runtime.NavBackStack
 import com.example.nav3recipes.deeplink.advanced.util.navigateUp

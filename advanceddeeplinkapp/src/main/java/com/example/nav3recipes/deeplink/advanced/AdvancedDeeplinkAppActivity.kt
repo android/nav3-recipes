@@ -24,10 +24,10 @@ import androidx.navigation3.ui.NavDisplay
 import com.example.nav3recipes.deeplink.advanced.util.buildBackStack
 import com.example.nav3recipes.deeplink.advanced.util.navigateUp
 import com.example.nav3recipes.deeplink.advanced.util.toKey
-import com.example.nav3recipes.deeplink.common.EntryScreen
-import com.example.nav3recipes.deeplink.common.FriendsList
-import com.example.nav3recipes.deeplink.common.LIST_USERS
-import com.example.nav3recipes.deeplink.common.PaddedButton
+import com.example.nav3recipes.common.deeplink.EntryScreen
+import com.example.nav3recipes.common.deeplink.FriendsList
+import com.example.nav3recipes.common.deeplink.LIST_USERS
+import com.example.nav3recipes.common.deeplink.PaddedButton
 
 class AdvancedDeeplinkAppActivity: ComponentActivity() {
 

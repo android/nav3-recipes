@@ -1,4 +1,4 @@
-package com.example.nav3recipes.deeplink.common
+package com.example.nav3recipes.common.deeplink
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
