@@ -42,7 +42,10 @@ class NavigationScene<T : Any>(
                     Box(
                         modifier = Modifier
                             .cacheSize(!isMovableContentCaller)
-                            .renderInSharedTransitionScopeOverlay()
+                            .sharedElement(
+                                rememberSharedContentState("nav-rail"),
+                                animatedContentScope
+                            )
                     ) {
                         if (isMovableContentCaller) {
                             navRailContent()
@@ -60,7 +63,10 @@ class NavigationScene<T : Any>(
                     Box(
                         modifier = Modifier
                             .cacheSize(!isMovableContentCaller)
-                            .renderInSharedTransitionScopeOverlay()
+                            .sharedElement(
+                                rememberSharedContentState("nav-bar"),
+                                animatedContentScope
+                            )
                     ) {
                         if (isMovableContentCaller) {
                             navBarContent()

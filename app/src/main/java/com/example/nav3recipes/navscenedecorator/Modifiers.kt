@@ -3,39 +3,76 @@ package com.example.nav3recipes.navscenedecorator
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.layout.MeasureResult
+import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.layout.boundsInWindow
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.node.GlobalPositionAwareModifierNode
+import androidx.compose.ui.node.LayoutModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.node.invalidateMeasurement
 import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 
-@Composable
-fun Modifier.cacheSize(useCachedSize: Boolean): Modifier {
-    var lastSize by remember { mutableStateOf<IntSize?>(null) }
+fun Modifier.cacheSize(useCachedSize: Boolean): Modifier =
+    this.then(CacheSizeElement(useCachedSize))
 
-    return this.layout { measurable, constraints ->
-        val placeable = measurable.measure(constraints)
+private data class CacheSizeElement(
+    val useCachedSize: Boolean
+) : ModifierNodeElement<CacheSizeNode>() {
 
-        if (!useCachedSize) {
-            lastSize = IntSize(placeable.width, placeable.height)
+    override fun create() = CacheSizeNode(useCachedSize)
+
+    override fun update(node: CacheSizeNode) {
+        node.useCachedSize = useCachedSize
+    }
+
+    override fun InspectorInfo.inspectableProperties() {
+        name = "cacheSize"
+        properties["useCachedSize"] = useCachedSize
+    }
+}
+
+private class CacheSizeNode(
+    useCachedSize: Boolean
+) : Modifier.Node(), LayoutModifierNode {
+
+    var useCachedSize: Boolean = useCachedSize
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidateMeasurement()
+            }
         }
 
-        val width = if (useCachedSize) lastSize?.width ?: placeable.width else placeable.width
-        val height = if (useCachedSize) lastSize?.height ?: placeable.height else placeable.height
+    private var isSizeCached = false
+    private var cachedSize: IntSize = IntSize.Zero
 
-        layout(width, height) {
+    override fun MeasureScope.measure(
+        measurable: Measurable,
+        constraints: Constraints
+    ): MeasureResult {
+        val placeable = measurable.measure(constraints)
+        val currentSize = IntSize(placeable.width, placeable.height)
+
+        val size = if (useCachedSize && isSizeCached) {
+            cachedSize
+        } else {
+            currentSize
+        }
+
+        cachedSize = size
+        isSizeCached = true
+
+        return layout(size.width, size.height) {
             placeable.placeRelative(0, 0)
         }
     }
@@ -81,7 +118,7 @@ private data class WindowInsetsOverlapElement(
         node.windowWidth = windowWidth
         node.layoutDirection = layoutDirection
         node.onOverlapChanged = onOverlapChanged
-        
+
         // Recalculate padding when modifier properties (like insets) change,
         // even if the component hasn't moved or changed size (no layout pass).
         node.calculatePadding()

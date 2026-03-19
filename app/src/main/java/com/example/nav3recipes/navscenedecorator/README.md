@@ -17,7 +17,7 @@ For example, the nav bar and rail composables in this recipe have some internal 
 To accomplish the desired behavior, this recipe combines Compose's [movable content](https://developer.android.com/reference/kotlin/androidx/compose/runtime/package-summary#movableContentOf(kotlin.Function0)) and [shared element](https://developer.android.com/develop/ui/compose/animation/shared-elements) APIs:
 
 * By using `movableContentOf`, it is able to retain the state of the composable as it is moved between the different branches of the composition corresponding to each scene.
-* By using the shared element APIs, it is able to keep the nav bar/rail in place while animating the content of the scenes that have been decorated. This is accomplished using the `renderInSharedTransitionScopeOverlay` modifier as well as a custom modifier, `cacheSize`, that maintains a placeholder of the correct size in the scene that doesn't call the movable content composable.
+* By using the shared element APIs, it is able to keep the nav bar/rail in place while animating the content of the scenes that have been decorated. This is accomplished using the `sharedElement` modifier as well as a custom modifier, `cacheSize`, that maintains a placeholder of the correct size in the scene that doesn't call the movable content composable.
 
 ### The `NavigationSceneDecoratorStrategy` class
 
