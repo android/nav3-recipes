@@ -15,13 +15,13 @@ import com.example.nav3recipes.deeplink.basic.util.DeepLinkPattern
 import com.example.nav3recipes.deeplink.basic.util.DeepLinkRequest
 import com.example.nav3recipes.deeplink.basic.util.DeepLinkMatchResult
 import com.example.nav3recipes.deeplink.basic.util.KeyDecoder
-import com.example.nav3recipes.deeplink.common.TextContent
+import com.example.nav3recipes.common.deeplink.TextContent
 import com.example.nav3recipes.deeplink.basic.ui.URL_HOME_EXACT
 import com.example.nav3recipes.deeplink.basic.ui.URL_SEARCH
 import com.example.nav3recipes.deeplink.basic.ui.URL_USERS_WITH_FILTER
-import com.example.nav3recipes.deeplink.common.EntryScreen
-import com.example.nav3recipes.deeplink.common.FriendsList
-import com.example.nav3recipes.deeplink.common.LIST_USERS
+import com.example.nav3recipes.common.deeplink.EntryScreen
+import com.example.nav3recipes.common.deeplink.FriendsList
+import com.example.nav3recipes.common.deeplink.LIST_USERS
 
 /**
  * Parses a target deeplink into a NavKey. There are several crucial steps involved:
