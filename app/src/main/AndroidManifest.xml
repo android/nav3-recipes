@@ -197,6 +197,11 @@
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes">
         </activity>
+        <activity
+            android:name=".navscenedecorator.ResponsiveNavigationSceneDecoratorActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Nav3Recipes">
+        </activity>
     </application>
 
 </manifest>

@@ -48,25 +48,26 @@ import com.example.nav3recipes.basicsaveable.BasicSaveableActivity
 import com.example.nav3recipes.bottomsheet.BottomSheetActivity
 import com.example.nav3recipes.commonui.CommonUiActivity
 import com.example.nav3recipes.conditional.ConditionalActivity
+import com.example.nav3recipes.deeplink.advanced.AdvancedCreateDeepLinkActivity
 import com.example.nav3recipes.deeplink.basic.CreateDeepLinkActivity
 import com.example.nav3recipes.dialog.DialogActivity
+import com.example.nav3recipes.interop.InteropActivity
 import com.example.nav3recipes.material.listdetail.MaterialListDetailActivity
 import com.example.nav3recipes.material.supportingpane.MaterialSupportingPaneActivity
-import com.example.nav3recipes.multiplestacks.MultipleStacksActivity
 import com.example.nav3recipes.modular.hilt.HiltModularActivity
 import com.example.nav3recipes.modular.koin.KoinModularActivity
+import com.example.nav3recipes.multiplestacks.MultipleStacksActivity
+import com.example.nav3recipes.navscenedecorator.ResponsiveNavigationSceneDecoratorActivity
 import com.example.nav3recipes.passingarguments.viewmodels.basic.BasicViewModelsActivity
 import com.example.nav3recipes.passingarguments.viewmodels.hilt.HiltViewModelsActivity
 import com.example.nav3recipes.passingarguments.viewmodels.koin.KoinViewModelsActivity
 import com.example.nav3recipes.results.event.ResultEventActivity
 import com.example.nav3recipes.results.state.ResultStateActivity
+import com.example.nav3recipes.retain.RetainActivity
 import com.example.nav3recipes.scenes.listdetail.ListDetailActivity
 import com.example.nav3recipes.scenes.twopane.TwoPaneActivity
 import com.example.nav3recipes.sharedviewmodel.SharedViewModelActivity
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
-import com.example.nav3recipes.deeplink.advanced.AdvancedCreateDeepLinkActivity
-import com.example.nav3recipes.interop.InteropActivity
-import com.example.nav3recipes.retain.RetainActivity
 
 /**
  * Activity to show all available recipes and allow users to launch each one.
@@ -89,6 +90,9 @@ private val recipes = listOf(
     Recipe("Two pane", TwoPaneActivity::class.java),
     Recipe("Bottom Sheet", BottomSheetActivity::class.java),
     Recipe("Dialog", DialogActivity::class.java),
+
+    Heading("Scene decorators"),
+    Recipe("Responsive Navigation UI", ResponsiveNavigationSceneDecoratorActivity::class.java),
 
     Heading("Material adaptive layouts"),
     Recipe("Material list-detail layout", MaterialListDetailActivity::class.java),
