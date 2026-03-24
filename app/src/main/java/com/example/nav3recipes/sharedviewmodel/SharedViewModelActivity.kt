@@ -84,7 +84,11 @@ class SharedViewModelActivity : ComponentActivity() {
                             ParentScreen.toContentKey()
                         )
                     ) {
-                        val parentViewModel = viewModel(modelClass = CounterViewModel::class)
+                        val parentViewModel = viewModel(
+                            modelClass = CounterViewModel::class,
+                            viewModelStoreOwner = LocalSharedViewModelStoreOwner.current
+                        )
+                        val standaloneViewModel = viewModel(modelClass = CounterViewModel::class)
 
                         ContentBlue("Child screen") {
                             Button(onClick = dropUnlessResumed { parentViewModel.count++ }) {
@@ -94,6 +98,11 @@ class SharedViewModelActivity : ComponentActivity() {
                                 backStack.add(StandaloneScreen)
                             }) {
                                 Text("View standalone screen")
+                            }
+                            Button(onClick = dropUnlessResumed {
+                                standaloneViewModel.count++
+                            }) {
+                                Text("Standalone Count: ${standaloneViewModel.count}")
                             }
                         }
                     }

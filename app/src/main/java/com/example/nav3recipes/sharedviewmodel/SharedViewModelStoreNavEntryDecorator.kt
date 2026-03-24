@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.lifecycle.HasDefaultViewModelProviderFactory
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SAVED_STATE_REGISTRY_OWNER_KEY
@@ -100,44 +101,29 @@ class SharedViewModelStoreNavEntryDecorator<T : Any>(
             }
         }),
         decorate = { entry ->
+            val standaloneViewModelStore =
+                viewModelStore.getEntryViewModel().viewModelStoreForKey(entry.contentKey)
+            val standaloneViewModelStoreOwner =
+                rememberViewModelStoreOwner(standaloneViewModelStore)
 
             // If the entry indicates it has a parent, use its parent's ViewModelStore.
-            val contentKey = entry.metadata[ParentKey] ?: entry.contentKey
-            val viewModelStore =
-                viewModelStore.getEntryViewModel().viewModelStoreForKey(contentKey)
-
-            val savedStateRegistryOwner = LocalSavedStateRegistryOwner.current
-            val childViewModelStoreOwner = remember {
-                object :
-                    ViewModelStoreOwner,
-                    SavedStateRegistryOwner by savedStateRegistryOwner,
-                    HasDefaultViewModelProviderFactory {
-                    override val viewModelStore: ViewModelStore
-                        get() = viewModelStore
-
-                    override val defaultViewModelProviderFactory: ViewModelProvider.Factory
-                        get() = SavedStateViewModelFactory()
-
-                    override val defaultViewModelCreationExtras: CreationExtras
-                        get() =
-                            MutableCreationExtras().also {
-                                it[SAVED_STATE_REGISTRY_OWNER_KEY] = this
-                                it[VIEW_MODEL_STORE_OWNER_KEY] = this
-                            }
-
-                    init {
-                        require(this.lifecycle.currentState == Lifecycle.State.INITIALIZED) {
-                            "The Lifecycle state is already beyond INITIALIZED. The " +
-                                    "SharedViewModelStoreNavEntryDecorator requires adding the " +
-                                    "SavedStateNavEntryDecorator to ensure support for " +
-                                    "SavedStateHandles."
-                        }
-                        enableSavedStateHandles()
-                    }
-                }
+            val parentViewModelStore = entry.metadata[ParentKey]?.let {
+                viewModelStore.getEntryViewModel().viewModelStoreForKey(it)
             }
-            CompositionLocalProvider(LocalViewModelStoreOwner provides childViewModelStoreOwner) {
-                entry.Content()
+            val parentViewModelStoreOwner = parentViewModelStore?.let {
+                rememberViewModelStoreOwner(it)
+            }
+
+            CompositionLocalProvider(LocalViewModelStoreOwner provides standaloneViewModelStoreOwner) {
+                if (parentViewModelStoreOwner != null) {
+                    CompositionLocalProvider(
+                        LocalSharedViewModelStoreOwner provides parentViewModelStoreOwner
+                    ) {
+                        entry.Content()
+                    }
+                } else {
+                    entry.Content()
+                }
             }
         },
     ) {
@@ -179,4 +165,42 @@ private fun ViewModelStore.getEntryViewModel(): EntryViewModel {
             factory = viewModelFactory { initializer { EntryViewModel() } },
         )
     return provider[EntryViewModel::class]
+}
+
+val LocalSharedViewModelStoreOwner =
+    staticCompositionLocalOf<ViewModelStoreOwner> { error("No LocalSharedViewModelStoreOwner provided!") }
+
+@Composable
+fun rememberViewModelStoreOwner(viewModelStore: ViewModelStore): ViewModelStoreOwner {
+    val savedStateRegistryOwner = LocalSavedStateRegistryOwner.current
+
+    return remember(viewModelStore, savedStateRegistryOwner) {
+        object :
+            ViewModelStoreOwner,
+            SavedStateRegistryOwner by savedStateRegistryOwner,
+            HasDefaultViewModelProviderFactory {
+            override val viewModelStore: ViewModelStore
+                get() = viewModelStore
+
+            override val defaultViewModelProviderFactory: ViewModelProvider.Factory
+                get() = SavedStateViewModelFactory()
+
+            override val defaultViewModelCreationExtras: CreationExtras
+                get() =
+                    MutableCreationExtras().also {
+                        it[SAVED_STATE_REGISTRY_OWNER_KEY] = this
+                        it[VIEW_MODEL_STORE_OWNER_KEY] = this
+                    }
+
+            init {
+                require(this.lifecycle.currentState == Lifecycle.State.INITIALIZED) {
+                    "The Lifecycle state is already beyond INITIALIZED. The " +
+                            "SharedViewModelStoreNavEntryDecorator requires adding the " +
+                            "SavedStateNavEntryDecorator to ensure support for " +
+                            "SavedStateHandles."
+                }
+                enableSavedStateHandles()
+            }
+        }
+    }
 }
