@@ -1,3 +1,19 @@
+/*
+ * Copyright 2026 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.example.nav3recipes.navscenedecorator
 
 import androidx.compose.animation.EnterExitState
@@ -19,17 +35,14 @@ import androidx.navigation3.scene.SceneDecoratorStrategyScope
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.window.core.layout.WindowSizeClass
 
-class NavigationScene<T : Any>(
+class ResponsiveNavigationScene<T : Any>(
     scene: Scene<T>,
     windowSizeClass: WindowSizeClass,
     sharedTransitionScope: SharedTransitionScope,
     navBarContent: @Composable (() -> Unit),
     navRailContent: @Composable (() -> Unit),
-) : Scene<T> {
+) : Scene<T> by scene {
     override val key = scene::class to scene.key
-    override val entries = scene.entries
-    override val previousEntries = scene.previousEntries
-    override val metadata = scene.metadata
 
     override val content = @Composable {
         val animatedContentScope = LocalNavAnimatedContentScope.current
@@ -79,12 +92,12 @@ class NavigationScene<T : Any>(
 }
 
 @Composable
-fun <T : Any> rememberNavigationSceneDecoratorStrategy(
+fun <T : Any> rememberResponsiveNavigationSceneDecoratorStrategy(
     navBar: @Composable () -> Unit,
     navRail: @Composable () -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     windowSizeClass: WindowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
-): NavigationSceneDecoratorStrategy<T> {
+): ResponsiveNavigationSceneDecoratorStrategy<T> {
     val currentNavBar by rememberUpdatedState(navBar)
     val currentNavRail by rememberUpdatedState(navRail)
 
@@ -92,7 +105,7 @@ fun <T : Any> rememberNavigationSceneDecoratorStrategy(
     val movableNavRail = remember { movableContentOf { currentNavRail() } }
 
     return remember(windowSizeClass, sharedTransitionScope) {
-        NavigationSceneDecoratorStrategy(
+        ResponsiveNavigationSceneDecoratorStrategy(
             windowSizeClass,
             sharedTransitionScope,
             movableNavBar,
@@ -101,7 +114,7 @@ fun <T : Any> rememberNavigationSceneDecoratorStrategy(
     }
 }
 
-class NavigationSceneDecoratorStrategy<T : Any>(
+class ResponsiveNavigationSceneDecoratorStrategy<T : Any>(
     private val windowSizeClass: WindowSizeClass,
     private val sharedTransitionScope: SharedTransitionScope,
     private val navBarContent: @Composable () -> Unit,
@@ -109,7 +122,7 @@ class NavigationSceneDecoratorStrategy<T : Any>(
 ) : SceneDecoratorStrategy<T> {
 
     override fun SceneDecoratorStrategyScope<T>.decorateScene(scene: Scene<T>): Scene<T> {
-        return NavigationScene(
+        return ResponsiveNavigationScene(
             scene,
             windowSizeClass,
             sharedTransitionScope,

@@ -199,7 +199,7 @@
             android:theme="@style/Theme.Nav3Recipes">
         </activity>
         <activity
-            android:name=".navscenedecorator.NavigationSceneDecoratorActivity"
+            android:name=".navscenedecorator.ResponsiveNavigationSceneDecoratorActivity"
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes">
         </activity>
