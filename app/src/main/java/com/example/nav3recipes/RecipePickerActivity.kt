@@ -52,6 +52,7 @@ import com.example.nav3recipes.deeplink.advanced.AdvancedCreateDeepLinkActivity
 import com.example.nav3recipes.deeplink.basic.CreateDeepLinkActivity
 import com.example.nav3recipes.dialog.DialogActivity
 import com.example.nav3recipes.interop.InteropActivity
+import com.example.nav3recipes.dialogscenedecorator.DialogSceneDecoratorActivity
 import com.example.nav3recipes.material.listdetail.MaterialListDetailActivity
 import com.example.nav3recipes.material.supportingpane.MaterialSupportingPaneActivity
 import com.example.nav3recipes.modular.hilt.HiltModularActivity
@@ -93,6 +94,7 @@ private val recipes = listOf(
 
     Heading("Scene decorators"),
     Recipe("Responsive Navigation UI", ResponsiveNavigationSceneDecoratorActivity::class.java),
+    Recipe("Dialog scene decorator", DialogSceneDecoratorActivity::class.java),
 
     Heading("Material adaptive layouts"),
     Recipe("Material list-detail layout", MaterialListDetailActivity::class.java),
