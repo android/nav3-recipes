@@ -39,10 +39,14 @@ class DialogSceneDecoratorActivity : ComponentActivity() {
 
             val dialogSceneDecoratorStrategy = rememberDialogSceneDecoratorStrategy<NavKey>(
                 onDismissAll = { entriesToDismiss ->
-                    val contentKeys = entriesToDismiss.map { it.contentKey }.toSet()
                     // Caution: This relies on the default behavior of NavEntry using key.toString()
                     // to define its contentKey property.
-                    backStack.removeAll { it.toString() in contentKeys }
+                    entriesToDismiss.forEach { entry ->
+                        backStack
+                            .indexOfLast { it.toString() == entry.contentKey }
+                            .takeIf { it >= 0 }
+                            ?.let { backStack.removeAt(it) }
+                    }
                 }
             )
 
