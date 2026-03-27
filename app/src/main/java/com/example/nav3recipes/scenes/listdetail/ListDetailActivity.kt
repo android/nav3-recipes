@@ -22,6 +22,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -74,7 +75,7 @@ class ListDetailActivity : ComponentActivity() {
                     modifier = Modifier.padding(paddingValues),
                     entryProvider = entryProvider {
                         entry<ConversationList>(
-                            metadata = ListDetailScene.listPane()
+                            metadata = ListDetailScene.listPane(placeholder = { Text("Placeholder") })
                         ) {
                             ConversationListScreen(
                                 onConversationClicked = { detailRoute ->

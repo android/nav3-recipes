@@ -83,7 +83,7 @@ class ListDetailScene<T : Any>(
          * Helper function to add metadata to a [NavEntry] indicating it can be displayed
          * in the list pane of a [ListDetailScene].
          */
-        fun listPane() = mapOf(LIST_KEY to true)
+        fun listPane(placeholder: (@Composable () -> Unit)? = null) = mapOf(LIST_KEY to ListMetadata(placeholder))
 
         /**
          * Helper function to add metadata to a [NavEntry] indicating it can be displayed
@@ -91,6 +91,8 @@ class ListDetailScene<T : Any>(
          */
         fun detailPane() = mapOf(DETAIL_KEY to true)
     }
+
+    data class ListMetadata(val placeholder: (@Composable () -> Unit)? = null)
 }
 
 /**
@@ -128,9 +130,20 @@ class ListDetailSceneStrategy<T : Any>(val windowSizeClass: WindowSizeClass) : S
             return null
         }
 
-        val detailEntry =
-            entries.lastOrNull()?.takeIf { it.metadata.containsKey(DETAIL_KEY) } ?: return null
+        // Conditions for showing the list-detail scene:
+        // 1) List is the last entry and it contains a placeholder composable in its metadata
+        // 2) List is in the back stack and the last key is detail
         val listEntry = entries.findLast { it.metadata.containsKey(LIST_KEY) } ?: return null
+        var detailEntry : NavEntry<T>? =
+            entries.lastOrNull()?.takeIf { it.metadata.containsKey(DETAIL_KEY) }
+
+        val listEntryMetadata = listEntry.metadata[LIST_KEY] as? ListDetailScene.ListMetadata
+
+        if (detailEntry == null && listEntryMetadata?.placeholder != null){
+            detailEntry = NavEntry(navEntry = listEntry, content = { listEntryMetadata.placeholder() })
+        }
+
+        if (detailEntry == null) return null
 
         // We use the list's contentKey to uniquely identify the scene.
         // This allows the detail panes to be animated in and out by the scene, rather than
