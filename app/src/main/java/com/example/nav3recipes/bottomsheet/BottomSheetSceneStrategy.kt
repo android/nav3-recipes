@@ -16,7 +16,7 @@ import com.example.nav3recipes.bottomsheet.BottomSheetSceneStrategy.Companion.bo
 
 /** An [OverlayScene] that renders an [entry] within a [ModalBottomSheet]. */
 @OptIn(ExperimentalMaterial3Api::class)
-internal class BottomSheetScene<T : Any>(
+internal data class BottomSheetScene<T : Any>(
     override val key: T,
     override val previousEntries: List<NavEntry<T>>,
     override val overlaidEntries: List<NavEntry<T>>,

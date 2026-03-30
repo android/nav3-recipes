@@ -67,6 +67,21 @@ class DialogDecoratorSceneConfiguration(
 
     fun shouldDismissSingleOnBackPress() =
         dialogProperties.dismissOnBackPress && backDismissalBehavior == DismissalBehavior.Single
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+        other as DialogDecoratorSceneConfiguration
+        return dialogProperties == other.dialogProperties &&
+                backDismissalBehavior == other.backDismissalBehavior &&
+                shape == other.shape
+    }
+
+    override fun hashCode(): Int {
+        return dialogProperties.hashCode() * 31 +
+                backDismissalBehavior.hashCode() * 31 +
+                shape.hashCode() * 31
+    }
 }
 
 /**
@@ -80,7 +95,7 @@ class DialogDecoratorSceneConfiguration(
  * @property onBack The callback to be invoked when a back event should be handled
  * @property onDismissAll The callback to be invoked when the entire dialog stack should be dismissed
  **/
-class DialogDecoratorScene<T : Any>(
+data class DialogDecoratorScene<T : Any>(
     private val scene: Scene<T>,
     override val overlaidEntries: List<NavEntry<T>>,
     private val dialogDecoratorSceneConfiguration: DialogDecoratorSceneConfiguration,

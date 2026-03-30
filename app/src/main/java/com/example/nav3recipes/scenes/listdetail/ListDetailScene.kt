@@ -43,7 +43,7 @@ import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_MEDIUM_LOW
  * A [Scene] that displays a list and a detail [NavEntry] side-by-side in a 40/60 split.
  *
  */
-class ListDetailScene<T : Any>(
+data class ListDetailScene<T : Any>(
     override val key: Any,
     override val previousEntries: List<NavEntry<T>>,
     val listEntry: NavEntry<T>,
