@@ -21,10 +21,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
@@ -50,14 +47,14 @@ class ResultStateActivity : ComponentActivity() {
                     modifier = Modifier.padding(paddingValues),
                     onBack = { backStack.removeLastOrNull() },
                     entryProvider = entryProvider {
-                        entry<Home>{
+                        entry<Home> {
                             val person = resultStore.getResultState<Person?>()
                             HomeScreen(
                                 person = person,
                                 onNext = { backStack.add(PersonDetailsForm()) }
                             )
                         }
-                        entry<PersonDetailsForm>{
+                        entry<PersonDetailsForm> {
                             PersonDetailsScreen(
                                 onSubmit = { person ->
                                     resultStore.setResult<Person>(result = person)
