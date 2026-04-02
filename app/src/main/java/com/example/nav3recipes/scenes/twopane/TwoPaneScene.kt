@@ -17,12 +17,11 @@ import androidx.navigation3.scene.SceneStrategyScope
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_MEDIUM_LOWER_BOUND
 
-
 // --- TwoPaneScene ---
 /**
  * A custom [Scene] that displays two [NavEntry]s side-by-side in a 50/50 split.
  */
-class TwoPaneScene<T : Any>(
+data class TwoPaneScene<T : Any>(
     override val key: Any,
     override val previousEntries: List<NavEntry<T>>,
     val firstEntry: NavEntry<T>,

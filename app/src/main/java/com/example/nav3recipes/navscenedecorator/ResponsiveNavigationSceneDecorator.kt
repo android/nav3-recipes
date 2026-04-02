@@ -35,12 +35,12 @@ import androidx.navigation3.scene.SceneDecoratorStrategyScope
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.window.core.layout.WindowSizeClass
 
-class ResponsiveNavigationScene<T : Any>(
-    scene: Scene<T>,
-    windowSizeClass: WindowSizeClass,
-    sharedTransitionScope: SharedTransitionScope,
-    navBarContent: @Composable (() -> Unit),
-    navRailContent: @Composable (() -> Unit),
+data class ResponsiveNavigationScene<T : Any>(
+    private val scene: Scene<T>,
+    private val sharedTransitionScope: SharedTransitionScope,
+    private val windowSizeClass: WindowSizeClass,
+    private val navBarContent: @Composable (() -> Unit),
+    private val navRailContent: @Composable (() -> Unit),
 ) : Scene<T> by scene {
     override val key = scene::class to scene.key
 
@@ -124,8 +124,8 @@ class ResponsiveNavigationSceneDecoratorStrategy<T : Any>(
     override fun SceneDecoratorStrategyScope<T>.decorateScene(scene: Scene<T>): Scene<T> {
         return ResponsiveNavigationScene(
             scene,
-            windowSizeClass,
             sharedTransitionScope,
+            windowSizeClass,
             navBarContent,
             navRailContent
         )
