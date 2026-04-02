@@ -44,6 +44,7 @@ import androidx.lifecycle.compose.dropUnlessResumed
 import com.example.nav3recipes.animations.AnimatedActivity
 import com.example.nav3recipes.basic.BasicActivity
 import com.example.nav3recipes.basicdsl.BasicDslActivity
+import com.example.nav3recipes.basicparcelable.BasicParcelableActivity
 import com.example.nav3recipes.basicsaveable.BasicSaveableActivity
 import com.example.nav3recipes.bottomsheet.BottomSheetActivity
 import com.example.nav3recipes.commonui.CommonUiActivity
@@ -51,8 +52,8 @@ import com.example.nav3recipes.conditional.ConditionalActivity
 import com.example.nav3recipes.deeplink.advanced.AdvancedCreateDeepLinkActivity
 import com.example.nav3recipes.deeplink.basic.CreateDeepLinkActivity
 import com.example.nav3recipes.dialog.DialogActivity
-import com.example.nav3recipes.interop.InteropActivity
 import com.example.nav3recipes.dialogscenedecorator.DialogSceneDecoratorActivity
+import com.example.nav3recipes.interop.InteropActivity
 import com.example.nav3recipes.material.listdetail.MaterialListDetailActivity
 import com.example.nav3recipes.material.supportingpane.MaterialSupportingPaneActivity
 import com.example.nav3recipes.modular.hilt.HiltModularActivity
@@ -85,6 +86,7 @@ private val recipes = listOf(
     Recipe("Basic", BasicActivity::class.java),
     Recipe("Basic DSL", BasicDslActivity::class.java),
     Recipe("Basic Saveable", BasicSaveableActivity::class.java),
+    Recipe("Basic Parcelable", BasicParcelableActivity::class.java),
 
     Heading("Layouts using Scenes"),
     Recipe("List-detail", ListDetailActivity::class.java),
@@ -190,7 +192,7 @@ class RecipePickerActivity : ComponentActivity() {
         }
     }
 
-    private fun Recipe.start(){
+    private fun Recipe.start() {
         val intent = Intent(this@RecipePickerActivity, this.activityClass)
         startActivity(intent)
     }
