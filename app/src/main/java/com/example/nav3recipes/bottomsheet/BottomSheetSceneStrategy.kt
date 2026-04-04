@@ -4,6 +4,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalBottomSheetProperties
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.rememberLifecycleOwner
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavMetadataKey
 import androidx.navigation3.runtime.get
@@ -28,11 +31,14 @@ internal data class BottomSheetScene<T : Any>(
     override val entries: List<NavEntry<T>> = listOf(entry)
 
     override val content: @Composable (() -> Unit) = {
+        val lifecycleOwner = rememberLifecycleOwner()
         ModalBottomSheet(
             onDismissRequest = onBack,
             properties = modalBottomSheetProperties,
         ) {
-            entry.Content()
+            CompositionLocalProvider(LocalLifecycleOwner provides lifecycleOwner) {
+                entry.Content()
+            }
         }
     }
 }
