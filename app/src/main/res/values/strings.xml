@@ -16,4 +16,6 @@
 
 <resources>
     <string name="app_name">Nav3Recipes</string>
+    <string name="dynamic_feature_install_time_title">Install Time Module</string>
+    <string name="dynamic_feature_on_demand_title">On-demand Module</string>
 </resources>
