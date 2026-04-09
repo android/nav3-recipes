@@ -55,6 +55,7 @@ android {
     }
     dynamicFeatures += setOf(
         ":dynamicfeature:installtime",
+        ":dynamicfeature:ondemand",
     )
 }
 
