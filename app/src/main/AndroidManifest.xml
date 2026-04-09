@@ -211,6 +211,10 @@
             android:name=".dialogscenedecorator.DialogSceneDecoratorActivity"
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes"/>
+        <activity
+            android:name=".dynamicfeature.DynamicFeatureActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Nav3Recipes"/>
     </application>
 
 </manifest>

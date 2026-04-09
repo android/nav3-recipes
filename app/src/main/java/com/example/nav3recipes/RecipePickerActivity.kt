@@ -53,6 +53,7 @@ import com.example.nav3recipes.deeplink.advanced.AdvancedCreateDeepLinkActivity
 import com.example.nav3recipes.deeplink.basic.CreateDeepLinkActivity
 import com.example.nav3recipes.dialog.DialogActivity
 import com.example.nav3recipes.dialogscenedecorator.DialogSceneDecoratorActivity
+import com.example.nav3recipes.dynamicfeature.DynamicFeatureActivity
 import com.example.nav3recipes.interop.InteropActivity
 import com.example.nav3recipes.material.listdetail.MaterialListDetailActivity
 import com.example.nav3recipes.material.supportingpane.MaterialSupportingPaneActivity
@@ -115,6 +116,7 @@ private val recipes = listOf(
     Heading("Architecture"),
     Recipe("Hilt - Modular Navigation", HiltModularActivity::class.java),
     Recipe("Koin - Modular Navigation", KoinModularActivity::class.java),
+    Recipe("Dynamic Feature Module Navigation", DynamicFeatureActivity::class.java),
 
     Heading("Passing navigation arguments using ViewModels"),
     Recipe("Basic", BasicViewModelsActivity::class.java),
