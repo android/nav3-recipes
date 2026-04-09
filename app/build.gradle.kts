@@ -54,6 +54,7 @@ android {
         compose = true
     }
     dynamicFeatures += setOf(
+        ":dynamicfeature:installtime",
     )
 }
 
