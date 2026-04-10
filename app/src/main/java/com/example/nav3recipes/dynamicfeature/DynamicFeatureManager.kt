@@ -89,6 +89,12 @@ class DynamicFeatureManager(context: Context) {
                         onModuleInstalled()
                     }
 
+                    SplitInstallSessionStatus.FAILED, SplitInstallSessionStatus.CANCELED -> {
+                        downloadState = null
+                        sessionId = null
+                        unregisterListener()
+                    }
+
                     else -> {}
                 }
             }
