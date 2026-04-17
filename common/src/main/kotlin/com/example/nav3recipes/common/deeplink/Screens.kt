@@ -34,6 +34,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.dropUnlessResumed
 
 @Composable
 public fun EntryScreen(text: String, content: @Composable () -> Unit = { }) {
@@ -59,7 +60,7 @@ public fun FriendsList(
                 val user = users[idx]
                 val userString = "${user.firstName}(${user.age}), ${user.location}"
                 if (onClick != null) {
-                    TextClickable(userString) { onClick(user) }
+                    TextClickable(userString, onClick = dropUnlessResumed { onClick(user) })
                 } else {
                     TextContent(userString)
                 }

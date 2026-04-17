@@ -30,10 +30,12 @@ import com.example.nav3recipes.results.common.HomeScreen
 import com.example.nav3recipes.results.common.Person
 import com.example.nav3recipes.results.common.PersonDetailsForm
 import com.example.nav3recipes.results.common.PersonDetailsScreen
+import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 
 class ResultStateActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setEdgeToEdgeConfig()
         super.onCreate(savedInstanceState)
 
         setContent {
