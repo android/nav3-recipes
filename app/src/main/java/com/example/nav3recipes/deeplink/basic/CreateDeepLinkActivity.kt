@@ -12,7 +12,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.dropUnlessResumed
-import com.example.nav3recipes.common.deeplink.PaddedButton
 import com.example.nav3recipes.common.deeplink.EMPTY
 import com.example.nav3recipes.common.deeplink.EntryScreen
 import com.example.nav3recipes.common.deeplink.FIRST_NAME_JOHN
@@ -25,11 +24,13 @@ import com.example.nav3recipes.common.deeplink.LOCATION_CA
 import com.example.nav3recipes.common.deeplink.LOCATION_US
 import com.example.nav3recipes.common.deeplink.MenuDropDown
 import com.example.nav3recipes.common.deeplink.MenuTextInput
+import com.example.nav3recipes.common.deeplink.PaddedButton
+import com.example.nav3recipes.common.deeplink.TextContent
 import com.example.nav3recipes.deeplink.basic.ui.PATH_BASE
 import com.example.nav3recipes.deeplink.basic.ui.PATH_INCLUDE
 import com.example.nav3recipes.deeplink.basic.ui.PATH_SEARCH
 import com.example.nav3recipes.deeplink.basic.ui.STRING_LITERAL_HOME
-import com.example.nav3recipes.common.deeplink.TextContent
+import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 
 /**
  * This activity allows the user to create a deep link and make a request with it.
@@ -55,6 +56,7 @@ import com.example.nav3recipes.common.deeplink.TextContent
  */
 class CreateDeepLinkActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        setEdgeToEdgeConfig()
         super.onCreate(savedInstanceState)
 
         setContent {

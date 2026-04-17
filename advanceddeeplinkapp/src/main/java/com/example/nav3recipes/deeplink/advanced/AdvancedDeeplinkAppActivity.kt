@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -12,7 +13,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -21,18 +21,19 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-import com.example.nav3recipes.deeplink.advanced.util.buildBackStack
-import com.example.nav3recipes.deeplink.advanced.util.navigateUp
-import com.example.nav3recipes.deeplink.advanced.util.toKey
 import com.example.nav3recipes.common.deeplink.EntryScreen
 import com.example.nav3recipes.common.deeplink.FriendsList
 import com.example.nav3recipes.common.deeplink.LIST_USERS
 import com.example.nav3recipes.common.deeplink.PaddedButton
+import com.example.nav3recipes.deeplink.advanced.util.buildBackStack
+import com.example.nav3recipes.deeplink.advanced.util.navigateUp
+import com.example.nav3recipes.deeplink.advanced.util.toKey
 
 class AdvancedDeeplinkAppActivity: ComponentActivity() {
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         val startKey = intent.data.toKey()

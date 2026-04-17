@@ -39,8 +39,7 @@ The `toContentKey()` extension function is used to standardize how the parent `N
 
 When `ChildScreen` requests a parent `CounterViewModel`:
 ```kotlin
-val parentViewModel = viewModel(
-    modelClass = CounterViewModel::class,
+val parentViewModel = viewModel<CounterViewModel>(
     viewModelStoreOwner = LocalSharedViewModelStoreOwner.current
 )
 ```
@@ -49,8 +48,6 @@ The decorator ensures it receives the **same instance** that `ParentScreen` is u
 
 The `ChildScreen` can still request its own `CounterViewModel` from the default `LocalViewModelStoreOwner`:
 ```kotlin
-val standaloneViewModel = viewModel(
-    modelClass = CounterViewModel::class,
-)
+val standaloneViewModel = viewModel<CounterViewModel>()
 ```
 In contrast, `StandaloneScreen` does not define a parent, so it only gets its own fresh `ViewModelStore` and a new instance of `CounterViewModel`.
