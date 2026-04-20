@@ -2,16 +2,14 @@ plugins {
     id("com.android.library")
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.kotlin.android)
 }
 
 android {
-    namespace = "com.example.nav3recipes"
+    namespace = "com.example.nav3recipes.common"
     compileSdk = 36
 
     defaultConfig {
         minSdk = 24
-        targetSdk = 36
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -31,9 +29,6 @@ android {
 
     buildFeatures {
         compose = true
-    }
-    kotlinOptions {
-        jvmTarget = "11"
     }
 }
 

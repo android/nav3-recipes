@@ -4,7 +4,7 @@ This recipe demonstrates how to implement a common navigation UI pattern with a 
 
 ## How it works
 
-This example has three top-level destinations: Home, ChatList, and Camera. The ChatList destination also has a sub-route, ChatDetail.
+This example has three top-level destinations: `Home`, `ChatList`, and `Camera`. The `ChatList` destination also has a sub-route, `ChatDetail`.
 
 ### `TopLevelBackStack`
 
@@ -27,4 +27,4 @@ This approach allows for a common navigation pattern where users can switch betw
 
 It's important to note how the navigation state is managed in this recipe. When a user navigates away from a top-level destination (e.g., by pressing the back button until they return to a previous tab), the entire navigation history for that destination is cleared. The state is not saved. When the user returns to that tab later, they will start from its initial screen.
 
-**Note**: In this example, the Home route can move above the ChatList and Camera routes, meaning navigating back from Home doesn't necessarily leave the app. The app will exit when the user goes back from a single remaining top level route in the back stack.
+**Note**: In this example, the `Home` route can move above the `ChatList` and `Camera` routes, meaning navigating back from `Home` doesn't necessarily leave the app. The app will exit when the user goes back from a single remaining top level route in the back stack.

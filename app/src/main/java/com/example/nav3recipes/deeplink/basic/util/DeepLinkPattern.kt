@@ -86,13 +86,11 @@ internal class DeepLinkPattern<T : NavKey>(
     val queryValueParsers: Map<String, TypeParser> = buildMap {
         uriPattern.queryParameterNames.forEach { paramName ->
             val elementIndex = serializer.descriptor.getElementIndex(paramName)
-            if (elementIndex == CompositeDecoder.UNKNOWN_NAME) {
-                throw IllegalArgumentException(
-                    "Query parameter '$paramName' defined in the DeepLink $uriPattern does not exist in the Serializable class '${serializer.descriptor.serialName}'."
-                )
+            // Ignore static query parameters that are not in the Serializable class
+            if (elementIndex != CompositeDecoder.UNKNOWN_NAME) {
+                val elementDescriptor = serializer.descriptor.getElementDescriptor(elementIndex)
+                this[paramName] = getTypeParser(elementDescriptor.kind)
             }
-            val elementDescriptor = serializer.descriptor.getElementDescriptor(elementIndex)
-            this[paramName] = getTypeParser(elementDescriptor.kind)
         }
     }
 

@@ -25,7 +25,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -45,26 +44,32 @@ import androidx.lifecycle.compose.dropUnlessResumed
 import com.example.nav3recipes.animations.AnimatedActivity
 import com.example.nav3recipes.basic.BasicActivity
 import com.example.nav3recipes.basicdsl.BasicDslActivity
+import com.example.nav3recipes.basicparcelable.BasicParcelableActivity
 import com.example.nav3recipes.basicsaveable.BasicSaveableActivity
 import com.example.nav3recipes.bottomsheet.BottomSheetActivity
 import com.example.nav3recipes.commonui.CommonUiActivity
 import com.example.nav3recipes.conditional.ConditionalActivity
+import com.example.nav3recipes.deeplink.advanced.AdvancedCreateDeepLinkActivity
 import com.example.nav3recipes.deeplink.basic.CreateDeepLinkActivity
 import com.example.nav3recipes.dialog.DialogActivity
+import com.example.nav3recipes.dialogscenedecorator.DialogSceneDecoratorActivity
+import com.example.nav3recipes.interop.InteropActivity
 import com.example.nav3recipes.material.listdetail.MaterialListDetailActivity
 import com.example.nav3recipes.material.supportingpane.MaterialSupportingPaneActivity
-import com.example.nav3recipes.multiplestacks.MultipleStacksActivity
 import com.example.nav3recipes.modular.hilt.HiltModularActivity
 import com.example.nav3recipes.modular.koin.KoinModularActivity
+import com.example.nav3recipes.multiplestacks.MultipleStacksActivity
+import com.example.nav3recipes.navscenedecorator.ResponsiveNavigationSceneDecoratorActivity
 import com.example.nav3recipes.passingarguments.viewmodels.basic.BasicViewModelsActivity
 import com.example.nav3recipes.passingarguments.viewmodels.hilt.HiltViewModelsActivity
 import com.example.nav3recipes.passingarguments.viewmodels.koin.KoinViewModelsActivity
 import com.example.nav3recipes.results.event.ResultEventActivity
 import com.example.nav3recipes.results.state.ResultStateActivity
+import com.example.nav3recipes.retain.RetainActivity
 import com.example.nav3recipes.scenes.listdetail.ListDetailActivity
 import com.example.nav3recipes.scenes.twopane.TwoPaneActivity
+import com.example.nav3recipes.sharedviewmodel.SharedViewModelActivity
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
-import com.example.nav3recipes.deeplink.advanced.AdvancedCreateDeepLinkActivity
 
 /**
  * Activity to show all available recipes and allow users to launch each one.
@@ -81,12 +86,17 @@ private val recipes = listOf(
     Recipe("Basic", BasicActivity::class.java),
     Recipe("Basic DSL", BasicDslActivity::class.java),
     Recipe("Basic Saveable", BasicSaveableActivity::class.java),
+    Recipe("Basic Parcelable", BasicParcelableActivity::class.java),
 
     Heading("Layouts using Scenes"),
     Recipe("List-detail", ListDetailActivity::class.java),
     Recipe("Two pane", TwoPaneActivity::class.java),
     Recipe("Bottom Sheet", BottomSheetActivity::class.java),
     Recipe("Dialog", DialogActivity::class.java),
+
+    Heading("Scene decorators"),
+    Recipe("Responsive Navigation UI", ResponsiveNavigationSceneDecoratorActivity::class.java),
+    Recipe("Dialog scene decorator", DialogSceneDecoratorActivity::class.java),
 
     Heading("Material adaptive layouts"),
     Recipe("Material list-detail layout", MaterialListDetailActivity::class.java),
@@ -99,6 +109,8 @@ private val recipes = listOf(
     Recipe("Common UI", CommonUiActivity::class.java),
     Recipe("Multiple Stacks", MultipleStacksActivity::class.java),
     Recipe("Conditional navigation", ConditionalActivity::class.java),
+    Recipe("Shared ViewModel", SharedViewModelActivity::class.java),
+    Recipe("Retain", RetainActivity::class.java),
 
     Heading("Architecture"),
     Recipe("Hilt - Modular Navigation", HiltModularActivity::class.java),
@@ -116,6 +128,9 @@ private val recipes = listOf(
     Heading("Deeplink"),
     Recipe("Parse Intent", CreateDeepLinkActivity::class.java),
     Recipe("Synthetic BackStack", AdvancedCreateDeepLinkActivity::class.java),
+
+    Heading("Interop"),
+    Recipe("Fragment and View Interop", InteropActivity::class.java),
 )
 
 class RecipePickerActivity : ComponentActivity() {
@@ -167,7 +182,6 @@ class RecipePickerActivity : ComponentActivity() {
                                     fontWeight = FontWeight.Bold
                                 )
                             },
-                            modifier = Modifier.height(48.dp),
                             colors = ListItemDefaults.colors(
                                 containerColor = MaterialTheme.colorScheme.surfaceVariant
                             )
@@ -178,7 +192,7 @@ class RecipePickerActivity : ComponentActivity() {
         }
     }
 
-    private fun Recipe.start(){
+    private fun Recipe.start() {
         val intent = Intent(this@RecipePickerActivity, this.activityClass)
         startActivity(intent)
     }

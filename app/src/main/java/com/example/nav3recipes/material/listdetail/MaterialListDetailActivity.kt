@@ -74,7 +74,7 @@ class MaterialListDetailActivity : ComponentActivity() {
             NavDisplay(
                 backStack = backStack,
                 onBack = { backStack.removeLastOrNull() },
-                sceneStrategy = listDetailStrategy,
+                sceneStrategies = listOf(listDetailStrategy),
                 entryProvider = entryProvider {
                     entry<ConversationList>(
                         metadata = ListDetailSceneStrategy.listPane(

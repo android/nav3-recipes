@@ -24,7 +24,6 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Nav3Recipes"
         android:enableOnBackInvokedCallback="true"
@@ -57,6 +56,11 @@
             android:theme="@style/Theme.Nav3Recipes"/>
         <activity
             android:name=".basicsaveable.BasicSaveableActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Nav3Recipes"/>
+        <activity
+            android:name=".basicparcelable.BasicParcelableActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Nav3Recipes"/>
@@ -142,6 +146,10 @@
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes">
         </activity>
+        <activity android:name=".retain.RetainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Nav3Recipes">
+        </activity>
         <activity
             android:name=".deeplink.basic.MainActivity"
             android:exported="true"
@@ -189,6 +197,20 @@
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes">
         </activity>
+        <activity
+            android:name=".interop.InteropActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Nav3Recipes">
+        </activity>
+        <activity
+            android:name=".navscenedecorator.ResponsiveNavigationSceneDecoratorActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Nav3Recipes">
+        </activity>
+        <activity
+            android:name=".dialogscenedecorator.DialogSceneDecoratorActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Nav3Recipes"/>
     </application>
 
 </manifest>

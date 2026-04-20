@@ -1,4 +1,4 @@
-package com.example.nav3recipes.deeplink.common
+package com.example.nav3recipes.common.deeplink
 
 import kotlinx.serialization.Serializable
 

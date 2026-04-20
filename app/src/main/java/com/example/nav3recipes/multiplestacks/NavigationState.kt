@@ -23,8 +23,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSerializable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.toMutableStateList
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
@@ -94,7 +92,7 @@ class NavigationState(
     @Composable
     fun toDecoratedEntries(
         entryProvider: (NavKey) -> NavEntry<NavKey>
-    ): SnapshotStateList<NavEntry<NavKey>> {
+    ): List<NavEntry<NavKey>> {
 
         // For each back stack, create a `SaveableStateHolder` decorator and use it to decorate
         // the entries from that stack. When backStacks changes, `rememberDecoratedNavEntries` will
@@ -113,7 +111,6 @@ class NavigationState(
         // Only return the entries for the stacks that are currently in use.
         return getTopLevelRoutesInUse()
             .flatMap { decoratedEntries[it] ?: emptyList() }
-            .toMutableStateList()
     }
 
     /**

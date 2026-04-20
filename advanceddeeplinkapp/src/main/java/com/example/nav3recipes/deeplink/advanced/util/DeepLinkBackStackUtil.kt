@@ -8,13 +8,13 @@ import androidx.core.app.TaskStackBuilder
 import androidx.core.net.toUri
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import com.example.nav3recipes.common.deeplink.LIST_USERS
 import com.example.nav3recipes.deeplink.advanced.DEEPLINK_URL_TAG_USER
 import com.example.nav3recipes.deeplink.advanced.DEEPLINK_URL_TAG_USERS
 import com.example.nav3recipes.deeplink.advanced.Home
 import com.example.nav3recipes.deeplink.advanced.NavDeepLinkRecipeKey
 import com.example.nav3recipes.deeplink.advanced.UserDetail
 import com.example.nav3recipes.deeplink.advanced.Users
-import com.example.nav3recipes.deeplink.common.LIST_USERS
 
 /**
  * A function that build a synthetic backStack.

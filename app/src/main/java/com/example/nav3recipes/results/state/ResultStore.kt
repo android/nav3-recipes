@@ -21,8 +21,10 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.ProvidedValue
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.mapSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 
 /**
@@ -53,7 +55,7 @@ object LocalResultStore {
  * Provides a [ResultStore] that will be remembered across configuration changes.
  */
 @Composable
-fun rememberResultStore() : ResultStore {
+fun rememberResultStore(): ResultStore {
     return rememberSaveable(saver = ResultStoreSaver()) {
         ResultStore()
     }
@@ -69,7 +71,7 @@ class ResultStore {
     /**
      * Map from the result key to a mutable state of the result.
      */
-    val resultStateMap: MutableMap<String, MutableState<Any?>> = mutableMapOf()
+    val resultStateMap = mutableStateMapOf<String, MutableState<Any?>>()
 
     /**
      * Retrieves the current result of the given resultKey.
@@ -92,9 +94,17 @@ class ResultStore {
     }
 }
 
-/** Saver to save and restore the NavController across config change and process death. */
+/** Saver to save and restore the ResultStore across config change and process death. */
 private fun ResultStoreSaver(): Saver<ResultStore, *> =
-    Saver(
-        save = { it.resultStateMap },
-        restore = { ResultStore().apply { resultStateMap.putAll(it)  } },
+    mapSaver(
+        save = { resultStore ->
+            resultStore.resultStateMap.mapValues { it.value.value }
+        },
+        restore = { restoredMap ->
+            ResultStore().apply {
+                restoredMap.forEach { (key, value) ->
+                    resultStateMap[key] = mutableStateOf(value)
+                }
+            }
+        }
     )

@@ -1,5 +1,3 @@
-package com.example.nav3recipes.sharedviewmodel
-
 /*
  * Copyright 2025 The Android Open Source Project
  *
@@ -16,29 +14,26 @@ package com.example.nav3recipes.sharedviewmodel
  * limitations under the License.
  */
 
+package com.example.nav3recipes.sharedviewmodel
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ProvidedValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.lifecycle.HasDefaultViewModelProviderFactory
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.SAVED_STATE_REGISTRY_OWNER_KEY
-import androidx.lifecycle.SavedStateViewModelFactory
-import androidx.lifecycle.VIEW_MODEL_STORE_OWNER_KEY
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
-import androidx.lifecycle.enableSavedStateHandles
-import androidx.lifecycle.viewmodel.CreationExtras
-import androidx.lifecycle.viewmodel.MutableCreationExtras
+import androidx.lifecycle.viewmodel.ViewModelStoreProvider
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.lifecycle.viewmodel.compose.rememberViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.rememberViewModelStoreProvider
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavEntryDecorator
-import androidx.savedstate.SavedStateRegistryOwner
+import androidx.navigation3.runtime.NavMetadataKey
+import androidx.navigation3.runtime.SaveableStateHolderNavEntryDecorator
+import androidx.navigation3.runtime.get
+import androidx.navigation3.runtime.metadata
 import androidx.savedstate.compose.LocalSavedStateRegistryOwner
 
 /**
@@ -46,9 +41,6 @@ import androidx.savedstate.compose.LocalSavedStateRegistryOwner
  *
  * @param [viewModelStoreOwner] The [ViewModelStoreOwner] that provides the [ViewModelStore] to
  *   NavEntries
- * @param [removeViewModelStoreOnPop] A lambda that returns a Boolean for whether the store for a
- *   [NavEntry] should be removed when the [NavEntry] is popped from the backStack. If true, the
- *   entry's ViewModelStore will be removed.
  */
 @Composable
 fun <T : Any> rememberSharedViewModelStoreNavEntryDecorator(
@@ -56,124 +48,74 @@ fun <T : Any> rememberSharedViewModelStoreNavEntryDecorator(
         checkNotNull(LocalViewModelStoreOwner.current) {
             "No ViewModelStoreOwner was provided via LocalViewModelStoreOwner"
         },
-    removeViewModelStoreOnPop: () -> Boolean = { true },
 ): SharedViewModelStoreNavEntryDecorator<T> {
-    val currentRemoveViewModelStoreOnPop = rememberUpdatedState(removeViewModelStoreOnPop)
-    return remember(viewModelStoreOwner, currentRemoveViewModelStoreOnPop) {
+    val viewModelStoreProvider = rememberViewModelStoreProvider(viewModelStoreOwner)
+    return remember(viewModelStoreOwner) {
         SharedViewModelStoreNavEntryDecorator(
-            viewModelStoreOwner.viewModelStore,
-            removeViewModelStoreOnPop,
+            viewModelStoreProvider,
         )
     }
 }
 
 /**
- * Provides the content of a [NavEntry] with a [ViewModelStoreOwner] and provides that
+ * Provides the content of a [NavEntry] with a new [ViewModelStoreOwner] and provides that
  * [ViewModelStoreOwner] as a [LocalViewModelStoreOwner] so that it is available within the content.
  *
  * If the [NavEntry] specifies that it has a parent in its metadata, the parent's
- * [ViewModelStoreOwner] will be supplied instead of creating a new one. This allows the
- * entry to access its parent's [ViewModel]s.
+ * [ViewModelStoreOwner] will also be supplied along with the new one. This allows the
+ * entry to access both its own [ViewModel] and its parent's [ViewModel]s.
+ *
+ * This requires the usage of [SaveableStateHolderNavEntryDecorator] to ensure that the [NavEntry]
+ * scoped [ViewModel]s can properly provide access to [androidx.lifecycle.SavedStateHandle]s.
  *
  * @see [SharedViewModelStoreNavEntryDecorator.parent]
  *
- * This requires the usage of [androidx.navigation3.runtime.SaveableStateHolderNavEntryDecorator] to
- * ensure that the [NavEntry] scoped [ViewModel]s can properly provide access to
- * [androidx.lifecycle.SavedStateHandle]s
- *
- * @param [viewModelStore] The [ViewModelStore] that provides to NavEntries
- * @param [removeViewModelStoreOnPop] A lambda that returns a Boolean for whether the store for a
- *   [NavEntry] should be cleared when the [NavEntry] is popped from the backStack. If true, the
- *   entry's ViewModelStore will be removed.
- * @see NavEntryDecorator.onPop for more details on when this callback is invoked
+ * @param [viewModelStoreProvider] The [ViewModelStoreProvider] scoped to
+ * the parent [ViewModelStoreOwner]
  */
 class SharedViewModelStoreNavEntryDecorator<T : Any>(
-    viewModelStore: ViewModelStore,
-    removeViewModelStoreOnPop: () -> Boolean,
-) :
-    NavEntryDecorator<T>(
-        onPop = ({ key ->
-            if (removeViewModelStoreOnPop()) {
-                viewModelStore.getEntryViewModel().clearViewModelStoreOwnerForKey(key)
-            }
-        }),
-        decorate = { entry ->
+    viewModelStoreProvider: ViewModelStoreProvider
+) : NavEntryDecorator<T>(
+    onPop = { key -> viewModelStoreProvider.clearKey(key) },
+    decorate = { entry ->
+        val localContentKey = entry.contentKey
+        val localOwner =
+            rememberViewModelStoreOwner(
+                viewModelStoreProvider,
+                localContentKey,
+                savedStateRegistryOwner = LocalSavedStateRegistryOwner.current,
+            )
 
-            // If the entry indicates it has a parent, use its parent's ViewModelStore.
-            val contentKey = entry.metadata[PARENT_CONTENT_KEY] ?: entry.contentKey
-            val viewModelStore =
-                viewModelStore.getEntryViewModel().viewModelStoreForKey(contentKey)
+        val localValues: MutableList<ProvidedValue<*>> = mutableListOf(LocalViewModelStoreOwner provides localOwner)
 
-            val savedStateRegistryOwner = LocalSavedStateRegistryOwner.current
-            val childViewModelStoreOwner = remember {
-                object :
-                    ViewModelStoreOwner,
-                    SavedStateRegistryOwner by savedStateRegistryOwner,
-                    HasDefaultViewModelProviderFactory {
-                    override val viewModelStore: ViewModelStore
-                        get() = viewModelStore
+        // If the entry indicates it has a parent, also provide its parent's ViewModelStore
+        val parentContentKey = entry.metadata[ParentKey]
+        if (parentContentKey != null) {
+            val parentOwner = rememberViewModelStoreOwner(
+                    viewModelStoreProvider,
+                    parentContentKey,
+                    savedStateRegistryOwner = LocalSavedStateRegistryOwner.current,
+                )
 
-                    override val defaultViewModelProviderFactory: ViewModelProvider.Factory
-                        get() = SavedStateViewModelFactory()
-
-                    override val defaultViewModelCreationExtras: CreationExtras
-                        get() =
-                            MutableCreationExtras().also {
-                                it[SAVED_STATE_REGISTRY_OWNER_KEY] = this
-                                it[VIEW_MODEL_STORE_OWNER_KEY] = this
-                            }
-
-                    init {
-                        require(this.lifecycle.currentState == Lifecycle.State.INITIALIZED) {
-                            "The Lifecycle state is already beyond INITIALIZED. The " +
-                                    "SharedViewModelStoreNavEntryDecorator requires adding the " +
-                                    "SavedStateNavEntryDecorator to ensure support for " +
-                                    "SavedStateHandles."
-                        }
-                        enableSavedStateHandles()
-                    }
-                }
-            }
-            CompositionLocalProvider(LocalViewModelStoreOwner provides childViewModelStoreOwner) {
-                entry.Content()
-            }
-        },
-    ) {
-
-        companion object {
-
-            private const val PARENT_CONTENT_KEY = "shared_decorator_parent_content_key"
-
-            /**
-             * Use this function to specify a `NavEntry`'s parent. The parent's
-             * `ViewModelStoreOwner` will be supplied using `LocalViewModelStoreOwner` rather than
-             * creating a new `ViewModelStoreOwner` for this `NavEntry`.
-             */
-            fun parent(contentKey: Any) = mapOf(PARENT_CONTENT_KEY to contentKey)
+            localValues.add(LocalSharedViewModelStoreOwner provides parentOwner)
+        }
+        CompositionLocalProvider(
+            values = localValues.toTypedArray()
+        ) { entry.Content() }
+    },
+) {
+    companion object {
+        /**
+         * Use this function to specify a `NavEntry`'s parent. The parent's
+         * `ViewModelStoreOwner` will be supplied via `LocalSharedViewModelStoreOwner`
+         */
+        fun parent(key: Any) = metadata {
+            put(ParentKey, key)
         }
 
-}
-
-private class EntryViewModel : ViewModel() {
-    private val owners = mutableMapOf<Any, ViewModelStore>()
-
-    fun viewModelStoreForKey(key: Any): ViewModelStore = owners.getOrPut(key) { ViewModelStore() }
-
-    fun clearViewModelStoreOwnerForKey(key: Any) {
-        owners.remove(key)?.clear()
-    }
-
-    override fun onCleared() {
-        owners.forEach { (_, store) -> store.clear() }
+        object ParentKey : NavMetadataKey<Any>
     }
 }
 
-
-private fun ViewModelStore.getEntryViewModel(): EntryViewModel {
-    val provider =
-        ViewModelProvider.create(
-            store = this,
-            factory = viewModelFactory { initializer { EntryViewModel() } },
-        )
-    return provider[EntryViewModel::class]
-}
+val LocalSharedViewModelStoreOwner =
+    staticCompositionLocalOf<ViewModelStoreOwner> { error("No LocalSharedViewModelStoreOwner provided!") }

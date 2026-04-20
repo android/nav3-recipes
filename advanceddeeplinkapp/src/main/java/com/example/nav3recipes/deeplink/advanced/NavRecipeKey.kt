@@ -1,10 +1,10 @@
 package com.example.nav3recipes.deeplink.advanced
 
-import androidx.navigation3.runtime.NavKey
-import com.example.nav3recipes.deeplink.common.User
-import kotlinx.serialization.Serializable
 import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
+import com.example.nav3recipes.common.deeplink.User
 import com.example.nav3recipes.deeplink.advanced.util.navigateUp
+import kotlinx.serialization.Serializable
 
 internal const val PATH_BASE = "https://www.nav3deeplink.com"
 

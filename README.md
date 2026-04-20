@@ -15,6 +15,7 @@ These are the recipes and what they demonstrate.
 ### Basic API usage
 - **[Basic](app/src/main/java/com/example/nav3recipes/basic)**: Shows most basic API usage.
 - **[Saveable back stack](app/src/main/java/com/example/nav3recipes/basicsaveable)**: As above, with a persistent back stack.
+- **[Parcelable back stack](app/src/main/java/com/example/nav3recipes/basicparcelable)**: As above, but with a persistent back stack of `Parcelable` routes.
 - **[Entry provider DSL](app/src/main/java/com/example/nav3recipes/basicdsl)**: As above, using the entryProvider DSL.
 
 ### Deep links
@@ -37,6 +38,10 @@ Examples showing how to use the layouts provided by the [Compose Material3 Adapt
 - **[Supporting Pane](app/src/main/java/com/example/nav3recipes/material/supportingpane)**: Shows how to use a Material adaptive supporting pane layout.
 
 Note: If you find a bug or have a feature request for Material3 Adaptive Scenes [please file it here](https://issuetracker.google.com/issues/new?component=1467081). Don't file an issue on this repository.
+
+### Scene Decorators
+- **[Dialog Scene Decorator](app/src/main/java/com/example/nav3recipes/dialogscenedecorator)**: Shows how to use a `DialogSceneDecoratorStrategy` to display a scene in a dialog.
+- **[Responsive Navigation Scene Decorator](app/src/main/java/com/example/nav3recipes/navscenedecorator)**: Demonstrates how to add UI elements such as top app bars and navigation bars or rails using the scene decorator API.
 
 ### Animations
 - **[Animations](app/src/main/java/com/example/nav3recipes/animations)**: Shows how to override the default animations for all destinations and a single destination.
@@ -61,9 +66,15 @@ Note: If you find a bug or have a feature request for Material3 Adaptive Scenes 
 #### Sharing a ViewModel between screens
 - **[Shared ViewModel](app/src/main/java/com/example/nav3recipes/sharedviewmodel)**: Demonstrates how to share a `ViewModel` between different screens (entries) in Navigation 3 using a custom `NavEntryDecorator`.
 
+### Retain
+- **[Retain Values for Composables on the Back Stack](app/src/main/java/com/example/nav3recipes/retain)**: Demonstrates how to set up `retain` to persist values as their UI is hidden while on the back stack, and how to implement a custom NavEntryDecorator
+
 ### Returning Results
 - **[Returning Results as Events](app/src/main/java/com/example/nav3recipes/results/event)**: Returning results as events to content in another NavEntry.
 - **[Returning Results as State](app/src/main/java/com/example/nav3recipes/results/state)**: Returning results as state stored in a CompositionLocal.
+
+### Interop
+- **[Fragment and View Interop](app/src/main/java/com/example/nav3recipes/interop)**: Demonstrates how to use Fragment and Views in Navigation3.
 
 ### Future recipes
 The most upvoted [recipe requests]([url](https://github.com/android/nav3-recipes/issues?q=is%3Aissue%20state%3Aopen%20label%3Arecipe-request)) will be considered for implementation. Don't see your recipe? [File a request for one here](https://github.com/android/nav3-recipes/issues/new?template=1-recipe-request.md)

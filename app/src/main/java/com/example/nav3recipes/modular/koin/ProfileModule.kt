@@ -19,6 +19,7 @@ import org.koin.dsl.navigation3.navigation
 // API
 object Profile
 
+// IMPL
 @OptIn(KoinExperimentalAPI::class)
 val profileModule = module {
     activityRetainedScope {
