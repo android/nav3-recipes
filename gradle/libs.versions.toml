@@ -13,26 +13,26 @@
 # limitations under the License.
 
 [versions]
-agp = "9.1.0"
+agp = "9.1.1"
 kotlin = "2.3.20"
 coreKtx = "1.18.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
-kotlinxSerializationCore = "1.10.0"
+kotlinxSerializationCore = "1.11.0"
 lifecycleRuntimeKtx = "2.10.0"
 lifecycleViewmodel = "2.11.0-alpha03"
 activityCompose = "1.13.0"
-composeBom = "2026.03.00"
+composeBom = "2026.04.00"
 fragment =  "1.8.9"
 navigation2 = "2.9.7"
-navigation3 = "1.1.0-rc01"
+navigation3 = "1.1.0"
 material3 = "1.4.0"
-nav3Material = "1.3.0-alpha09"
+nav3Material = "1.3.0-alpha10"
 ksp = "2.3.6"
 hilt = "2.59.2"
 hiltNavigationCompose = "1.3.0"
-koin = "4.2.0"
+koin = "4.2.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

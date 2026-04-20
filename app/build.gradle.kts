@@ -34,7 +34,7 @@ kotlin {
 
 android {
     namespace = "com.example.nav3recipes"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.example.nav3recipes"
