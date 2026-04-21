@@ -2,14 +2,11 @@ package com.example.nav3recipes.retain
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.retain.RetainedValuesStore
 import androidx.compose.runtime.retain.RetainedValuesStoreRegistry
 import androidx.compose.runtime.retain.retain
@@ -17,14 +14,20 @@ import androidx.compose.runtime.retain.retainRetainedValuesStoreRegistry
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavEntryDecorator
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.example.nav3recipes.content.ContentBlue
 import com.example.nav3recipes.content.ContentGreen
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
+import kotlinx.serialization.Serializable
 
-private data object RouteA
+@Serializable
+private data object RouteA : NavKey
 
-private data class RouteB(val id: Int)
+@Serializable
+private data class RouteB(val id: Int) : NavKey
 
 class RetainActivity : ComponentActivity() {
 
@@ -32,7 +35,7 @@ class RetainActivity : ComponentActivity() {
         setEdgeToEdgeConfig()
         super.onCreate(savedInstanceState)
         setContent {
-            val backStack = remember { mutableStateListOf<Any>(RouteA) }
+            val backStack = rememberNavBackStack(RouteA)
 
             NavDisplay(
                 backStack = backStack,
@@ -40,32 +43,25 @@ class RetainActivity : ComponentActivity() {
                 entryDecorators = listOf(
                     rememberRetainedValuesStoreNavEntryDecorator()
                 ),
-                entryProvider = { key ->
-                    when (key) {
-                        is RouteA -> NavEntry(key) {
-                            ContentGreen("Nav3 with retain support") {
-                                Text("Retained value: ${retainValue()}")
-                                Button(onClick = dropUnlessResumed {
-                                    backStack.add(RouteB(1))
-                                }) {
-                                    Text("Click to navigate")
-                                }
+                entryProvider = entryProvider {
+                    entry<RouteA> {
+                        ContentGreen("Nav3 with retain support") {
+                            Text("Retained value: ${retainValue()}")
+                            Button(onClick = dropUnlessResumed {
+                                backStack.add(RouteB(1))
+                            }) {
+                                Text("Click to navigate")
                             }
                         }
-
-                        is RouteB -> NavEntry(key) {
-                            ContentBlue("Route id: ${key.id}") {
-                                Text("Retained value: ${retainValue()}")
-                                Button(onClick = dropUnlessResumed {
-                                    backStack.add(RouteB(key.id + 1))
-                                }) {
-                                    Text("Click to navigate")
-                                }
+                    }
+                    entry<RouteB> { key ->
+                        ContentBlue("Route id: ${key.id}") {
+                            Text("Retained value: ${retainValue()}")
+                            Button(onClick = dropUnlessResumed {
+                                backStack.add(RouteB(key.id + 1))
+                            }) {
+                                Text("Click to navigate")
                             }
-                        }
-
-                        else -> {
-                            error("Unknown route: $key")
                         }
                     }
                 }

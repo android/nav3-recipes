@@ -24,18 +24,17 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.ViewModelStoreProvider
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.rememberViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.rememberViewModelStoreProvider
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.NavMetadataKey
+import androidx.navigation3.runtime.SaveableStateHolderNavEntryDecorator
 import androidx.navigation3.runtime.get
 import androidx.navigation3.runtime.metadata
 import androidx.savedstate.compose.LocalSavedStateRegistryOwner
-import androidx.lifecycle.viewmodel.ViewModelStoreProvider
-import androidx.lifecycle.viewmodel.compose.rememberViewModelStoreOwner
-import androidx.lifecycle.viewmodel.compose.rememberViewModelStoreProvider
-import androidx.navigation3.runtime.SaveableStateHolderNavEntryDecorator
-import kotlin.collections.mutableListOf
 
 /**
  * Returns a [SharedViewModelStoreNavEntryDecorator] that is remembered across recompositions.

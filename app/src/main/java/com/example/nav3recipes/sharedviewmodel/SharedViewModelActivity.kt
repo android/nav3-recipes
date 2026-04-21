@@ -71,7 +71,7 @@ class SharedViewModelActivity : ComponentActivity() {
                         val viewModel = viewModel<CounterViewModel>()
 
                         ContentRed("Parent screen") {
-                            Button(onClick = dropUnlessResumed { viewModel.count++ }) {
+                            Button(onClick = { viewModel.count++ }) {
                                 Text("Count: ${viewModel.count}")
                             }
                             Button(onClick = dropUnlessResumed { backStack.add(ChildScreen) }) {
@@ -91,10 +91,10 @@ class SharedViewModelActivity : ComponentActivity() {
                         val standaloneViewModel = viewModel<CounterViewModel>()
 
                         ContentBlue("Child screen") {
-                            Button(onClick = dropUnlessResumed { parentViewModel.count++ }) {
+                            Button(onClick = { parentViewModel.count++ }) {
                                 Text("Parent count: ${parentViewModel.count}")
                             }
-                            Button(onClick = dropUnlessResumed { standaloneViewModel.count++ }) {
+                            Button(onClick = { standaloneViewModel.count++ }) {
                                 Text("Standalone Count: ${standaloneViewModel.count}")
                             }
                             Button(onClick = dropUnlessResumed { backStack.add(StandaloneScreen) }) {
@@ -106,7 +106,7 @@ class SharedViewModelActivity : ComponentActivity() {
                         val viewModel = viewModel<CounterViewModel>()
 
                         ContentGreen("Standalone screen") {
-                            Button(onClick = dropUnlessResumed {
+                            Button(onClick = {
                                 viewModel.count++
                             }) {
                                 Text("Count: ${viewModel.count}")
