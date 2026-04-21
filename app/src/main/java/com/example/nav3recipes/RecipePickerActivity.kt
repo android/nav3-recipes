@@ -22,12 +22,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -158,14 +158,16 @@ class RecipePickerActivity : ComponentActivity() {
 
     @Composable
     fun RecipeList(padding: PaddingValues) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        LazyVerticalGrid(
+            modifier = Modifier.fillMaxSize(),
+            columns = GridCells.Adaptive(minSize = 240.dp),
+            contentPadding = padding,
         ) {
-            items(recipes) { item ->
-                when(item){
+            items(recipes, span = { item ->
+                val span = if (item is Heading) maxLineSpan else 1
+                GridItemSpan(span)
+            }) { item ->
+                when (item) {
                     is Recipe -> {
                         ListItem(
                             headlineContent = { Text(item.name) },
@@ -174,6 +176,7 @@ class RecipePickerActivity : ComponentActivity() {
                             })
                         )
                     }
+
                     is Heading -> {
                         ListItem(
                             headlineContent = {
