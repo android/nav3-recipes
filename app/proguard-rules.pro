@@ -19,3 +19,8 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Dynamic Feature Module recipe
+-keep class * implements com.example.nav3recipes.dynamicfeature.DynamicFeatureContentProvider {
+   public <init>();
+}

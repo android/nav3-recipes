@@ -1,5 +1,5 @@
-<!--
- Copyright 2025 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?><!--
+ Copyright 2026 The Android Open Source Project
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -13,9 +13,12 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
+<manifest xmlns:dist="http://schemas.android.com/apk/distribution">
 
-<resources>
-    <string name="app_name">Nav3Recipes</string>
-    <string name="dynamic_feature_install_time_title">Install Time Module</string>
-    <string name="dynamic_feature_on_demand_title">On-demand Module</string>
-</resources>
+    <dist:module dist:title="@string/dynamic_feature_install_time_title">
+        <dist:delivery>
+            <dist:install-time />
+        </dist:delivery>
+        <dist:fusing dist:include="true" />
+    </dist:module>
+</manifest>
