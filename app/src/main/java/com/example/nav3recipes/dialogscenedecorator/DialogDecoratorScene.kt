@@ -3,7 +3,7 @@ package com.example.nav3recipes.dialogscenedecorator
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Shape
@@ -125,7 +125,7 @@ data class DialogDecoratorScene<T : Any>(
 
 @Composable
 fun <T : Any> rememberDialogSceneDecoratorStrategy(
-    windowSizeClass: WindowSizeClass = currentWindowAdaptiveInfo().windowSizeClass,
+    windowSizeClass: WindowSizeClass = currentWindowAdaptiveInfoV2().windowSizeClass,
     onDismissAll: ((List<NavEntry<T>>) -> Unit)
 ): DialogSceneDecoratorStrategy<T> = remember(windowSizeClass, onDismissAll) {
     DialogSceneDecoratorStrategy(windowSizeClass, onDismissAll = onDismissAll)
