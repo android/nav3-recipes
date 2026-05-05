@@ -63,6 +63,10 @@ android {
     buildFeatures {
         compose = true
     }
+    dynamicFeatures += setOf(
+        ":dynamicfeature:installtime",
+        ":dynamicfeature:ondemand",
+    )
 }
 
 dependencies {
@@ -103,4 +107,5 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     testImplementation(kotlin("test"))
+    implementation(libs.feature.delivery.ktx)
 }

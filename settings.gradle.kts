@@ -49,3 +49,5 @@ rootProject.name = "Nav3Recipes"
 include(":app")
 include(":advanceddeeplinkapp")
 include(":common")
+include(":dynamicfeature:installtime")
+include(":dynamicfeature:ondemand")
