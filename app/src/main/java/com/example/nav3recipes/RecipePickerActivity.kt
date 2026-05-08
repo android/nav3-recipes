@@ -64,6 +64,7 @@ import com.example.nav3recipes.navscenedecorator.ResponsiveNavigationSceneDecora
 import com.example.nav3recipes.passingarguments.viewmodels.basic.BasicViewModelsActivity
 import com.example.nav3recipes.passingarguments.viewmodels.hilt.HiltViewModelsActivity
 import com.example.nav3recipes.passingarguments.viewmodels.koin.KoinViewModelsActivity
+import com.example.nav3recipes.passingarguments.viewmodels.metro.MetroViewModelsActivity
 import com.example.nav3recipes.results.event.ResultEventActivity
 import com.example.nav3recipes.results.state.ResultStateActivity
 import com.example.nav3recipes.retain.RetainActivity
@@ -122,6 +123,7 @@ private val recipes = listOf(
     Recipe("Basic", BasicViewModelsActivity::class.java),
     Recipe("Using Hilt", HiltViewModelsActivity::class.java),
     Recipe("Using Koin", KoinViewModelsActivity::class.java),
+    Recipe("Using Metro", MetroViewModelsActivity::class.java),
 
     Heading("Returning Results"),
     Recipe("Return result as Event", ResultEventActivity::class.java),
