@@ -10,7 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -20,7 +20,6 @@ import androidx.navigation3.ui.NavDisplay
 import com.example.nav3recipes.content.ContentBlue
 import com.example.nav3recipes.content.ContentGreen
 import com.example.nav3recipes.modular.metro.ActivityScope
-import com.example.nav3recipes.passingarguments.viewmodels.basic.RouteB
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.AssistedFactory
@@ -34,8 +33,12 @@ import dev.zacsweers.metrox.viewmodel.ManualViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.ManualViewModelAssistedFactoryKey
 import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.assistedMetroViewModel
+import kotlinx.serialization.Serializable
 
+@Serializable
 data object RouteA
+
+@Serializable
 data class RouteB(val id: String)
 
 @ContributesIntoMap(ActivityScope::class, binding<Activity>())
@@ -47,7 +50,7 @@ class MetroViewModelsActivity(private val metroVmf: MetroViewModelFactory) : Com
         setEdgeToEdgeConfig()
         super.onCreate(savedInstanceState)
         setContent {
-            val backStack = remember { mutableStateListOf<Any>(RouteA) }
+            val backStack = rememberSaveable { mutableStateListOf<Any>(RouteA) }
 
 
             CompositionLocalProvider(LocalMetroViewModelFactory provides metroVmf) {
@@ -79,15 +82,6 @@ class MetroViewModelsActivity(private val metroVmf: MetroViewModelFactory) : Com
                         }
                         entry<RouteB> { key ->
                             val viewModel: RouteBViewModel = assistedMetroViewModel<RouteBViewModel, RouteBViewModel.Factory> {
-//                                assistedMetroViewModel<RouteBViewModel, RouteBViewModel.Factory> {
-//                                // Note: We need a new ViewModel for every new RouteB instance. Usually
-//                                // we would need to supply a `key` String that is unique to the
-//                                // instance, however, the ViewModelStoreNavEntryDecorator (supplied
-//                                // above) does this for us, using `NavEntry.contentKey` to uniquely
-//                                // identify the viewModel.
-//                                //
-//                                // tl;dr: Make sure you use rememberViewModelStoreNavEntryDecorator()
-//                                // if you want a new ViewModel for each new navigation key instance.
                                 create(key)
                             }
                             ScreenB(viewModel = viewModel)

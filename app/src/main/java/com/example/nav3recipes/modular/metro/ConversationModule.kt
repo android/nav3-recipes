@@ -25,9 +25,12 @@ import com.example.nav3recipes.ui.theme.colors
 import dev.zacsweers.metro.ContributesTo
 import dev.zacsweers.metro.IntoSet
 import dev.zacsweers.metro.Provides
+import kotlinx.serialization.Serializable
 
 // API
+@Serializable
 object ConversationList
+@Serializable
 data class ConversationDetail(val id: Int) {
     val color: Color
         get() = colors[id % colors.size]
