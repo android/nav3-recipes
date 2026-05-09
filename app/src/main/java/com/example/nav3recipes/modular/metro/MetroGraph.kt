@@ -7,10 +7,12 @@ import dev.zacsweers.metro.Provides
 import dev.zacsweers.metrox.android.MetroAppComponentProviders
 import dev.zacsweers.metrox.viewmodel.ViewModelGraph
 
-@DependencyGraph(AppScope::class) interface AppGraph : MetroAppComponentProviders, ViewModelGraph {
+@DependencyGraph(AppScope::class, [ActivityScope::class]) interface MetroGraph : MetroAppComponentProviders, ViewModelGraph {
 
     @DependencyGraph.Factory
     interface Factory {
-        fun create(@Provides context: Context): AppGraph
+        fun create(@Provides context: Context): MetroGraph
     }
 }
+
+abstract class ActivityScope private constructor()

@@ -22,11 +22,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessResumed
 import com.example.nav3recipes.ui.theme.colors
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ActivityRetainedComponent
-import dagger.multibindings.IntoSet
+import dev.zacsweers.metro.ContributesTo
+import dev.zacsweers.metro.IntoSet
+import dev.zacsweers.metro.Provides
 
 // API
 object ConversationList
@@ -36,9 +34,8 @@ data class ConversationDetail(val id: Int) {
 }
 
 // IMPL
-@Module
-@InstallIn(ActivityRetainedComponent::class)
-object ConversationModule {
+@ContributesTo(ActivityScope::class)
+interface ConversationModule {
 
     @IntoSet
     @Provides

@@ -1,19 +1,3 @@
-/*
- * Copyright 2025 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.example.nav3recipes.passingarguments.viewmodels.metro
 
 import android.app.Activity
@@ -35,9 +19,9 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.nav3recipes.content.ContentBlue
 import com.example.nav3recipes.content.ContentGreen
+import com.example.nav3recipes.modular.metro.ActivityScope
 import com.example.nav3recipes.passingarguments.viewmodels.basic.RouteB
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
-import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.AssistedFactory
 import dev.zacsweers.metro.AssistedInject
@@ -54,7 +38,7 @@ import dev.zacsweers.metrox.viewmodel.assistedMetroViewModel
 data object RouteA
 data class RouteB(val id: String)
 
-@ContributesIntoMap(AppScope::class, binding<Activity>())
+@ContributesIntoMap(ActivityScope::class, binding<Activity>())
 @ActivityKey(MetroViewModelsActivity::class)
 @Inject
 class MetroViewModelsActivity(private val metroVmf: MetroViewModelFactory) : ComponentActivity() {
@@ -128,7 +112,7 @@ class RouteBViewModel (
 
     @AssistedFactory
     @ManualViewModelAssistedFactoryKey
-    @ContributesIntoMap(AppScope::class)
+    @ContributesIntoMap(ActivityScope::class)
     interface Factory: ManualViewModelAssistedFactory {
         fun create(@Assisted navKey: RouteB): RouteBViewModel
     }

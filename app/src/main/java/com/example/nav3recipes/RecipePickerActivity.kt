@@ -59,6 +59,7 @@ import com.example.nav3recipes.material.listdetail.MaterialListDetailActivity
 import com.example.nav3recipes.material.supportingpane.MaterialSupportingPaneActivity
 import com.example.nav3recipes.modular.hilt.HiltModularActivity
 import com.example.nav3recipes.modular.koin.KoinModularActivity
+import com.example.nav3recipes.modular.metro.MetroModularActivity
 import com.example.nav3recipes.multiplestacks.MultipleStacksActivity
 import com.example.nav3recipes.navscenedecorator.ResponsiveNavigationSceneDecoratorActivity
 import com.example.nav3recipes.passingarguments.viewmodels.basic.BasicViewModelsActivity
@@ -117,6 +118,7 @@ private val recipes = listOf(
     Heading("Architecture"),
     Recipe("Hilt - Modular Navigation", HiltModularActivity::class.java),
     Recipe("Koin - Modular Navigation", KoinModularActivity::class.java),
+    Recipe("Metro - Modular Navigation", MetroModularActivity::class.java),
     Recipe("Dynamic Feature Module Navigation", DynamicFeatureActivity::class.java),
 
     Heading("Passing navigation arguments using ViewModels"),

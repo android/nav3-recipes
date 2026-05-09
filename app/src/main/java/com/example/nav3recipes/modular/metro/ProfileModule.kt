@@ -11,19 +11,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ActivityRetainedComponent
-import dagger.multibindings.IntoSet
+import dev.zacsweers.metro.ContributesTo
+import dev.zacsweers.metro.IntoSet
+import dev.zacsweers.metro.Provides
 
 // API
 object Profile
 
 // IMPLEMENTATION
-@Module
-@InstallIn(ActivityRetainedComponent::class)
-object ProfileModule {
+@ContributesTo(ActivityScope::class)
+interface ProfileModule {
 
     @IntoSet
     @Provides

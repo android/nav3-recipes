@@ -1,16 +1,13 @@
 package com.example.nav3recipes.modular.metro
 
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ActivityRetainedComponent
-import dagger.hilt.android.scopes.ActivityRetainedScoped
+import dev.zacsweers.metro.ContributesTo
+import dev.zacsweers.metro.Provides
+import dev.zacsweers.metro.SingleIn
 
-@Module
-@InstallIn(ActivityRetainedComponent::class)
-object AppModule {
+@ContributesTo(ActivityScope::class)
+interface AppModule {
 
     @Provides
-    @ActivityRetainedScoped
+    @SingleIn(ActivityScope::class)
     fun provideNavigator() : Navigator = Navigator(startDestination = ConversationList)
 }

@@ -26,7 +26,6 @@ plugins {
     alias(libs.plugins.metro)
 }
 
-
 kotlin {
     compilerOptions {
         jvmTarget = JvmTarget.JVM_11
