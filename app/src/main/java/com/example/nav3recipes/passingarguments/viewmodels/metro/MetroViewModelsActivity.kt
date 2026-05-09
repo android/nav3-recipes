@@ -39,7 +39,7 @@ data object RouteA
 data class RouteB(val id: String)
 
 @ContributesIntoMap(ActivityScope::class, binding<Activity>())
-@ActivityKey(MetroViewModelsActivity::class)
+@ActivityKey
 @Inject
 class MetroViewModelsActivity(private val metroVmf: MetroViewModelFactory) : ComponentActivity() {
 

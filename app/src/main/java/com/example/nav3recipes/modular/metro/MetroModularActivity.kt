@@ -17,7 +17,7 @@ import dev.zacsweers.metrox.android.ActivityKey
 import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
 
 @ContributesIntoMap(ActivityScope::class, binding<Activity>())
-@ActivityKey(MetroModularActivity::class)
+@ActivityKey
 @Inject
 class MetroModularActivity(private val metroVmf: MetroViewModelFactory) : ComponentActivity() {
 
