@@ -17,54 +17,89 @@
 package com.example.nav3recipes.dynamicfeature
 
 import android.content.Context
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.BasicAlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import com.google.android.play.core.ktx.bytesDownloaded
+import com.google.android.play.core.ktx.errorCode
 import com.google.android.play.core.ktx.sessionId
 import com.google.android.play.core.ktx.status
 import com.google.android.play.core.ktx.totalBytesToDownload
 import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.google.android.play.core.splitinstall.SplitInstallRequest
+import com.google.android.play.core.splitinstall.SplitInstallSessionState
 import com.google.android.play.core.splitinstall.SplitInstallStateUpdatedListener
 import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
-import kotlin.math.roundToInt
 
 @Composable
 fun retainDynamicFeatureManager(): DynamicFeatureManager {
     val applicationContext = LocalContext.current.applicationContext
 
-    return retain {
+    val manager = retain {
         DynamicFeatureManager(applicationContext)
     }
+
+    DisposableEffect(manager) {
+        onDispose {
+            manager.dispose()
+        }
+    }
+
+    return manager
 }
 
+sealed interface InstallStatus {
+    data object Idle : InstallStatus
+    data class Pending(val sessionId: Int) : InstallStatus
+    data class Downloading(val sessionId: Int, val progress: Float) : InstallStatus
+    data class Installing(val sessionId: Int) : InstallStatus
+    data class RequiresUserConfirmation(val state: SplitInstallSessionState) : InstallStatus
+    data class Failed(val sessionId: Int, val errorCode: Int) : InstallStatus
+}
+
+@Stable
 class DynamicFeatureManager(context: Context) {
     private val splitInstallManager = SplitInstallManagerFactory.create(context)
-    private var listener: SplitInstallStateUpdatedListener? = null
 
-    var sessionId by mutableStateOf<Int?>(null)
+    // Maintain a single listener for the lifetime of the manager
+    private val listener = SplitInstallStateUpdatedListener { state ->
+        val sessionId = state.sessionId
+        // Capture session ID if we're expecting an install but haven't got the ID yet (race condition)
+        if (activeSessionId == null && activeModuleName != null) {
+            if (state.moduleNames().contains(activeModuleName)) {
+                activeSessionId = sessionId
+            }
+        }
+
+        if (sessionId == activeSessionId) {
+            updateStatus(state)
+        }
+    }
+
+    private var activeSessionId: Int? = null
+    private var activeModuleName: String? = null
+    private var onModuleInstalledCallback: (() -> Unit)? = null
+
+    var status by mutableStateOf<InstallStatus>(InstallStatus.Idle)
         private set
 
-    var downloadState by mutableStateOf<DownloadState?>(null)
+    var installedModules: Set<String> by mutableStateOf(splitInstallManager.installedModules.toSet())
         private set
+
+    init {
+        splitInstallManager.registerListener(listener)
+    }
+
+    fun dispose() {
+        splitInstallManager.unregisterListener(listener)
+    }
 
     fun installModule(moduleName: String, onModuleInstalled: () -> Unit) {
         if (splitInstallManager.installedModules.contains(moduleName)) {
@@ -72,103 +107,102 @@ class DynamicFeatureManager(context: Context) {
             return
         }
 
-        listener = SplitInstallStateUpdatedListener { state ->
-            if (state.sessionId == sessionId) {
-                when (state.status) {
-                    SplitInstallSessionStatus.DOWNLOADING -> {
-                        downloadState = DownloadState(
-                            bytesDownloaded = state.bytesDownloaded,
-                            totalBytesToDownload = state.totalBytesToDownload,
-                        )
-                    }
+        // Avoid starting multiple installs if one is already in progress
+        if (status !is InstallStatus.Idle && status !is InstallStatus.Failed) return
 
-                    SplitInstallSessionStatus.INSTALLED -> {
-                        downloadState = null
-                        sessionId = null
-                        unregisterListener()
-                        onModuleInstalled()
-                    }
-
-                    SplitInstallSessionStatus.FAILED, SplitInstallSessionStatus.CANCELED -> {
-                        downloadState = null
-                        sessionId = null
-                        unregisterListener()
-                    }
-
-                    else -> {}
-                }
-            }
-        }.also(splitInstallManager::registerListener)
+        activeModuleName = moduleName
+        onModuleInstalledCallback = onModuleInstalled
+        // Use a placeholder ID to indicate we are waiting for a session
+        status = InstallStatus.Pending(-1)
 
         splitInstallManager.startInstall(
             SplitInstallRequest.newBuilder().addModule(moduleName).build()
-        ).addOnSuccessListener {
-            sessionId = it
+        ).addOnSuccessListener { sessionId ->
+            if (activeSessionId == null) {
+                activeSessionId = sessionId
+            }
+            // Only update status if it hasn't progressed beyond our placeholder
+            if (status is InstallStatus.Pending && (status as InstallStatus.Pending).sessionId == -1) {
+                status = InstallStatus.Pending(sessionId)
+            }
+        }.addOnFailureListener {
+            status = InstallStatus.Failed(-1, -1)
+            onModuleInstalledCallback = null
         }
+    }
+
+    private fun clearSessionState() {
+        activeSessionId = null
+        activeModuleName = null
+        onModuleInstalledCallback = null
+    }
+
+    private fun updateStatus(state: SplitInstallSessionState) {
+        val sessionId = state.sessionId
+        when (state.status) {
+            SplitInstallSessionStatus.PENDING -> {
+                status = InstallStatus.Pending(sessionId)
+            }
+
+            SplitInstallSessionStatus.DOWNLOADING -> {
+                val progress = if (state.totalBytesToDownload > 0) {
+                    state.bytesDownloaded.toFloat() / state.totalBytesToDownload
+                } else 0f
+                status = InstallStatus.Downloading(sessionId, progress)
+            }
+
+            SplitInstallSessionStatus.DOWNLOADED -> {
+                status = InstallStatus.Installing(sessionId)
+            }
+
+            SplitInstallSessionStatus.INSTALLING -> {
+                status = InstallStatus.Installing(sessionId)
+            }
+
+            SplitInstallSessionStatus.REQUIRES_USER_CONFIRMATION -> {
+                status = InstallStatus.RequiresUserConfirmation(state)
+            }
+
+            SplitInstallSessionStatus.INSTALLED -> {
+                status = InstallStatus.Idle
+                installedModules = splitInstallManager.installedModules.toSet()
+                onModuleInstalledCallback?.invoke()
+                clearSessionState()
+            }
+
+            SplitInstallSessionStatus.FAILED -> {
+                status = InstallStatus.Failed(sessionId, state.errorCode)
+                clearSessionState()
+            }
+
+            SplitInstallSessionStatus.CANCELING -> {
+                status = InstallStatus.Pending(sessionId)
+            }
+
+            SplitInstallSessionStatus.CANCELED -> {
+                status = InstallStatus.Idle
+                clearSessionState()
+            }
+
+            SplitInstallSessionStatus.UNKNOWN -> {
+                status = InstallStatus.Failed(sessionId, -1)
+                clearSessionState()
+            }
+        }
+    }
+
+    fun startConfirmationDialogForResult(
+        state: SplitInstallSessionState,
+        launcher: ActivityResultLauncher<IntentSenderRequest>
+    ) {
+        splitInstallManager.startConfirmationDialogForResult(state, launcher)
     }
 
     fun cancelInstallModule() {
-        sessionId?.let {
-            splitInstallManager.cancelInstall(it).addOnSuccessListener {
-                downloadState = null
-                sessionId = null
-                unregisterListener()
-            }
+        activeSessionId?.let { id ->
+            splitInstallManager.cancelInstall(id)
         }
-    }
-
-    private fun unregisterListener() {
-        listener?.let(splitInstallManager::unregisterListener)
-    }
-
-    data class DownloadState(
-        val bytesDownloaded: Long,
-        val totalBytesToDownload: Long,
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun DynamicFeatureDownloadProgressDialog(
-    manager: DynamicFeatureManager,
-    modifier: Modifier = Modifier,
-) {
-    val sessionId = manager.sessionId
-    val state = manager.downloadState
-    val progress = if (state != null) {
-        state.bytesDownloaded.toFloat() / state.totalBytesToDownload
-    } else {
-        0f
-    }
-    val progressPercentage = "${(progress * 100).roundToInt()}%"
-
-    if (sessionId != null) {
-        BasicAlertDialog(
-            onDismissRequest = {},
-            modifier = modifier,
-        ) {
-            Surface(shape = MaterialTheme.shapes.large) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(16.dp),
-                ) {
-                    Text(
-                        text = "Downloading module...",
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    Box(contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(progress = { progress })
-                        Text(
-                            text = progressPercentage,
-                            style = MaterialTheme.typography.labelSmall,
-                        )
-                    }
-                    Button(onClick = manager::cancelInstallModule) {
-                        Text(text = "Cancel")
-                    }
-                }
-            }
-        }
+        status = InstallStatus.Idle
+        clearSessionState()
     }
 }

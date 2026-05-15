@@ -25,7 +25,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.navigation3.runtime.NavKey
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
@@ -34,37 +34,45 @@ import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 import kotlinx.serialization.Serializable
 
 class DynamicFeatureActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         setEdgeToEdgeConfig()
         super.onCreate(savedInstanceState)
         setContent {
-            val backStack = rememberNavBackStack(RegularModule)
+            val backStack = rememberNavBackStack(Home)
             val dynamicFeatureManager = retainDynamicFeatureManager()
 
             DynamicFeatureDownloadProgressDialog(dynamicFeatureManager)
 
             NavDisplay(
                 backStack = backStack,
+                onBack = { backStack.removeLastOrNull() },
                 modifier = Modifier.fillMaxSize(),
                 entryProvider = entryProvider {
-                    entry<RegularModule> {
-                        RegularModuleScreen(
+                    appEntry<Home> {
+                        HomeScreen(
                             onNavigateToInstallTime = {
-                                dynamicFeatureManager.installModule(InstallTimeModule.MODULE_NAME) {
-                                    backStack.add(InstallTimeModule)
-                                }
+                                dynamicFeatureManager.installModule(
+                                    moduleName = InstallTimeModule.moduleName,
+                                    onModuleInstalled = {
+                                        backStack.add(InstallTimeModule.Home)
+                                    }
+                                )
                             },
                             onNavigateToOnDemand = {
-                                dynamicFeatureManager.installModule(OnDemandModule.MODULE_NAME) {
-                                    backStack.add(OnDemandModule)
-                                }
+                                dynamicFeatureManager.installModule(
+                                    moduleName = OnDemandModule.moduleName,
+                                    onModuleInstalled = {
+                                        backStack.add(OnDemandModule.Home)
+                                    }
+                                )
                             },
                         )
                     }
 
-                    dynamicFeatureEntry<InstallTimeModule>(InstallTimeModule.CLASS_NAME)
-
-                    dynamicFeatureEntry<OnDemandModule>(OnDemandModule.CLASS_NAME)
+                    dynamicFeatureManager.installedModules
+                        .mapNotNull { ALL_DYNAMIC_MODULES_MAP[it] }
+                        .forEach { buildDynamicEntries(it) }
                 }
             )
         }
@@ -72,20 +80,20 @@ class DynamicFeatureActivity : ComponentActivity() {
 }
 
 @Composable
-fun RegularModuleScreen(
+fun HomeScreen(
     onNavigateToInstallTime: () -> Unit,
     onNavigateToOnDemand: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     ContentGreen(
-        title = "Regular Module screen",
+        title = "Home screen",
         modifier = modifier,
     ) {
         Column {
-            Button(onClick = onNavigateToInstallTime) {
+            Button(onClick = dropUnlessResumed { onNavigateToInstallTime() }) {
                 Text(text = "Go to Install Time Module Screen")
             }
-            Button(onClick = onNavigateToOnDemand) {
+            Button(onClick = dropUnlessResumed { onNavigateToOnDemand() }) {
                 Text(text = "Go to On Demand Module Screen")
             }
         }
@@ -93,18 +101,33 @@ fun RegularModuleScreen(
 }
 
 @Serializable
-private data object RegularModule : NavKey
+private data object Home : AppNavKey
 
-@Serializable
-data object InstallTimeModule : NavKey {
-    const val CLASS_NAME =
-        "com.example.dynamicfeature.installtime.DynamicFeatureInstallTimeContentProvider"
-    const val MODULE_NAME = "installtime"
+private val ALL_DYNAMIC_MODULES_MAP = listOf(
+    InstallTimeModule,
+    OnDemandModule
+).associateBy { it.moduleName }
+
+object InstallTimeModule : DynamicModule(
+    entryBuilderClassName = "com.example.dynamicfeature.installtime.InstallTimeEntryBuilder",
+    moduleName = "installtime",
+) {
+    @Serializable
+    data object Home : AppNavKey {
+        override fun toContentKey(): Any {
+            return "InstallTimeHome"
+        }
+    }
 }
 
-@Serializable
-data object OnDemandModule : NavKey {
-    const val CLASS_NAME =
-        "com.example.dynamicfeature.ondemand.DynamicFeatureOnDemandContentProvider"
-    const val MODULE_NAME = "ondemand"
+object OnDemandModule : DynamicModule(
+    entryBuilderClassName = "com.example.dynamicfeature.ondemand.OnDemandEntryBuilder",
+    moduleName = "ondemand"
+) {
+    @Serializable
+    data object Home : AppNavKey {
+        override fun toContentKey(): Any {
+            return "OnDemandHome"
+        }
+    }
 }

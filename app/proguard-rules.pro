@@ -21,6 +21,6 @@
 #-renamesourcefileattribute SourceFile
 
 # Dynamic Feature Module recipe
--keep class * implements com.example.nav3recipes.dynamicfeature.DynamicFeatureContentProvider {
+-keep class * implements com.example.nav3recipes.dynamicfeature.DynamicModuleEntryBuilder {
    public <init>();
 }

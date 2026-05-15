@@ -14,24 +14,28 @@
  * limitations under the License.
  */
 
-package com.example.dynamicfeature.ondemand
+package com.example.dynamicfeature.installtime
 
 import androidx.compose.runtime.Composable
-import com.example.nav3recipes.content.ContentBlue
-import com.example.nav3recipes.dynamicfeature.DynamicFeatureContentProvider
-import com.example.nav3recipes.dynamicfeature.OnDemandModule
+import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavKey
+import com.example.nav3recipes.content.ContentRed
+import com.example.nav3recipes.dynamicfeature.DynamicModuleEntryBuilder
+import com.example.nav3recipes.dynamicfeature.InstallTimeModule
+import com.example.nav3recipes.dynamicfeature.appEntry
 
 @Suppress("unused")
-class DynamicFeatureOnDemandContentProvider : DynamicFeatureContentProvider<OnDemandModule> {
-    @Composable
-    override fun Content(key: OnDemandModule) {
-        OnDemandModuleScreen()
+class InstallTimeEntryBuilder : DynamicModuleEntryBuilder {
+    override fun EntryProviderScope<NavKey>.build() {
+        appEntry<InstallTimeModule.Home> {
+            InstallTimeModuleScreen()
+        }
     }
 }
 
 @Composable
-private fun OnDemandModuleScreen() {
-    ContentBlue(
-        title = "On Demand Module screen"
+private fun InstallTimeModuleScreen() {
+    ContentRed(
+        title = "Install Time Module screen"
     )
 }
