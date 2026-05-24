@@ -56,6 +56,7 @@ Note: If you find a bug or have a feature request for Material3 Adaptive Scenes 
 ### Architecture
 - **[Hilt - Modularized navigation code](app/src/main/java/com/example/nav3recipes/modular/hilt)**: Demonstrates how to decouple navigation code into separate modules (uses Dagger/Hilt for DI).
 - **[Koin - Modularized navigation code](app/src/main/java/com/example/nav3recipes/modular/koin)**: Demonstrates how to decouple navigation code into separate modules (uses Koin for DI).
+- **[Metro - Modularized navigation code](metroapp/src/main/java/com/example/nav3recipes/modular/metro)**: Demonstrates how to decouple navigation code into separate modules (uses Metro for DI).
 - **[Dynamic feature navigation](app/src/main/java/com/example/nav3recipes/dynamicfeature)**: Demonstrates how to integrate navigation code with Dynamic Feature Module.
 
 ### Working with ViewModels
@@ -63,6 +64,7 @@ Note: If you find a bug or have a feature request for Material3 Adaptive Scenes 
 - **[Basic ViewModel](app/src/main/java/com/example/nav3recipes/passingarguments/viewmodels/basic)**: Navigation arguments are passed to a ViewModel constructed using `viewModel()`
 - **[Hilt injected ViewModel](app/src/main/java/com/example/nav3recipes/passingarguments/viewmodels/hilt)**: Navigation arguments are passed to a ViewModel constructed using `hiltViewModel()`
 - **[Koin injected ViewModel](app/src/main/java/com/example/nav3recipes/passingarguments/viewmodels/koin)**: Navigation arguments are passed to a ViewModel constructed using `koinViewModel()`
+- **[Metro injected ViewModel](metroapp/src/main/java/com/example/nav3recipes/passingarguments/viewmodels/metro)**: Navigation arguments are passed to a ViewModel constructed using `assistedMetroViewModel()`
 
 #### Sharing a ViewModel between screens
 - **[Shared ViewModel](app/src/main/java/com/example/nav3recipes/sharedviewmodel)**: Demonstrates how to share a `ViewModel` between different screens (entries) in Navigation 3 using a custom `NavEntryDecorator`.
