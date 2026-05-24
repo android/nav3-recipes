@@ -14,21 +14,11 @@
  * limitations under the License.
  */
 
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.hilt)
-    alias(libs.plugins.ksp)
-    id("kotlin-parcelize")
-}
-
-kotlin {
-    compilerOptions {
-        jvmTarget = JvmTarget.JVM_11
-    }
+    alias(libs.plugins.metro)
 }
 
 android {
@@ -62,10 +52,6 @@ android {
     buildFeatures {
         compose = true
     }
-    dynamicFeatures += setOf(
-        ":dynamicfeature:installtime",
-        ":dynamicfeature:ondemand",
-    )
 }
 
 dependencies {
@@ -78,25 +64,12 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.androidx.material3.windowsizeclass)
-    implementation(libs.androidx.adaptive.layout)
-    implementation(libs.androidx.material3.navigation3)
 
     implementation(libs.kotlinx.serialization.core)
-    implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
-    implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
-    implementation(libs.androidx.material.icons.extended)
-    implementation(libs.androidx.navigation2)
-    implementation(libs.androidx.fragment.compose)
     implementation(project(":common"))
-
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
-    implementation(libs.koin.compose.viewmodel)
-    implementation(libs.koin.navigation3)
 
     implementation(libs.metrox.android)
     implementation(libs.metrox.viewmodel)
@@ -110,5 +83,4 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     testImplementation(kotlin("test"))
-    implementation(libs.feature.delivery.ktx)
 }
