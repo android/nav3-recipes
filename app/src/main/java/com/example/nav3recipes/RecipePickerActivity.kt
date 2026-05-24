@@ -59,13 +59,11 @@ import com.example.nav3recipes.material.listdetail.MaterialListDetailActivity
 import com.example.nav3recipes.material.supportingpane.MaterialSupportingPaneActivity
 import com.example.nav3recipes.modular.hilt.HiltModularActivity
 import com.example.nav3recipes.modular.koin.KoinModularActivity
-import com.example.nav3recipes.modular.metro.MetroModularActivity
 import com.example.nav3recipes.multiplestacks.MultipleStacksActivity
 import com.example.nav3recipes.navscenedecorator.ResponsiveNavigationSceneDecoratorActivity
 import com.example.nav3recipes.passingarguments.viewmodels.basic.BasicViewModelsActivity
 import com.example.nav3recipes.passingarguments.viewmodels.hilt.HiltViewModelsActivity
 import com.example.nav3recipes.passingarguments.viewmodels.koin.KoinViewModelsActivity
-import com.example.nav3recipes.passingarguments.viewmodels.metro.MetroViewModelsActivity
 import com.example.nav3recipes.results.event.ResultEventActivity
 import com.example.nav3recipes.results.state.ResultStateActivity
 import com.example.nav3recipes.retain.RetainActivity
@@ -118,14 +116,12 @@ private val recipes = listOf(
     Heading("Architecture"),
     Recipe("Hilt - Modular Navigation", HiltModularActivity::class.java),
     Recipe("Koin - Modular Navigation", KoinModularActivity::class.java),
-    Recipe("Metro - Modular Navigation", MetroModularActivity::class.java),
     Recipe("Dynamic Feature Module Navigation", DynamicFeatureActivity::class.java),
 
     Heading("Passing navigation arguments using ViewModels"),
     Recipe("Basic", BasicViewModelsActivity::class.java),
     Recipe("Using Hilt", HiltViewModelsActivity::class.java),
     Recipe("Using Koin", KoinViewModelsActivity::class.java),
-    Recipe("Using Metro", MetroViewModelsActivity::class.java),
 
     Heading("Returning Results"),
     Recipe("Return result as Event", ResultEventActivity::class.java),

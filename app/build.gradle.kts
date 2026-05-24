@@ -25,6 +25,7 @@ plugins {
     id("kotlin-parcelize")
 }
 
+
 kotlin {
     compilerOptions {
         jvmTarget = JvmTarget.JVM_11
@@ -37,7 +38,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.nav3recipes"
-        minSdk = 28
+        minSdk = 24
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -97,10 +98,6 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.koin.compose.viewmodel)
     implementation(libs.koin.navigation3)
-
-    implementation(libs.metrox.android)
-    implementation(libs.metrox.viewmodel)
-    implementation(libs.metrox.viewmodel.compose)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
