@@ -7,8 +7,8 @@ This recipe demonstrates how to integrate Dynamic Feature Module (DFM) with Navi
 This example defines three keys for screens in three different modules and delivery options:
 
 - `Home`: A screen in the main `:app` module that displays buttons to navigate into the screens from the dynamic feature modules.
-- `InstallTimeModule.Home`: A screen in the `:dynamicfeature:installtime` module, which is installed at delivery time.
-- `OnDemandModule.Home`: A screen in the `:dynamicfeature:ondemand` module, which is installed on-demand.
+- `InstallTimeModule.Home`: A screen in the `:dynamicfeature:installtime` module, which is installed at delivery time. For example, this might be used for an asset-rich onboarding module that is needed when the app is first installed, but which can be deleted after the onboarding is complete.
+- `OnDemandModule.Home`: A screen in the `:dynamicfeature:ondemand` module, which is installed on-demand. For example, this might be used for a module with a large file size that only a small subset of the userbase is expected to use.
 
 ### `DynamicModule`
 
