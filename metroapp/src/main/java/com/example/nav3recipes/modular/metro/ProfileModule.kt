@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.zacsweers.metro.BindingContainer
 import dev.zacsweers.metro.ContributesTo
 import dev.zacsweers.metro.IntoSet
 import dev.zacsweers.metro.Provides
@@ -20,7 +21,8 @@ object Profile
 
 // IMPLEMENTATION
 @ContributesTo(ActivityScope::class)
-interface ProfileModule {
+@BindingContainer
+object ProfileModule {
 
     @IntoSet
     @Provides

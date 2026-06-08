@@ -7,5 +7,5 @@ import dev.zacsweers.metrox.android.MetroAppComponentProviders
 import dev.zacsweers.metrox.android.MetroApplication
 
 class Nav3MetroApplication : Application(), MetroApplication {
-    override val appComponentProviders: MetroAppComponentProviders by lazy { createGraphFactory<MetroGraph.Factory>().create(this) }
+    override val appComponentProviders: MetroAppComponentProviders by lazy { createGraphFactory<MetroGraph.Factory>().create() }
 }

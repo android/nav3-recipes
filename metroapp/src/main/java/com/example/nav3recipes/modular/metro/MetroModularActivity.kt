@@ -18,13 +18,10 @@ import dev.zacsweers.metrox.android.ActivityKey
 @ContributesIntoMap(ActivityScope::class, binding<Activity>())
 @ActivityKey
 @Inject
-class MetroModularActivity : ComponentActivity() {
-
-    @Inject
-    lateinit var navigator: Navigator
-
-    @Inject
-    lateinit var entryProviderScopes: Set<@JvmSuppressWildcards EntryProviderInstaller>
+class MetroModularActivity(
+    private val navigator: Navigator,
+    private val entryProviderScopes: Set<@JvmSuppressWildcards EntryProviderInstaller>
+) : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

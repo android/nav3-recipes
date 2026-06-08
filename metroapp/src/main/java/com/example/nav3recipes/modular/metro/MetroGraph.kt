@@ -11,7 +11,7 @@ import dev.zacsweers.metrox.viewmodel.ViewModelGraph
 
     @DependencyGraph.Factory
     interface Factory {
-        fun create(@Provides context: Context): MetroGraph
+        fun create(): MetroGraph
     }
 }
 

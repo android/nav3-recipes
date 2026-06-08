@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessResumed
 import com.example.nav3recipes.ui.theme.colors
+import dev.zacsweers.metro.BindingContainer
 import dev.zacsweers.metro.ContributesTo
 import dev.zacsweers.metro.IntoSet
 import dev.zacsweers.metro.Provides
@@ -38,7 +39,8 @@ data class ConversationDetail(val id: Int) {
 
 // IMPL
 @ContributesTo(ActivityScope::class)
-interface ConversationModule {
+@BindingContainer
+object ConversationModule {
 
     @IntoSet
     @Provides
