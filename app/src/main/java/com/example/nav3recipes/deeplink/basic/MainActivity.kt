@@ -1,12 +1,16 @@
 package com.example.nav3recipes.deeplink.basic
 
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.core.net.toUri
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.deeplink.DeepLinkMatcher
+import androidx.navigation3.runtime.deeplink.DeepLinkMatcher.MatchResult
+import androidx.navigation3.runtime.deeplink.DeepLinkRequest
+import androidx.navigation3.runtime.deeplink.DeepLinkUri
+import androidx.navigation3.runtime.deeplink.UriDeepLinkMatcher
+import androidx.navigation3.runtime.deeplink.fromIntent
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
@@ -17,23 +21,18 @@ import com.example.nav3recipes.common.deeplink.TextContent
 import com.example.nav3recipes.deeplink.basic.ui.URL_HOME_EXACT
 import com.example.nav3recipes.deeplink.basic.ui.URL_SEARCH
 import com.example.nav3recipes.deeplink.basic.ui.URL_USERS_WITH_FILTER
-import com.example.nav3recipes.deeplink.basic.util.DeepLinkMatchResult
-import com.example.nav3recipes.deeplink.basic.util.DeepLinkMatcher
-import com.example.nav3recipes.deeplink.basic.util.DeepLinkPattern
-import com.example.nav3recipes.deeplink.basic.util.DeepLinkRequest
-import com.example.nav3recipes.deeplink.basic.util.KeyDecoder
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 
 /**
  * Parses a target deeplink into a NavKey. There are several crucial steps involved:
  *
- * STEP 1.Parse supported deeplinks (URLs that can be deeplinked into) into a readily readable
- *  format (see [DeepLinkPattern])
- * STEP 2. Parse the requested deeplink into a readily readable, format (see [DeepLinkRequest])
+ * STEP 1. Parse supported deeplinks (URLs that can be deeplinked into) into a readily readable
+ *  format (see [DeepLinkUri])
+ * STEP 2. Parse the requested deeplink into a readily readable format (see [DeepLinkRequest])
  *  **note** the parsed requested deeplink and parsed supported deeplinks should be cohesive with each
  *  other to facilitate comparison and finding a match
  * STEP 3. Compare the requested deeplink target with supported deeplinks in order to find a match
- *  (see [DeepLinkMatchResult]). The match result's format should enable conversion from result
+ *  (see [MatchResult]). The match result's format should enable conversion from result
  *  to backstack key, regardless of what the conversion method may be.
  * STEP 4. Associate the match results with the correct backstack key
  *
@@ -51,36 +50,29 @@ import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 class MainActivity : ComponentActivity() {
     /** STEP 1. Parse supported deeplinks */
     // internal so that landing activity can link to this in the kdocs
-    internal val deepLinkPatterns: List<DeepLinkPattern<out NavKey>> = listOf(
+    internal val deepLinkMatchers: List<DeepLinkMatcher<out NavKey>> = listOf(
         // "https://www.nav3recipes.com/home"
-        DeepLinkPattern(HomeKey.serializer(), (URL_HOME_EXACT).toUri()),
+        UriDeepLinkMatcher(DeepLinkUri(URL_HOME_EXACT), HomeKey.serializer()),
         // "https://www.nav3recipes.com/users/with/{filter}"
-        DeepLinkPattern(UsersKey.serializer(), (URL_USERS_WITH_FILTER).toUri()),
+        UriDeepLinkMatcher(DeepLinkUri(URL_USERS_WITH_FILTER), UsersKey.serializer()),
         // "https://www.nav3recipes.com/users/search?{firstName}&{age}&{location}"
-        DeepLinkPattern(SearchKey.serializer(), (URL_SEARCH.toUri())),
+        UriDeepLinkMatcher(DeepLinkUri(URL_SEARCH), SearchKey.serializer()),
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setEdgeToEdgeConfig()
         super.onCreate(savedInstanceState)
 
-        // retrieve the target Uri
-        val uri: Uri? = intent.data
-        // associate the target with the correct backstack key
-        val key: NavKey = uri?.let {
-            /** STEP 2. Parse requested deeplink */
-            val request = DeepLinkRequest(uri)
-            /** STEP 3. Compared requested with supported deeplink to find match*/
-            val match = deepLinkPatterns.firstNotNullOfOrNull { pattern ->
-                DeepLinkMatcher(request, pattern).match()
-            }
-            /** STEP 4. If match is found, associate match to the correct key*/
-            match?.let {
-                   //leverage kotlinx.serialization's Decoder to decode
-                   // match result into a backstack key
-                    KeyDecoder(match.args)
-                        .decodeSerializableValue(match.serializer)
-            }
+        val key: NavKey = intent.data?.let {
+            val request = DeepLinkRequest.fromIntent(intent)
+
+            deepLinkMatchers.asSequence()
+                .mapNotNull { matcher ->
+                    @Suppress("UNCHECKED_CAST")
+                    matcher.match(request) as? MatchResult<NavKey>
+                }
+                .maxOrNull()
+                ?.key
         } ?: HomeKey // fallback if intent.uri is null or match is not found
 
         /**

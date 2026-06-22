@@ -51,93 +51,51 @@ Let's start with the basics: how to parse an Intent's URL into a navigation key.
 
 ## Parsing an intent into a navigation key
 
-When your app receives a deep link, you need to convert the incoming `Intent`
-(specifically the data URI) into a `NavKey` that your navigation system can
-understand.
+When your app receives a deep link, you convert the incoming `Intent` into navigation keys.
 
-This process involves four main steps:
+This process involves the following steps:
 
-1.  **Define Supported Deep Links**: Create `DeepLinkPattern` objects that
-    describe the URLs your app supports. These patterns link a URI structure to
-    a specific `NavKey` class.
-2.  **Parse the Request**: Convert the incoming `Intent`'s data URI into a
-    readable format, such as a `DeepLinkRequest`.
-3.  **Match Request to Pattern**: Compare the incoming request against your list
-    of supported patterns to find a match.
-4.  **Decode to Key**: Use the match result to extract arguments and create an
-    instance of the corresponding `NavKey`.
+1.  **Define matchers**: Create `UriDeepLinkMatcher` instances that describe the deep links your app supports and which can create corresponding navigation keys.
+2.  **Model the request**: Create a `DeepLinkRequest` to model the incoming deep link. You can use the `DeepLinkRequest.fromIntent(intent)` helper to create one from an `Intent`, capturing the `uri`, `action`, and `mimeType` of the `Intent`.
+3.  **Match the request**: Call `matcher.match(request)` for each of your matchers, collecting the results.
+4.  **Determine the best result**: Filter out `null` results and then find the best match by making use of `MatchResult`'s implementation of the `Comparable` interface.
 
 ### Example Implementation
 
-The `com.example.nav3recipes.deeplink.basic` package provides an example of
-this flow.
+The `com.example.nav3recipes.deeplink.basic` package provides an example of this flow in `MainActivity.kt`, using the `UriDeepLinkMatcher` to match requests.
 
-**Step 1: Define Patterns**
-
-In a file (e.g., `MainActivity`), define a list of supported deeplink patterns.
-You can leverage the `kotlinx.serialization` library by annotating your Navigation keys with
-`@Serializable`, and then use the generated `Serializer` to map deep link arguments to a
-key argument.
-
-For example:
+In your app, define the list of supported deep link matchers:
 
 ```kotlin
-internal val deepLinkPatterns: List<DeepLinkPattern<out NavKey>> = listOf(
+internal val deepLinkMatchers: List<DeepLinkMatcher<out NavKey>> = listOf(
     // URL pattern with exact match: "https://www.nav3recipes.com/home"
-    DeepLinkPattern(HomeKey.serializer(), (URL_HOME_EXACT).toUri()),
+    UriDeepLinkMatcher(DeepLinkUri(URL_HOME_EXACT), HomeKey.serializer()),
     
     // URL pattern with Path arguments: "https://www.nav3recipes.com/users/with/{filter}"
-    DeepLinkPattern(UsersKey.serializer(), (URL_USERS_WITH_FILTER).toUri()),
+    UriDeepLinkMatcher(DeepLinkUri(URL_USERS_WITH_FILTER), UsersKey.serializer()),
     
-    // URL pattern with Query arguments: "https://www.nav3recipes.com/users/search?{firstName}&{age}..."
-    DeepLinkPattern(SearchKey.serializer(), (URL_SEARCH.toUri())),
+    // URL pattern with Query arguments: "https://www.nav3recipes.com/users/search?firstName={firstName}&ageMin={ageMin}..."
+    UriDeepLinkMatcher(DeepLinkUri(URL_SEARCH), SearchKey.serializer()),
 )
 ```
 
-The sample `DeepLinkPattern` class takes the URL pattern and serializer for the associated
-key, then maps each argument ("{...}") to a field in the key. Using the serializer,
-`DeepLinkPattern` stores the metadata for each argument such as its KType and its argument name.
-
-**Step 2: Parse the Request**
-
-In your Activity's `onCreate` method, you will need to retrieve the deep link URI from the
-intent. Then parse that URI into a readable format. In this recipe, we use a
-`DeepLinkRequest` class which parses the URI's path segments and query parameters into a map. This
-map will make it easier to compare against the patterns defined in Step 1.
-
-**Step 3: Match Request to Pattern**
-
-Next, iterate through your list of `deepLinkPatterns`. For each pattern,
-use a matcher (e.g., `DeepLinkMatcher`) to check if the request's path and arguments align with
-the pattern's structure. The matcher should return a result object containing the matched arguments
-if successful, or null if not.
-
-**Step 4: Decode to Key**
-
-If a match is found, use the matched arguments to instantiate the corresponding `NavKey`.
-Since we used `kotlinx.serialization` in Step 1, we can leverage a custom Decoder (`KeyDecoder`)
-to decode the map of arguments directly into the strongly-typed key object.
+In your Activity's `onCreate` method, retrieve and parse the intent, find the highest-ranking match result, and extract the strongly-typed key:
 
 ```kotlin
 override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    val uri: Uri? = intent.data
-    
-    val key: NavKey = uri?.let {
-        // Step 2: Parse request
-        val request = DeepLinkRequest(uri)
-        
-        // Step 3: Find match
-        val match = deepLinkPatterns.firstNotNullOfOrNull { pattern ->
-            DeepLinkMatcher(request, pattern).match()
-        }
-        
-        // Step 4: Decode to NavKey
-        match?.let {
-            KeyDecoder(match.args).decodeSerializableValue(match.serializer)
-        }
-    } ?: HomeKey // Fallback to home if no match or no URI
+    val key: NavKey = intent.data?.let {
+        val request = DeepLinkRequest.fromIntent(intent)
+
+        deepLinkMatchers.asSequence()
+            .mapNotNull { matcher ->
+                @Suppress("UNCHECKED_CAST")
+                matcher.match(request) as? MatchResult<NavKey>
+            }
+            .maxOrNull()
+            ?.key
+    } ?: HomeKey // Fallback to home if no URI or no match
 
     setContent {
         val backStack = rememberNavBackStack(key)
@@ -146,8 +104,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
 }
 ```
 
-For more details, refer to the [Basic Deep Link Recipe](../app/src/main/java/com/example/nav3recipes/deeplink/basic/README.md)
-and the helper functions in the [util](../app/src/main/java/com/example/nav3recipes/deeplink/basic/util) package.
+For more details, refer to the [Basic Deep Link Recipe](../app/src/main/java/com/example/nav3recipes/deeplink/basic/README.md).
 
 ## Synthetic backStack & managing Tasks
 

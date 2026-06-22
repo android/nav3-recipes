@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.example.nav3recipes.deeplink.advanced"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.example.nav3recipes.deeplink.advanced"

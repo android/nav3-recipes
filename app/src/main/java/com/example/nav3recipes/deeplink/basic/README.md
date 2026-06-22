@@ -13,7 +13,7 @@ The `MainActivity` has several backStack keys to demonstrate different types of 
 2. `UsersKey` - deeplink with path arguments
 3. `SearchKey` - deeplink with query arguments
 
-See `MainActivity.deepLinkPatterns` for the actual url pattern of each.
+See `MainActivity.deepLinkMatchers` for the actual url pattern of each.
 
 ## Recipe structure
 

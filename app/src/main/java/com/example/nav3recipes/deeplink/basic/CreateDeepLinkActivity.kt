@@ -44,7 +44,7 @@ import com.example.nav3recipes.ui.setEdgeToEdgeConfig
  * 1. [HomeKey] - deeplink with an exact url (no deeplink arguments)
  * 2. [UsersKey] - deeplink with path arguments
  * 3. [SearchKey] - deeplink with query arguments
- * See [MainActivity.deepLinkPatterns] for the actual url pattern of each.
+ * See [MainActivity.deepLinkMatchers] for the actual url pattern of each.
  *
  * **RECIPE STRUCTURE** This recipe consists of three main packages:
  * 1. basic.deeplink - Contains the two activities
