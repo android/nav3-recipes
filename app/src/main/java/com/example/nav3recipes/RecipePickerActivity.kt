@@ -66,6 +66,7 @@ import com.example.nav3recipes.passingarguments.viewmodels.hilt.HiltViewModelsAc
 import com.example.nav3recipes.passingarguments.viewmodels.koin.KoinViewModelsActivity
 import com.example.nav3recipes.results.event.ResultEventActivity
 import com.example.nav3recipes.results.state.ResultStateActivity
+import com.example.nav3recipes.results.saveable.ResultSaveableActivity
 import com.example.nav3recipes.retain.RetainActivity
 import com.example.nav3recipes.scenes.listdetail.ListDetailActivity
 import com.example.nav3recipes.scenes.twopane.TwoPaneActivity
@@ -126,6 +127,7 @@ private val recipes = listOf(
     Heading("Returning Results"),
     Recipe("Return result as Event", ResultEventActivity::class.java),
     Recipe("Return result as State", ResultStateActivity::class.java),
+    Recipe("Return result as Saveable State", ResultSaveableActivity::class.java),
 
     Heading("Deeplink"),
     Recipe("Parse Intent", CreateDeepLinkActivity::class.java),
