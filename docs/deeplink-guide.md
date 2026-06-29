@@ -56,7 +56,7 @@ When your app receives a deep link, you convert the incoming `Intent` into navig
 This process involves the following steps:
 
 1.  **Define matchers**: Create `UriDeepLinkMatcher` instances that describe the deep links your app supports and which can create corresponding navigation keys.
-2.  **Model the request**: Create a `DeepLinkRequest` to model the incoming deep link. You can use the `DeepLinkRequest.fromIntent(intent)` helper to create one from an `Intent`, capturing the `uri`, `action`, and `mimeType` of the `Intent`.
+2.  **Model the request**: Create a `DeepLinkRequest` to model the incoming deep link. You can use the `DeepLinkRequest(intent)` helper to create one from an `Intent`, which copies the `uri` from the intent as well as setting the MIME type and action extras as applicable and copying the extras from the intent itself.
 3.  **Match the request**: Call `matcher.match(request)` for each of your matchers, collecting the results.
 4.  **Determine the best result**: Filter out `null` results and then find the best match by making use of `MatchResult`'s implementation of the `Comparable` interface.
 
@@ -86,13 +86,10 @@ override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
     val key: NavKey = intent.data?.let {
-        val request = DeepLinkRequest.fromIntent(intent)
+        val request = DeepLinkRequest(intent)
 
         deepLinkMatchers.asSequence()
-            .mapNotNull { matcher ->
-                @Suppress("UNCHECKED_CAST")
-                matcher.match(request) as? MatchResult<NavKey>
-            }
+            .mapNotNull { it.match(request) }
             .maxOrNull()
             ?.key
     } ?: HomeKey // Fallback to home if no URI or no match

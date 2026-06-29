@@ -10,7 +10,7 @@ import androidx.navigation3.runtime.deeplink.DeepLinkMatcher.MatchResult
 import androidx.navigation3.runtime.deeplink.DeepLinkRequest
 import androidx.navigation3.runtime.deeplink.DeepLinkUri
 import androidx.navigation3.runtime.deeplink.UriDeepLinkMatcher
-import androidx.navigation3.runtime.deeplink.fromIntent
+import androidx.navigation3.runtime.deeplink.invoke
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
@@ -64,13 +64,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val key: NavKey = intent.data?.let {
-            val request = DeepLinkRequest.fromIntent(intent)
+            val request = DeepLinkRequest(intent)
 
-            deepLinkMatchers.asSequence()
-                .mapNotNull { matcher ->
-                    @Suppress("UNCHECKED_CAST")
-                    matcher.match(request) as? MatchResult<NavKey>
-                }
+            deepLinkMatchers
+                .mapNotNull { it.match(request) }
                 .maxOrNull()
                 ?.key
         } ?: HomeKey // fallback if intent.uri is null or match is not found
