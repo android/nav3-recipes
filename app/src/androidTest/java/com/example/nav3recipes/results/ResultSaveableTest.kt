@@ -36,12 +36,21 @@ import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import com.example.nav3recipes.results.saveable.conflateAsSaveableState
 import kotlinx.serialization.Serializable
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.concurrent.TimeUnit
+import androidx.test.espresso.IdlingPolicies
 
 class ResultSaveableTest {
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @Before
+    fun setup() {
+        IdlingPolicies.setMasterPolicyTimeout(60, TimeUnit.SECONDS)
+        IdlingPolicies.setIdlingResourceTimeout(60, TimeUnit.SECONDS)
+    }
 
     @Test
     fun testResultConflateAsSaveableState() {
