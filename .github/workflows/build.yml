@@ -57,7 +57,7 @@ jobs:
           api-level: ${{ matrix.api-level }}
           target: google_apis
           arch: x86_64
-          profile: Galaxy Nexus
+          profile: pixel_7
           disable-animations: true
           disk-size: 6000M
           heap-size: 600M
