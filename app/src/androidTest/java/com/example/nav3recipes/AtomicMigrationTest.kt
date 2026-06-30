@@ -8,13 +8,16 @@ import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso
+import androidx.test.espresso.IdlingPolicies
 import com.example.nav3recipes.migration.atomic.begin.BeginAtomicMigrationActivity
 import com.example.nav3recipes.migration.atomic.end.EndAtomicMigrationActivity
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import org.junit.runners.Parameterized.Parameters
+import java.util.concurrent.TimeUnit
 
 /**
  * Instrumented navigation tests for the start and end states of the atomic migration guide.
@@ -34,6 +37,12 @@ class AtomicMigrationTest(activityClass: Class<out ComponentActivity>) {
                 arrayOf(EndAtomicMigrationActivity::class.java)
             )
         }
+    }
+
+    @Before
+    fun setup() {
+        IdlingPolicies.setMasterPolicyTimeout(60, TimeUnit.SECONDS)
+        IdlingPolicies.setIdlingResourceTimeout(60, TimeUnit.SECONDS)
     }
 
     @Test

@@ -122,6 +122,11 @@
             android:label="@string/app_name"
             android:theme="@style/Theme.Nav3Recipes"/>
         <activity
+            android:name=".results.saveable.ResultSaveableActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Nav3Recipes"/>
+        <activity
             android:name=".migration.atomic.begin.BeginAtomicMigrationActivity"
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes"/>

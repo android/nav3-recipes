@@ -17,6 +17,7 @@ This project contains recipes for using the Navigation 3 library. To maintain co
 - **Resumed Navigation**: Use `dropUnlessResumed` for navigation actions (e.g., button clicks that update navigation state) to prevent multiple rapid clicks or navigation from background.
   - Exception: Optional for the click handlers used by `NavigationBarItem`, `NavigationRailItem`, or equivalent composables for navigate between top-level destinations.
 - **Scenes**: Implementations of the `Scene` interface should be data classes or implement `equals` and `hashcode` to ensure that the same `Scene` is used when appropriate.
+- **Entry Decorators**: When overriding the default `entryDecorators` list on `NavDisplay` (or calling `rememberDecoratedNavEntries`), ensure that `rememberSaveableStateHolderNavEntryDecorator()` is included (typically as the first decorator in the list). This ensures that `rememberSaveable` state functions correctly inside the `NavEntry` content across configuration changes and back stack inactive states.
 
 ## Recipe Discoverability and Maintenance
 
