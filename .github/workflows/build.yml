@@ -51,6 +51,12 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
       - name: Build projects and run instrumentation tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -61,8 +67,4 @@ jobs:
           disable-animations: true
           disk-size: 6000M
           heap-size: 600M
-          script: |
-            adb shell settings put global window_animation_scale 0.0
-            adb shell settings put global transition_animation_scale 0.0
-            adb shell settings put global animator_duration_scale 0.0
-            ./gradlew connectedAndroidTest --daemon
+          script: ./gradlew connectedAndroidTest --daemon
