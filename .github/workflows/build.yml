@@ -55,8 +55,14 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api-level }}
+          target: google_apis
           arch: x86_64
+          profile: Galaxy Nexus
           disable-animations: true
           disk-size: 6000M
           heap-size: 600M
-          script: ./gradlew connectedAndroidTest --daemon
+          script: |
+            adb shell settings put global window_animation_scale 0.0
+            adb shell settings put global transition_animation_scale 0.0
+            adb shell settings put global animator_duration_scale 0.0
+            ./gradlew connectedAndroidTest --daemon
