@@ -29,6 +29,7 @@ Read the [guide to deeplinking](docs/deeplink-guide.md). Upvote [this issue](htt
 
 #### Create custom Scenes
 - **[BottomSheet](app/src/main/java/com/example/nav3recipes/bottomsheet)**: Shows how to create a BottomSheet destination.
+- **[Columnar Scene](app/src/main/java/com/example/nav3recipes/scenes/columnar)**: Shows how to display multiple columns side-by-side using a custom layout.
 - **[List-Detail Scene](app/src/main/java/com/example/nav3recipes/scenes/listdetail)**: Shows how to create a custom, list-detail layout using a `Scene` and `SceneStrategy` (see video of UI behavior below).
 - **[Two pane Scene](app/src/main/java/com/example/nav3recipes/scenes/twopane)**: Shows how to create a custom, 2-pane layout.
 

@@ -138,6 +138,10 @@
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes"/>
         <activity
+            android:name=".scenes.columnar.ColumnarActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Nav3Recipes"/>
+        <activity
             android:name=".multiplestacks.MultipleStacksActivity"
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes"/>

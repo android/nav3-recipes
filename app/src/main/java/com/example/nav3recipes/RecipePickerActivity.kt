@@ -67,6 +67,7 @@ import com.example.nav3recipes.passingarguments.viewmodels.koin.KoinViewModelsAc
 import com.example.nav3recipes.results.event.ResultEventActivity
 import com.example.nav3recipes.results.state.ResultStateActivity
 import com.example.nav3recipes.retain.RetainActivity
+import com.example.nav3recipes.scenes.columnar.ColumnarActivity
 import com.example.nav3recipes.scenes.listdetail.ListDetailActivity
 import com.example.nav3recipes.scenes.twopane.TwoPaneActivity
 import com.example.nav3recipes.sharedviewmodel.SharedViewModelActivity
@@ -91,6 +92,7 @@ private val recipes = listOf(
 
     Heading("Layouts using Scenes"),
     Recipe("List-detail", ListDetailActivity::class.java),
+    Recipe("Columnar", ColumnarActivity::class.java),
     Recipe("Two pane", TwoPaneActivity::class.java),
     Recipe("Bottom Sheet", BottomSheetActivity::class.java),
     Recipe("Dialog", DialogActivity::class.java),
