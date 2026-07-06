@@ -122,7 +122,7 @@
             android:label="@string/app_name"
             android:theme="@style/Theme.Nav3Recipes"/>
         <activity
-            android:name=".results.saveable.ResultSaveableActivity"
+            android:name=".results.serializable.ResultSerializableActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Nav3Recipes"/>

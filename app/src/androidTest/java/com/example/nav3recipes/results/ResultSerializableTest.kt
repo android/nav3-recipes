@@ -34,15 +34,15 @@ import androidx.navigation3.runtime.result.LocalResultEventBus
 import androidx.navigation3.runtime.result.rememberResultEventBusNavEntryDecorator
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
-import com.example.nav3recipes.results.saveable.conflateAsSaveableState
+import androidx.test.espresso.IdlingPolicies
+import com.example.nav3recipes.results.serializable.conflateAsSerializableState
 import kotlinx.serialization.Serializable
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.TimeUnit
-import androidx.test.espresso.IdlingPolicies
 
-class ResultSaveableTest {
+class ResultSerializableTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -53,12 +53,12 @@ class ResultSaveableTest {
     }
 
     @Test
-    fun testResultConflateAsSaveableState() {
+    fun testResultConflateAsSerializableState() {
         lateinit var backStack: NavBackStack<NavKey>
         val restorationTester = StateRestorationTester(composeTestRule)
         restorationTester.setContent {
-            backStack = rememberNavBackStack(SaveableHome)
-            val dialogStrategy = remember { SaveableDialogStrategy }
+            backStack = rememberNavBackStack(SerializableHome)
+            val dialogStrategy = remember { DialogSceneStrategy<NavKey>() }
 
             NavDisplay(
                 backStack = backStack,
@@ -69,11 +69,11 @@ class ResultSaveableTest {
                     rememberResultEventBusNavEntryDecorator()
                 ),
                 entryProvider = entryProvider {
-                    entry<SaveableHome> {
-                        val resultState by LocalResultEventBus.current.conflateAsSaveableState<String?>(null)
+                    entry<SerializableHome> {
+                        val resultState by LocalResultEventBus.current.conflateAsSerializableState<String?>(null)
                         Text(resultState ?: noResult)
                     }
-                    entry<SaveableDialog>(metadata = DialogSceneStrategy.dialog()) {
+                    entry<SerializableDialog>(metadata = DialogSceneStrategy.dialog()) {
                         val resultBus = LocalResultEventBus.current
                         Button(onClick = {
                             resultBus.sendResult(result = resultFromDialog)
@@ -90,7 +90,7 @@ class ResultSaveableTest {
         composeTestRule.onNodeWithText(noResult).assertIsDisplayed()
 
         composeTestRule.runOnIdle {
-            backStack.add(SaveableDialog)
+            backStack.add(SerializableDialog)
         }
 
         composeTestRule.waitForIdle()
@@ -115,12 +115,10 @@ class ResultSaveableTest {
 }
 
 @Serializable
-private data object SaveableHome : NavKey
+private data object SerializableHome : NavKey
 
 @Serializable
-private data object SaveableDialog : NavKey
-
-private val SaveableDialogStrategy = DialogSceneStrategy<NavKey>()
+private data object SerializableDialog : NavKey
 
 private const val noResult = "No Result"
 private const val resultFromDialog = "Result from Dialog"
