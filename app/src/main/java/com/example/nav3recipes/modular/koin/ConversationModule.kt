@@ -21,15 +21,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessResumed
+import androidx.navigation3.runtime.NavKey
 import com.example.nav3recipes.ui.theme.colors
+import kotlinx.serialization.Serializable
 import org.koin.androidx.scope.dsl.activityRetainedScope
 import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.dsl.module
 import org.koin.dsl.navigation3.navigation
 
 // API
-object ConversationList
-data class ConversationDetail(val id: Int) {
+@Serializable
+object ConversationList : NavKey
+
+@Serializable
+data class ConversationDetail(val id: Int) : NavKey {
     val color: Color
         get() = colors[id % colors.size]
 }

@@ -21,16 +21,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessResumed
+import androidx.navigation3.runtime.NavKey
 import com.example.nav3recipes.ui.theme.colors
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityRetainedComponent
 import dagger.multibindings.IntoSet
+import kotlinx.serialization.Serializable
 
 // API
-object ConversationList
-data class ConversationDetail(val id: Int) {
+@Serializable
+object ConversationList: NavKey
+
+@Serializable
+data class ConversationDetail(val id: Int): NavKey {
     val color: Color
         get() = colors[id % colors.size]
 }
