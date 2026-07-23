@@ -50,7 +50,7 @@ import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 class MainActivity : ComponentActivity() {
     /** STEP 1. Parse supported deeplinks */
     // internal so that landing activity can link to this in the kdocs
-    internal val deepLinkMatchers: List<DeepLinkMatcher<out NavKey>> = listOf(
+    internal val deepLinkMatchers = listOf(
         // "https://www.nav3recipes.com/home"
         UriDeepLinkMatcher(DeepLinkUri(URL_HOME_EXACT), HomeKey.serializer()),
         // "https://www.nav3recipes.com/users/with/{filter}"
