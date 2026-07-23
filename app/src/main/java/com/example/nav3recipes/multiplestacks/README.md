@@ -17,4 +17,4 @@ Key behaviors:
 
 Important implementation details: 
 
-- Each top level route has its own `SaveableStateHolderNavEntryDecorator`. This is the object responsible for managing the state for the entries in its back stack. 
+- Each top level route has its own `SaveableStateHolderNavEntryDecorator` and keyed `ViewModelStoreProvider` with a `ViewModelStoreNavEntryDecorator`. These objects manage the state for the entries in each back stack, so saveable state and `ViewModel`s survive top-level stack swaps.
