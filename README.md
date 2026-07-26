@@ -31,6 +31,7 @@ Read the [guide to deeplinking](docs/deeplink-guide.md). Upvote [this issue](htt
 - **[BottomSheet](app/src/main/java/com/example/nav3recipes/bottomsheet)**: Shows how to create a BottomSheet destination.
 - **[List-Detail Scene](app/src/main/java/com/example/nav3recipes/scenes/listdetail)**: Shows how to create a custom, list-detail layout using a `Scene` and `SceneStrategy` (see video of UI behavior below).
 - **[Two pane Scene](app/src/main/java/com/example/nav3recipes/scenes/twopane)**: Shows how to create a custom, 2-pane layout.
+- **[Overlay](app/src/main/java/com/example/nav3recipes/overlay)**: Shows how to create a custom overlay scene that displays one screen on top of another, enabling shared element transitions.
 
 #### Use Material Scenes
 Examples showing how to use the layouts provided by the [Compose Material3 Adaptive Navigation3 library](https://developer.android.com/jetpack/androidx/releases/compose-material3-adaptive#compose_material3_adaptive_navigation3_version_10_2)

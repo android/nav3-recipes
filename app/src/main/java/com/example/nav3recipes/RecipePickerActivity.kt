@@ -59,6 +59,7 @@ import com.example.nav3recipes.material.listdetail.MaterialListDetailActivity
 import com.example.nav3recipes.material.supportingpane.MaterialSupportingPaneActivity
 import com.example.nav3recipes.modular.hilt.HiltModularActivity
 import com.example.nav3recipes.modular.koin.KoinModularActivity
+import com.example.nav3recipes.overlay.OverlayActivity
 import com.example.nav3recipes.multiplestacks.MultipleStacksActivity
 import com.example.nav3recipes.navscenedecorator.ResponsiveNavigationSceneDecoratorActivity
 import com.example.nav3recipes.passingarguments.viewmodels.basic.BasicViewModelsActivity
@@ -95,6 +96,7 @@ private val recipes = listOf(
     Recipe("Two pane", TwoPaneActivity::class.java),
     Recipe("Bottom Sheet", BottomSheetActivity::class.java),
     Recipe("Dialog", DialogActivity::class.java),
+    Recipe("Overlay", OverlayActivity::class.java),
 
     Heading("Scene decorators"),
     Recipe("Responsive Navigation UI", ResponsiveNavigationSceneDecoratorActivity::class.java),
