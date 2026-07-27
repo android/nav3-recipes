@@ -17,6 +17,8 @@
 package com.example.nav3recipes.multiplestacks
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
@@ -24,6 +26,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
@@ -35,6 +38,7 @@ import com.example.nav3recipes.content.ContentPurple
 import com.example.nav3recipes.content.ContentRed
 
 fun EntryProviderScope<NavKey>.featureASection(
+    scrollState: LazyListState,
     onSubRouteClick: () -> Unit,
 ) {
     entry<RouteA> {
@@ -42,6 +46,11 @@ fun EntryProviderScope<NavKey>.featureASection(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Button(onClick = dropUnlessResumed(block = onSubRouteClick)) {
                     Text("Go to A1")
+                }
+                LazyColumn(state = scrollState) {
+                    items(30) { index ->
+                        Text("Route A item ${index + 1}", fontSize = 24.sp)
+                    }
                 }
             }
         }

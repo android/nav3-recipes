@@ -20,6 +20,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.Face
@@ -79,9 +80,13 @@ class MultipleStacksActivity : ComponentActivity() {
             )
 
             val navigator = remember { Navigator(navigationState) }
+            val routeAScrollState = rememberLazyListState()
 
             val entryProvider = entryProvider {
-                featureASection(onSubRouteClick = { navigator.navigate(RouteA1) })
+                featureASection(
+                    scrollState = routeAScrollState,
+                    onSubRouteClick = { navigator.navigate(RouteA1) }
+                )
                 featureBSection(onSubRouteClick = { navigator.navigate(RouteB1) })
                 featureCSection(onSubRouteClick = { navigator.navigate(RouteC1) })
             }
@@ -92,7 +97,13 @@ class MultipleStacksActivity : ComponentActivity() {
                         val isSelected = key == navigationState.topLevelRoute
                         NavigationBarItem(
                             selected = isSelected,
-                            onClick = { navigator.navigate(key) },
+                            onClick = {
+                                if (isSelected && key == RouteA) {
+                                    routeAScrollState.requestScrollToItem(0)
+                                } else {
+                                    navigator.navigate(key)
+                                }
+                            },
                             icon = {
                                 Icon(
                                     imageVector = value.icon,
