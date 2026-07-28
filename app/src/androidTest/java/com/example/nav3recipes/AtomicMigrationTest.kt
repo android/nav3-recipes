@@ -9,6 +9,9 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.IdlingPolicies
+import androidx.test.espresso.action.ViewActions.pressBack
+import androidx.test.espresso.matcher.RootMatchers.isDialog
+import androidx.test.espresso.matcher.ViewMatchers.isRoot
 import com.example.nav3recipes.migration.atomic.begin.BeginAtomicMigrationActivity
 import com.example.nav3recipes.migration.atomic.end.EndAtomicMigrationActivity
 import org.junit.Before
@@ -133,16 +136,14 @@ class AtomicMigrationTest(activityClass: Class<out ComponentActivity>) {
         }
     }
 
-    /**
-     * TODO: Investigate why these dialog tests sometimes fail.
-     */
     @Test
     fun navigateToDialogD_onA_showsDialogContentAndDismisses() {
         composeTestRule.apply {
 
             onNodeWithText("Open dialog D").performClick()
             onNodeWithText("Route D title (dialog)").assertExists()
-            Espresso.pressBack()
+            Espresso.onView(isRoot()).inRoot(isDialog()).perform(pressBack())
+            onNodeWithText("Route D title (dialog)").assertDoesNotExist()
             onNodeWithText("Route A title").assertExists()
         }
     }
@@ -155,7 +156,8 @@ class AtomicMigrationTest(activityClass: Class<out ComponentActivity>) {
 
             onNodeWithText("Open dialog D").performClick()
             onNodeWithText("Route D title (dialog)").assertExists()
-            Espresso.pressBack()
+            Espresso.onView(isRoot()).inRoot(isDialog()).perform(pressBack())
+            onNodeWithText("Route D title (dialog)").assertDoesNotExist()
             onNodeWithText("Route B title").assertExists()
         }
     }
@@ -169,7 +171,8 @@ class AtomicMigrationTest(activityClass: Class<out ComponentActivity>) {
 
             onNodeWithText("Open dialog D").performClick()
             onNodeWithText("Route D title (dialog)").assertExists()
-            Espresso.pressBack()
+            Espresso.onView(isRoot()).inRoot(isDialog()).perform(pressBack())
+            onNodeWithText("Route D title (dialog)").assertDoesNotExist()
             onNodeWithText("Route C title").assertExists()
         }
     }
