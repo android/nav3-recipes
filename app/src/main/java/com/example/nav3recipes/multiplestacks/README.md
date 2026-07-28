@@ -14,7 +14,7 @@ Key behaviors:
 
 - This app follows the "exit through home" pattern where the user always exits through the starting back stack. This means that `RouteA`'s entries are _always_ in the list of entries. 
 - Navigating to a top level route that is not the starting route _replaces_ the other entries. For example, navigating A->B->C would result in entries for A+C, B's entries are removed. 
-- Tapping the already-selected `RouteA` navigation item resets the retained `RouteA1` list scroll position.
+- When a top level route is reselected (for example, `RouteA` while already on `RouteA`), the `NavigationBar` emits the reselected `NavKey` to a `Flow<NavKey>`. `RouteA` observes this flow and resets its retained `RouteA1` list scroll position to index 0.
 
 Important implementation details: 
 
