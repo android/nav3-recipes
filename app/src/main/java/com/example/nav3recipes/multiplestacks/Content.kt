@@ -43,26 +43,17 @@ fun EntryProviderScope<NavKey>.featureASection(
 ) {
     entry<RouteA> {
         ContentRed("Route A") {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Button(onClick = dropUnlessResumed(block = onSubRouteClick)) {
-                    Text("Go to A1")
-                }
-                LazyColumn(state = scrollState) {
-                    items(30) { index ->
-                        Text("Route A item ${index + 1}", fontSize = 24.sp)
-                    }
-                }
+            Button(onClick = dropUnlessResumed(block = onSubRouteClick)) {
+                Text("Go to A1")
             }
         }
     }
     entry<RouteA1> {
         ContentPink("Route A1") {
-            var count by rememberSaveable {
-                mutableIntStateOf(0)
-            }
-
-            Button(onClick = { count++ }) {
-                Text("Value: $count")
+            LazyColumn(state = scrollState) {
+                items(100) { index ->
+                    Text("Route A item ${index + 1}", fontSize = 24.sp)
+                }
             }
         }
     }

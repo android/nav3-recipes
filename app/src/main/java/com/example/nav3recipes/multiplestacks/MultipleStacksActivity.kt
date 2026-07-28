@@ -98,10 +98,9 @@ class MultipleStacksActivity : ComponentActivity() {
                         NavigationBarItem(
                             selected = isSelected,
                             onClick = {
+                                navigator.navigate(key)
                                 if (isSelected && key == RouteA) {
                                     routeAScrollState.requestScrollToItem(0)
-                                } else {
-                                    navigator.navigate(key)
                                 }
                             },
                             icon = {
