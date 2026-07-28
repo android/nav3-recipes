@@ -16,11 +16,11 @@
 
 package com.example.nav3recipes.multiplestacks
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.Face
@@ -31,7 +31,9 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
@@ -69,7 +71,6 @@ data class NavBarItem(
 )
 
 class MultipleStacksActivity : ComponentActivity() {
-    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         setEdgeToEdgeConfig()
         super.onCreate(savedInstanceState)
@@ -80,18 +81,17 @@ class MultipleStacksActivity : ComponentActivity() {
             )
 
             val navigator = remember { Navigator(navigationState) }
-            val routeAScrollState = rememberLazyListState()
 
             val entryProvider = entryProvider {
                 featureASection(
-                    scrollState = routeAScrollState,
+                    reselectEvents = navigator.reselectEvents,
                     onSubRouteClick = { navigator.navigate(RouteA1) }
                 )
                 featureBSection(onSubRouteClick = { navigator.navigate(RouteB1) })
                 featureCSection(onSubRouteClick = { navigator.navigate(RouteC1) })
             }
 
-            Scaffold(bottomBar = {
+            Scaffold(contentWindowInsets = WindowInsets(0.dp), bottomBar = {
                 NavigationBar {
                     TOP_LEVEL_ROUTES.forEach { (key, value) ->
                         val isSelected = key == navigationState.topLevelRoute
@@ -99,8 +99,8 @@ class MultipleStacksActivity : ComponentActivity() {
                             selected = isSelected,
                             onClick = {
                                 navigator.navigate(key)
-                                if (isSelected && key == RouteA) {
-                                    routeAScrollState.requestScrollToItem(0)
+                                if (isSelected) {
+                                    navigator.onReselect(key)
                                 }
                             },
                             icon = {
@@ -113,10 +113,11 @@ class MultipleStacksActivity : ComponentActivity() {
                         )
                     }
                 }
-            }) {
+            }) { innerPadding ->
                 NavDisplay(
                     entries = navigationState.toDecoratedEntries(entryProvider),
-                    onBack = { navigator.goBack() }
+                    onBack = { navigator.goBack() },
+                    modifier = Modifier.padding(innerPadding)
                 )
             }
         }

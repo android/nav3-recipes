@@ -18,9 +18,10 @@ package com.example.nav3recipes.multiplestacks
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -36,9 +37,10 @@ import com.example.nav3recipes.content.ContentOrange
 import com.example.nav3recipes.content.ContentPink
 import com.example.nav3recipes.content.ContentPurple
 import com.example.nav3recipes.content.ContentRed
+import kotlinx.coroutines.flow.Flow
 
 fun EntryProviderScope<NavKey>.featureASection(
-    scrollState: LazyListState,
+    reselectEvents: Flow<NavKey>,
     onSubRouteClick: () -> Unit,
 ) {
     entry<RouteA> {
@@ -49,6 +51,15 @@ fun EntryProviderScope<NavKey>.featureASection(
         }
     }
     entry<RouteA1> {
+        val scrollState = rememberLazyListState()
+        LaunchedEffect(reselectEvents) {
+            reselectEvents.collect { route ->
+                if (route == RouteA) {
+                    scrollState.scrollToItem(0)
+                }
+            }
+        }
+
         ContentPink("Route A1") {
             LazyColumn(state = scrollState) {
                 items(100) { index ->
