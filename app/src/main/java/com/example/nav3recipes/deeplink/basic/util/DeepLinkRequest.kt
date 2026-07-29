@@ -19,8 +19,10 @@ internal class DeepLinkRequest(
      * A map of query name to query value
      */
     val queries = buildMap {
-        uri.queryParameterNames.forEach { argName ->
-            this[argName] = uri.getQueryParameter(argName)!!
+        if (uri.isHierarchical) {
+            uri.queryParameterNames.forEach { argName ->
+                this[argName] = uri.getQueryParameter(argName)!!
+            }
         }
     }
 
