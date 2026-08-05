@@ -1,4 +1,4 @@
-# Deep Link Basic Recipe
+# Deep Link Static URI Recipe
 
 This recipe demonstrates how deep link with a static Uri.
 

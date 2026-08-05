@@ -1,4 +1,4 @@
-# Deep Link Basic Recipe
+# Deep Link URI Arguments Recipe
 
 This recipe demonstrates how to parse a deep link URL from an Android Intent into a Navigation key.
 
