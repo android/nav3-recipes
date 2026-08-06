@@ -25,6 +25,7 @@ Read the [guide to deeplinking](docs/deeplink-guide.md).
 - **[Uri with Arguments](/app/src/main/java/com/example/nav3recipes/deeplink/handlerequests/uriarguments)**: Shows how to handle deep link with uri arguments using `UriDeepLinkMatcher`.
 - **[Synthetic BackStack](/app/src/main/java/com/example/nav3recipes/deeplink/handlerequests/syntheticbackstack)**: Shows how to deep link between apps with a synthetic back stack using `DeepLinkMatcher.withBackStack` and correct "Up" navigation behavior.
 - **[Custom DeepLinkMatcher](/app/src/main/java/com/example/nav3recipes/deeplink/usecases/matcher)**: Demonstrates how to create a custom `DeepLinkMatcher` to parse deep links from `DeepLinkRequest` extras.
+- **[Colocated DeepLinkKey](/app/src/main/java/com/example/nav3recipes/deeplink/usecases/colocatedkey)**: Demonstrates how to colocate deep link URI patterns directly with navigation key definitions using a `DeepLinkKey` interface.
 
 ### Scenes
 #### Use built-in Scenes

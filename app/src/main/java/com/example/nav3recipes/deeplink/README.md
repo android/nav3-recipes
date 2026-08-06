@@ -9,6 +9,7 @@ The deep link module consists of two main packages:
 ### 1. usecases
 Shows common cases for customizing deep link components
 - `matcher` - a custom `DeepLinkMatcher` to parse deep links from `DeepLinkRequest` extras
+- `colocatedkey` - colocating deep link URI patterns directly with navigation keys using a `DeepLinkKey` interface
 
 ### 2. handlerequests
 Shows how to handle different types of deep link requests
