@@ -53,6 +53,7 @@ import com.example.nav3recipes.conditionaltransitions.ConditionalTransitionsActi
 import com.example.nav3recipes.deeplink.handlerequests.syntheticbackstack.SyntheticBackStackDeepLinkActivity
 import com.example.nav3recipes.deeplink.handlerequests.uriarguments.UriWithArgumentsDeepLinkActivity
 import com.example.nav3recipes.deeplink.handlerequests.staticuri.StaticUriDeepLinkActivity
+import com.example.nav3recipes.deeplink.usecases.deeplinkkey.DeepLinkKeyActivity
 import com.example.nav3recipes.deeplink.usecases.matcher.CustomDeepLinkMatcherActivity
 import com.example.nav3recipes.deeplink.usecases.serializer.DeepLinkSerializerActivity
 import com.example.nav3recipes.deeplink.usecases.filter.CompositeFilterDeepLinkActivity
@@ -144,6 +145,7 @@ private val recipes = listOf(
     Recipe("Custom DeepLinkMatcher", CustomDeepLinkMatcherActivity::class.java),
     Recipe("Uri with Non-Primitive Arguments", DeepLinkSerializerActivity::class.java),
     Recipe("Composite DeepLink Filters", CompositeFilterDeepLinkActivity::class.java),
+    Recipe("DeepLinkKey", DeepLinkKeyActivity::class.java),
 
     Heading("Interop"),
     Recipe("Fragment and View Interop", InteropActivity::class.java),

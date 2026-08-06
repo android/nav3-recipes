@@ -11,6 +11,7 @@ Shows common cases for customizing deep link components
 - `matcher` - a custom `DeepLinkMatcher` to parse deep links from `DeepLinkRequest` extras
 - `serializer` - custom `DeepLinkSerializer` for URI deep link keys with non-primitive arguments
 - `filter` - composite `DeepLinkMatcher.Filter` operators combining filters with infix functions (`and`, `or`)
+- `deeplinkkey` - associate deep link URI patterns directly with navigation keys using a `DeepLinkKey` interface
 
 ### 2. handlerequests
 Shows how to handle different types of deep link requests
