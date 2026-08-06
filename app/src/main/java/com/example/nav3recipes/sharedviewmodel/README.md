@@ -52,7 +52,7 @@ val standaloneViewModel = viewModel<CounterViewModel>()
 ```
 In contrast, `StandaloneScreen` does not define a parent, so it only gets its own fresh `ViewModelStore` and a new instance of `CounterViewModel`.
 
-Note: The following import is important to bring the `get` operator extension function into scope
+Import the following `get` operator function in order to read from metadata with a NavMetadataKey
 ```kotlin
 import androidx.navigation3.runtime.get
 ```
