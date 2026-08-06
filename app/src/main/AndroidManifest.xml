@@ -247,6 +247,14 @@
             android:name=".deeplink.usecases.matcher.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes"/>
+        <activity
+            android:name=".deeplink.usecases.colocatedkey.DeepLinkKeyActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Nav3Recipes"/>
+        <activity
+            android:name=".deeplink.usecases.colocatedkey.MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Nav3Recipes"/>
     </application>
 
 </manifest>
