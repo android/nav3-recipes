@@ -8,7 +8,7 @@ val appModule = module {
 
     activityRetainedScope {
         scoped {
-            Navigator(startDestination = ConversationList)
+            Navigator()
         }
     }
 }
