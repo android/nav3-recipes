@@ -256,6 +256,14 @@
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes">
         </activity>
+        <activity
+            android:name=".deeplink.usecases.filter.CompositeFilterDeepLinkActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Nav3Recipes"/>
+        <activity
+            android:name=".deeplink.usecases.filter.MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Nav3Recipes"/>
     </application>
 
 </manifest>

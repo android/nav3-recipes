@@ -10,6 +10,7 @@ The deep link module consists of two main packages:
 Shows common cases for customizing deep link components
 - `matcher` - a custom `DeepLinkMatcher` to parse deep links from `DeepLinkRequest` extras
 - `serializer` - custom `DeepLinkSerializer` for URI deep link keys with non-primitive arguments
+- `filter` - composite `DeepLinkMatcher.Filter` operators combining filters with infix functions (`and`, `or`)
 
 ### 2. handlerequests
 Shows how to handle different types of deep link requests
