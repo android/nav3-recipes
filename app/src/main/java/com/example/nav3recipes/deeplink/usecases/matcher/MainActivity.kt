@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.deeplink.DeepLinkMatcher
 import androidx.navigation3.runtime.deeplink.DeepLinkRequest
 import androidx.navigation3.runtime.deeplink.invoke
 import androidx.navigation3.runtime.entryProvider
@@ -12,27 +13,30 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.example.nav3recipes.common.deeplink.EntryScreen
 import com.example.nav3recipes.common.deeplink.TextContent
+import com.example.nav3recipes.deeplink.usecases.matcher.modules.HomeKey
+import com.example.nav3recipes.deeplink.usecases.matcher.modules.ProfileKey
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.serializer
+import javax.inject.Inject
 
 @Serializable
-internal data class HomeKey(val name: String): NavKey
+object FallbackKey : NavKey
 
-@Serializable
-internal object FallbackKey: NavKey
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var deepLinkMatchers: Set<@JvmSuppressWildcards DeepLinkMatcher<NavKey, DeepLinkMatcher.MatchResult<NavKey>>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setEdgeToEdgeConfig()
         super.onCreate(savedInstanceState)
 
         val request = DeepLinkRequest(intent)
-        val deepLinkMatcher = createJsonDeepLinkMatcher<HomeKey>()
-
-        val matchResult = deepLinkMatcher.match(request)
-        val key = matchResult?.key ?: FallbackKey
+        val key = deepLinkMatchers.firstNotNullOfOrNull { matcher ->
+            matcher.match(request)
+        }?.key ?: FallbackKey
 
         setContent {
             val backStack: NavBackStack<NavKey> = rememberNavBackStack(key)
@@ -40,16 +44,21 @@ class MainActivity : ComponentActivity() {
                 backStack = backStack,
                 onBack = backStack::removeLastOrNull,
                 entryProvider = entryProvider {
-                    entry<HomeKey> { key ->
-                        EntryScreen("Welcome") {
-                            TextContent(key.name)
+                    entry<HomeKey> { homeKey ->
+                        EntryScreen("Home Screen") {
+                            TextContent("Welcome, ${homeKey.name}!")
                         }
                     }
-                    entry<FallbackKey> { key ->
+                    entry<ProfileKey> { profileKey ->
+                        EntryScreen("Profile Screen") {
+                            TextContent("User ID: ${profileKey.userId}")
+                        }
+                    }
+                    entry<FallbackKey> {
                         EntryScreen("Fallback Key") {
                             TextContent(
                                 "Failed to deep link - DeepLinkRequest " +
-                                        "did not match with any DeepLinkMatcher"
+                                    "did not match with any DeepLinkMatcher"
                             )
                         }
                     }
@@ -57,10 +66,4 @@ class MainActivity : ComponentActivity() {
             )
         }
     }
-}
-
-// Optional JsonDeepLinkMatcher factory function that automatically captures KSerializer for T.
-private inline fun <reified T : NavKey> createJsonDeepLinkMatcher(): JsonDeepLinkMatcher<T> {
-    val serializer = serializer<T>()
-    return JsonDeepLinkMatcher(serializer)
 }

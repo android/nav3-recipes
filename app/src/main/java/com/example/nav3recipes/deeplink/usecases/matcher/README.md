@@ -1,17 +1,44 @@
-# Custom DeepLinkMatcher Recipe
+# Custom DeepLinkMatcher Recipe (Hilt Multi-Module Injection)
 
-This recipe demonstrates how to create a custom `DeepLinkMatcher` in Navigation 3 using custom request extras and Kotlinx Serialization.
+This recipe demonstrates how feature modules independently contribute custom `DeepLinkMatcher` implementations into the main app using Dagger Hilt multibindings (`@IntoSet`).
 
 ## How it works
 
-This recipe consists of two activities:
-- `CustomDeepLinkMatcherActivity`: Accepts user input, serializes a `HomeKey` instance into JSON, attaches it to an `Intent` extra via a `RequestExtrasKey`, and launches `MainActivity`.
-- `MainActivity`: Constructs a `DeepLinkRequest(intent)`, evaluates it with `JsonDeepLinkMatcher`, decodes the `HomeKey`, and sets it as the starting route in `NavDisplay`.
+The architecture is divided into decoupled components:
+
+- **Feature Modules (`HomeModule`, `ProfileModule`)**:
+  - Each module defines its own navigation key (`HomeKey`, `ProfileKey`) and a corresponding `RequestExtrasKey<String>`.
+  - Each module provides its own `DeepLinkMatcher` instance into a multibound set (`Set<DeepLinkMatcher<NavKey, MatchResult<NavKey>>>`) via `@Provides @IntoSet`.
+- **Main App (`MainActivity`)**:
+  - Annotated with `@AndroidEntryPoint`.
+  - Injects the set of matchers and resolves incoming `DeepLinkRequest` intents by iterating across the set until a match is found.
+  - If no matcher matches the request, it routes to `FallbackKey`.
+- **Launcher Sandbox (`CustomDeepLinkMatcherActivity`)**:
+  - Allows constructing and launching deep links targeting by feature modules.
 
 ## Key Concepts
 
-1. **Custom `RequestExtrasKey`**:
-   `JsonDeepLinkMatcherKey` defines a custom extra key implementing `RequestExtrasKey<String>` to type-safely store and read serialized JSON payloads in `DeepLinkRequest.extras`.
+1. **Multibound Matchers via Dagger Hilt**:
+   Feature modules contribute matchers to `ActivityComponent` using `@IntoSet`:
+   ```kotlin
+   @Module
+   @InstallIn(ActivityComponent::class)
+   object HomeMatcherModule {
+       @Provides
+       @IntoSet
+       fun provideHomeMatcher(): DeepLinkMatcher<NavKey, DeepLinkMatcher.MatchResult<NavKey>> {
+           return JsonDeepLinkMatcher(HomeDeepLinkKey, HomeKey.serializer())
+       }
+   }
+   ```
 
-2. **Custom `DeepLinkMatcher`**:
-   `JsonDeepLinkMatcher<T>` extends `DeepLinkMatcher<T, MatchResult<T>>` and implements `matchRequest(request)` to extract `request.extras[JsonDeepLinkMatcherKey]` and decode it into a strongly typed `NavKey` using Kotlinx Serialization.
+2. **Decoupled Request Resolution**:
+   `MainActivity` does not statically depend on each feature's matcher factory. It evaluates the injected set:
+   ```kotlin
+   val key = deepLinkMatchers.firstNotNullOfOrNull { matcher ->
+       matcher.match(request)
+   }?.key ?: FallbackKey
+   ```
+
+3. **Custom `DeepLinkMatcher`**:
+   `JsonDeepLinkMatcher<T>` extends `DeepLinkMatcher<NavKey, MatchResult<NavKey>>` and deserializes JSON payloads from `DeepLinkRequest.extras` using Kotlinx Serialization.
