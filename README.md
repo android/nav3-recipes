@@ -27,6 +27,7 @@ Read the [guide to deeplinking](docs/deeplink-guide.md).
 - **[Custom DeepLinkMatcher](/app/src/main/java/com/example/nav3recipes/deeplink/usecases/matcher)**: Demonstrates how to create a custom `DeepLinkMatcher` to parse deep links from `DeepLinkRequest` extras.
 - **[Uri with Non-Primitive Arguments](/app/src/main/java/com/example/nav3recipes/deeplink/usecases/serializer)**: Demonstrates how to use a custom `DeepLinkSerializer` for URI deep link keys with non-primitive arguments.
 - **[Composite DeepLink Filters](/app/src/main/java/com/example/nav3recipes/deeplink/usecases/filter)**: Demonstrates how to combine multiple `DeepLinkMatcher.Filter` instances using infix functions (`and`, `or`).
+- **[DeepLinkKey](/app/src/main/java/com/example/nav3recipes/deeplink/usecases/deeplinkkey)**: Demonstrates how to associate deep link URI patterns directly with navigation key definitions using a `DeepLinkKey` interface.
 
 ### Scenes
 #### Use built-in Scenes
