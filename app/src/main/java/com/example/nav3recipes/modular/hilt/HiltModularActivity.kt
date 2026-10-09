@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.example.nav3recipes.conditional.rememberNavBackStack
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -25,11 +27,13 @@ class HiltModularActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setEdgeToEdgeConfig()
         setContent {
+            navigator.backStack = rememberNavBackStack(ConversationList)
             Scaffold { paddingValues ->
                 NavDisplay(
                     backStack = navigator.backStack,
                     modifier = Modifier.padding(paddingValues),
                     onBack = { navigator.goBack() },
+                    entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator()),
                     entryProvider = entryProvider {
                         entryProviderScopes.forEach { builder -> this.builder() }
                     }

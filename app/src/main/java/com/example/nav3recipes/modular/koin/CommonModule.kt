@@ -1,16 +1,16 @@
 package com.example.nav3recipes.modular.koin
 
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 
-class Navigator(startDestination: Any) {
-    val backStack : SnapshotStateList<Any> = mutableStateListOf(startDestination)
+class Navigator {
+    lateinit var backStack: NavBackStack<NavKey>
 
-    fun goTo(destination: Any){
+    fun goTo(destination: NavKey) {
         backStack.add(destination)
     }
 
-    fun goBack(){
+    fun goBack() {
         backStack.removeLastOrNull()
     }
 }
