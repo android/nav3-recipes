@@ -23,6 +23,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSerializable
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewmodel.compose.rememberViewModelStoreProvider
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
@@ -84,7 +86,7 @@ class NavigationState(
 
     /**
      * Convert the navigation state into `NavEntry`s that have been decorated with a
-     * `SaveableStateHolder`.
+     * `SaveableStateHolder` and `ViewModelStore`.
      *
      * @param entryProvider - the entry provider used to convert the keys in the
      * back stacks to `NavEntry`s.
@@ -94,12 +96,14 @@ class NavigationState(
         entryProvider: (NavKey) -> NavEntry<NavKey>
     ): List<NavEntry<NavKey>> {
 
-        // For each back stack, create a `SaveableStateHolder` decorator and use it to decorate
-        // the entries from that stack. When backStacks changes, `rememberDecoratedNavEntries` will
-        // be recomposed and a new list of decorated entries is returned.
-        val decoratedEntries = backStacks.mapValues { (_, stack) ->
+        // For each back stack, create state holder decorators and use them to decorate the entries
+        // from that stack. When backStacks changes, `rememberDecoratedNavEntries` will be recomposed
+        // and a new list of decorated entries is returned.
+        val decoratedEntries = backStacks.mapValues { (topLevelRoute, stack) ->
+            val viewModelStoreProvider = rememberViewModelStoreProvider(topLevelRoute)
             val decorators = listOf(
                 rememberSaveableStateHolderNavEntryDecorator<NavKey>(),
+                rememberViewModelStoreNavEntryDecorator(viewModelStoreProvider),
             )
             rememberDecoratedNavEntries(
                 backStack = stack,
