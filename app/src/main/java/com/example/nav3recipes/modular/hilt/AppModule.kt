@@ -12,5 +12,5 @@ object AppModule {
 
     @Provides
     @ActivityRetainedScoped
-    fun provideNavigator() : Navigator = Navigator(startDestination = ConversationList)
+    fun provideNavigator() : Navigator = Navigator()
 }

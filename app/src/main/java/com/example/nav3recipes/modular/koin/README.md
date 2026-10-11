@@ -15,3 +15,9 @@ The application is divided into several Android modules:
     -   **`impl` module**: Provides the implementation of the feature, including its composables and Koin `Module`. The Koin module uses the [`navigation`](https://insert-koin.io/docs/reference/koin-compose/navigation3/#declaring-navigation-entries) DSL to define the entry provider installers for the feature module.
 
 This modular approach allows for a clean separation of concerns, making the codebase more scalable and maintainable. Each feature is responsible for its own navigation logic, and the `app` module only combines these pieces together.
+
+## State Preservation
+
+- **Backstack Restoration**: Navigation routes (`NavKey`s) are annotated with `@Serializable` and persisted across process death using `rememberNavBackStack`.
+- **Screen UI State Preservation**: `rememberSaveableStateHolderNavEntryDecorator()` is passed as an `entryDecorator` to `NavDisplay` to retain each screen's internal UI state (such as scroll positions and text inputs) across process death.
+

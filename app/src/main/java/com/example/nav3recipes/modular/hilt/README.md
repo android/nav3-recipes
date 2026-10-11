@@ -17,3 +17,9 @@ The application is divided into several modules:
     -   **`impl` module**: Provides the implementation of the feature, including its composables and an `EntryProviderInstaller` that maps the feature's routes to its composables. This installer is then provided to the `app` module using Dagger/Hilt.
 
 This modular approach allows for a clean separation of concerns, making the codebase more scalable and maintainable. Each feature is responsible for its own navigation logic, and the `app` module only combines these pieces together.
+
+## State Preservation
+
+- **Backstack Restoration**: Navigation routes (`NavKey`s) are annotated with `@Serializable` and persisted across process death using `rememberNavBackStack`.
+- **Screen UI State Preservation**: `rememberSaveableStateHolderNavEntryDecorator()` is passed as an `entryDecorator` to `NavDisplay` to retain each screen's internal UI state (such as scroll positions and text inputs) across process death.
+
