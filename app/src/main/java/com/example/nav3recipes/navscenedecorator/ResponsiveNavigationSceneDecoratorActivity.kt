@@ -20,9 +20,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.scene.NavigationBackHandler
+import androidx.navigation3.scene.rememberNavigationEventState
+import androidx.navigation3.scene.rememberSceneState
 import androidx.navigation3.ui.NavDisplay
 import com.example.nav3recipes.scenes.listdetail.rememberListDetailSceneStrategy
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
@@ -35,9 +39,10 @@ class ResponsiveNavigationSceneDecoratorActivity : ComponentActivity() {
 
         setContent {
             SharedTransitionLayout {
+                val topLevelRoutes = remember { setOf(RouteA, RouteB, RouteC) }
                 val navigationState = rememberNavigationState(
                     startRoute = RouteA,
-                    topLevelRoutes = setOf(RouteA, RouteB, RouteC)
+                    topLevelRoutes = topLevelRoutes,
                 )
 
                 val navigator = remember(navigationState) { Navigator(navigationState) }
@@ -48,7 +53,7 @@ class ResponsiveNavigationSceneDecoratorActivity : ComponentActivity() {
                     rememberResponsiveNavigationSceneDecoratorStrategy<NavKey>(
                         navBar = { NavBar(NAV_ITEMS, navigator) },
                         navRail = { NavRail(NAV_ITEMS, navigator) },
-                        sharedTransitionScope = this
+                        sharedTransitionScope = this,
                     )
 
                 val entryProvider = entryProvider {
@@ -57,13 +62,56 @@ class ResponsiveNavigationSceneDecoratorActivity : ComponentActivity() {
                     featureCSection { navigator.navigate(RouteC1) }
                 }
 
-                NavDisplay(
+                val sceneState = rememberSceneState(
                     entries = navigationState.toEntries(entryProvider),
-                    sceneDecoratorStrategies = listOf(responsiveNavigationSceneDecoratorStrategy),
                     sceneStrategies = listOf(listDetailStrategy),
+                    sceneDecoratorStrategies = listOf(responsiveNavigationSceneDecoratorStrategy),
                     sharedTransitionScope = this,
-                    onBack = navigator::goBack
+                    onBack = navigator::goBack,
                 )
+
+                val navigationEventState = rememberNavigationEventState(sceneState)
+
+                NavigationBackHandler(
+                    sceneState = sceneState,
+                    state = navigationEventState,
+                    onBackCompleted = navigator::goBack,
+                )
+
+                val currentSceneIsDecorated =
+                    sceneState.currentScene is DecoratedResponsiveScene<*>
+
+                val topLevelContentKeys = remember(topLevelRoutes) {
+                    topLevelRoutes.mapTo(mutableSetOf()) { it.toContentKey() }
+                }
+
+                CompositionLocalProvider(LocalCurrentSceneIsDecorated provides currentSceneIsDecorated) {
+                    NavDisplay(
+                        sceneState = sceneState,
+                        navigationEventState = navigationEventState,
+                        transitionSpec = {
+                            if (isSameHierarchy(topLevelContentKeys)) {
+                                materialSharedAxisXForward()
+                            } else {
+                                materialTopLevelCrossfade()
+                            }
+                        },
+                        popTransitionSpec = {
+                            if (isSameHierarchy(topLevelContentKeys)) {
+                                materialSharedAxisXPop()
+                            } else {
+                                materialTopLevelCrossfade()
+                            }
+                        },
+                        predictivePopTransitionSpec = {
+                            if (isSameHierarchy(topLevelContentKeys)) {
+                                materialSharedAxisXPop()
+                            } else {
+                                materialTopLevelCrossfade()
+                            }
+                        },
+                    )
+                }
             }
         }
     }

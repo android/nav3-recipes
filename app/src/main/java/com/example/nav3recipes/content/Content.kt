@@ -156,7 +156,7 @@ fun ContentRed(
     content: (@Composable () -> Unit)? = null,
 ) = ContentBase(
     title = title,
-    modifier = modifier.background(PastelRed),
+    modifier = Modifier.background(PastelRed).then(modifier),
     onNext = onNext,
     content = content
 )
@@ -169,7 +169,7 @@ fun ContentOrange(
     content: (@Composable () -> Unit)? = null,
 ) = ContentBase(
     title = title,
-    modifier = modifier.background(PastelOrange),
+    modifier = Modifier.background(PastelOrange).then(modifier),
     onNext = onNext,
     content = content
 )
@@ -182,7 +182,7 @@ fun ContentYellow(
     content: (@Composable () -> Unit)? = null,
 ) = ContentBase(
     title = title,
-    modifier = modifier.background(PastelYellow),
+    modifier = Modifier.background(PastelYellow).then(modifier),
     onNext = onNext,
     content = content
 )
@@ -195,7 +195,7 @@ fun ContentGreen(
     content: (@Composable () -> Unit)? = null,
 ) = ContentBase(
     title = title,
-    modifier = modifier.background(PastelGreen),
+    modifier = Modifier.background(PastelGreen).then(modifier),
     onNext = onNext,
     content = content
 )
@@ -208,7 +208,7 @@ fun ContentBlue(
     content: (@Composable () -> Unit)? = null,
 ) = ContentBase(
     title = title,
-    modifier = modifier.background(PastelBlue),
+    modifier = Modifier.background(PastelBlue).then(modifier),
     onNext = onNext,
     content = content
 )
@@ -221,7 +221,7 @@ fun ContentMauve(
     content: (@Composable () -> Unit)? = null,
 ) = ContentBase(
     title = title,
-    modifier = modifier.background(PastelMauve),
+    modifier = Modifier.background(PastelMauve).then(modifier),
     onNext = onNext,
     content = content
 )
@@ -234,7 +234,7 @@ fun ContentPurple(
     content: (@Composable () -> Unit)? = null,
 ) = ContentBase(
     title = title,
-    modifier = modifier.background(PastelPurple),
+    modifier = Modifier.background(PastelPurple).then(modifier),
     onNext = onNext,
     content = content
 )
@@ -247,7 +247,7 @@ fun ContentPink(
     content: (@Composable () -> Unit)? = null,
 ) = ContentBase(
     title = title,
-    modifier = modifier.background(PastelPink),
+    modifier = Modifier.background(PastelPink).then(modifier),
     onNext = onNext,
     content = content
 )

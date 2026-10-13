@@ -20,16 +20,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -49,8 +48,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -97,12 +94,10 @@ fun EntryProviderScope<NavKey>.featureASection(
         metadata = ListDetailScene.listPane()
     ) {
         Surface(modifier = Modifier.fillMaxHeight()) {
-            var contentPadding by remember { mutableStateOf(PaddingValues()) }
+            val navInsets = LocalNavInsets.current
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .onWindowInsetsOverlapChanged(WindowInsets.safeDrawing) { contentPadding = it },
-                contentPadding = contentPadding
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = WindowInsets.safeDrawing.union(navInsets).asPaddingValues()
             ) {
                 items(List(ITEM_COUNT) { it + 1 }) { id ->
                     ListItem(
@@ -132,7 +127,9 @@ fun EntryProviderScope<NavKey>.featureASection(
     ) { key ->
         ContentBase(
             "Item ${key.id}",
-            modifier = Modifier.background(colors[key.id % colors.size])
+            modifier = Modifier
+                .background(colors[key.id % colors.size])
+                .windowInsetsPadding(LocalNavInsets.current)
         ) {
             var count by rememberSaveable {
                 mutableIntStateOf(0)
@@ -149,7 +146,10 @@ fun EntryProviderScope<NavKey>.featureBSection(
     onSubRouteClick: () -> Unit,
 ) {
     entry<RouteB> {
-        ContentGreen("Route B") {
+        ContentGreen(
+            "Route B",
+            modifier = Modifier.windowInsetsPadding(LocalNavInsets.current)
+        ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -160,7 +160,10 @@ fun EntryProviderScope<NavKey>.featureBSection(
         }
     }
     entry<RouteB1> {
-        ContentPurple("Route B1") {
+        ContentPurple(
+            "Route B1",
+            modifier = Modifier.windowInsetsPadding(LocalNavInsets.current)
+        ) {
             var count by rememberSaveable {
                 mutableIntStateOf(0)
             }
@@ -175,7 +178,10 @@ fun EntryProviderScope<NavKey>.featureCSection(
     onSubRouteClick: () -> Unit,
 ) {
     entry<RouteC> {
-        ContentMauve("Route C") {
+        ContentMauve(
+            "Route C",
+            modifier = Modifier.windowInsetsPadding(LocalNavInsets.current)
+        ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Button(onClick = dropUnlessResumed { onSubRouteClick() }) {
                     Text("Go to C1")
@@ -183,8 +189,13 @@ fun EntryProviderScope<NavKey>.featureCSection(
             }
         }
     }
-    entry<RouteC1> {
-        ContentOrange("Route C1") {
+    entry<RouteC1>(
+        metadata = ResponsiveNavigationSceneDecoratorStrategy.navScene(false)
+    ) {
+        ContentOrange(
+            "Route C1 (Undecorated)",
+            modifier = Modifier.windowInsetsPadding(LocalNavInsets.current)
+        ) {
             var count by rememberSaveable {
                 mutableIntStateOf(0)
             }
@@ -219,7 +230,7 @@ fun NavBar(navBarItems: List<NavBarItem>, navigator: Navigator) {
 
 @Composable
 fun NavBar(navBarItems: List<NavBarItem>, topLevelRoute: NavKey, onNavItemClick: (NavKey) -> Unit) {
-    NavigationBar(Modifier.consumeWindowInsets(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))) {
+    NavigationBar {
         navBarItems.forEach { item ->
             NavigationBarItem(
                 selected = item.navKey == topLevelRoute,
