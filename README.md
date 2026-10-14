@@ -18,6 +18,7 @@ These are the recipes and what they demonstrate.
 - **[Parcelable back stack](app/src/main/java/com/example/nav3recipes/basicparcelable)**: As above, but with a persistent back stack of `Parcelable` routes.
 - **[Entry provider DSL](app/src/main/java/com/example/nav3recipes/basicdsl)**: As above, using the entryProvider DSL.
 - **[Lifecycle Owner](app/src/main/java/com/example/nav3recipes/lifecycleowner)**: Shows how to observe and use `LocalLifecycleOwner` within entry content.
+- **[AppState](app/src/main/java/com/example/nav3recipes/appstate)**: Shows how to store and persist the back stack using `StateStore` and `DataStore`.
 
 ### Deep links
 Read the [guide to deeplinking](docs/deeplink-guide.md).
