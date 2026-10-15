@@ -56,7 +56,12 @@ data class ResponsiveNavigationScene<T : Any>(
                         modifier = Modifier
                             .cacheSize(!isMovableContentCaller)
                             .sharedElement(
-                                rememberSharedContentState("nav-rail"),
+                                rememberSharedContentState(
+                                    key = "nav-rail",
+                                    config = SharedContentConfig(
+                                        permitTransformDuringDeferredTransition = false
+                                    )
+                                ),
                                 animatedContentScope
                             )
                     ) {
@@ -77,7 +82,12 @@ data class ResponsiveNavigationScene<T : Any>(
                         modifier = Modifier
                             .cacheSize(!isMovableContentCaller)
                             .sharedElement(
-                                rememberSharedContentState("nav-bar"),
+                                rememberSharedContentState(
+                                    key = "nav-bar",
+                                    config = SharedContentConfig(
+                                        permitTransformDuringDeferredTransition = false
+                                    )
+                                ),
                                 animatedContentScope
                             )
                     ) {

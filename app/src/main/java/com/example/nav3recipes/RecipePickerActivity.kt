@@ -64,13 +64,8 @@ import com.example.nav3recipes.interop.InteropActivity
 import com.example.nav3recipes.lifecycleowner.LifecycleOwnerActivity
 import com.example.nav3recipes.material.listdetail.MaterialListDetailActivity
 import com.example.nav3recipes.material.supportingpane.MaterialSupportingPaneActivity
-<<<<<<< HEAD
 import com.example.nav3recipes.modular.hilt.HiltDeepLinkActivity
-=======
-import com.example.nav3recipes.modular.hilt.HiltModularActivity
 import com.example.nav3recipes.modular.koin.KoinDeepLinkActivity
->>>>>>> 598147a (Integrate deep link matcher to Koin multi module recipe)
-import com.example.nav3recipes.modular.koin.KoinModularActivity
 import com.example.nav3recipes.multiplestacks.MultipleStacksActivity
 import com.example.nav3recipes.navscenedecorator.ResponsiveNavigationSceneDecoratorActivity
 import com.example.nav3recipes.passingarguments.viewmodels.basic.BasicViewModelsActivity
