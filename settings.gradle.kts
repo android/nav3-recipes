@@ -42,7 +42,7 @@ dependencyResolutionManagement {
         // Reset uri back to "https://androidx.dev/snapshots/builds/<build_id>/artifacts/repository"
         // and comment out when no longer using snapshot artifacts.
         maven {
-            url = uri("https://androidx.dev/snapshots/builds/15953794/artifacts/repository")
+            url = uri("https://androidx.dev/snapshots/builds/16579952/artifacts/repository")
         }
     }
 }

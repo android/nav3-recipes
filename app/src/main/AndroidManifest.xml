@@ -282,6 +282,15 @@
             android:name=".deeplink.usecases.deeplinkkey.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Nav3Recipes"/>
+        <activity
+            android:name=".appstate.closed.AppStateActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Nav3Recipes"/>
+        <activity
+            android:name=".appstate.open.AppStateActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Nav3Recipes"/>
+
     </application>
 
 </manifest>

@@ -41,6 +41,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessResumed
 import com.example.nav3recipes.animations.AnimatedActivity
+import com.example.nav3recipes.appstate.closed.AppStateActivity as ClosedAppStateActivity
+import com.example.nav3recipes.appstate.open.AppStateActivity as OpenAppStateActivity
 import com.example.nav3recipes.basic.BasicActivity
 import com.example.nav3recipes.basicdsl.BasicDslActivity
 import com.example.nav3recipes.basicparcelable.BasicParcelableActivity
@@ -145,6 +147,10 @@ private val recipes = listOf(
     Recipe("Uri with Non-Primitive Arguments", DeepLinkSerializerActivity::class.java),
     Recipe("Composite DeepLink Filters", CompositeFilterDeepLinkActivity::class.java),
     Recipe("DeepLinkKey", DeepLinkKeyActivity::class.java),
+
+    Heading("App State integration"),
+    Recipe("App State with closed polymorphism", ClosedAppStateActivity::class.java),
+    Recipe("App State with open polymorphism", OpenAppStateActivity::class.java),
 
     Heading("Interop"),
     Recipe("Fragment and View Interop", InteropActivity::class.java),
