@@ -19,9 +19,7 @@ package com.example.nav3recipes.navscenedecorator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSerializable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
@@ -30,9 +28,8 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
-import androidx.navigation3.runtime.serialization.NavKeySerializer
-import androidx.savedstate.compose.serialization.serializers.MutableStateSerializer
 import com.example.nav3recipes.conditional.rememberNavBackStack
+import com.example.nav3recipes.multiplestacks.rememberNavKey
 
 /**
  * Create a navigation state that persists config changes and process death.
@@ -42,11 +39,7 @@ fun rememberNavigationState(
     startRoute: NavKey, topLevelRoutes: Set<NavKey>
 ): NavigationState {
 
-    val topLevelRoute = rememberSerializable(
-        startRoute, topLevelRoutes, serializer = MutableStateSerializer(NavKeySerializer())
-    ) {
-        mutableStateOf(startRoute)
-    }
+    val topLevelRoute = rememberNavKey(startRoute)
 
     val backStacks = topLevelRoutes.associateWith { key -> rememberNavBackStack(key) }
 
