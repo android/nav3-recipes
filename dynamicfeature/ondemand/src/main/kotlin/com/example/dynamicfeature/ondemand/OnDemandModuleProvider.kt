@@ -16,26 +16,108 @@
 
 package com.example.dynamicfeature.ondemand
 
+import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.lifecycle.compose.dropUnlessResumed
+import androidx.navigation3.dynamicfeatures.DynamicFeatureModuleEntryProvider
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.example.nav3recipes.content.ContentBlue
-import com.example.nav3recipes.dynamicfeature.DynamicModuleEntryBuilder
-import com.example.nav3recipes.dynamicfeature.OnDemandModule
-import com.example.nav3recipes.dynamicfeature.appEntry
+import com.example.nav3recipes.content.ContentPink
+import com.example.nav3recipes.content.ContentPurple
+import com.example.nav3recipes.dynamicfeature.DynamicFeatureEntryPoint
+import com.example.nav3recipes.dynamicfeature.DynamicFeatureNavigator
+import com.example.nav3recipes.dynamicfeature.OnDemandHome
+import dagger.hilt.android.EntryPointAccessors
+import kotlinx.serialization.Serializable
 
-@Suppress("unused")
-class OnDemandEntryBuilder : DynamicModuleEntryBuilder {
-    override fun EntryProviderScope<NavKey>.build() {
-        appEntry<OnDemandModule.Home> {
-            OnDemandModuleScreen()
+@Serializable
+private sealed interface OnDemandSubKey : NavKey
+
+@Serializable
+private data class OnDemandDetail(val id: String) : OnDemandSubKey
+
+@Serializable
+private data object OnDemandSettings : OnDemandSubKey
+
+class OnDemandModuleEntryProvider : DynamicFeatureModuleEntryProvider<NavKey> {
+    override fun EntryProviderScope<NavKey>.buildEntries() {
+        entry<OnDemandHome> {
+            val navigator = rememberNavigator()
+            OnDemandModuleScreen(
+                onNavigateToDetail = { id -> navigator.goTo(OnDemandDetail(id)) },
+                onNavigateToSettings = { navigator.goTo(OnDemandSettings) },
+            )
+        }
+        entry<OnDemandDetail> { key ->
+            val navigator = rememberNavigator()
+            OnDemandDetailScreen(
+                id = key.id,
+                onNavigateToSettings = { navigator.goTo(OnDemandSettings) },
+            )
+        }
+        entry<OnDemandSettings> {
+            val navigator = rememberNavigator()
+            OnDemandSettingsScreen(
+                onBackToModuleHome = {
+                    navigator.backStack.removeAll { it is OnDemandSubKey }
+                },
+            )
         }
     }
 }
 
 @Composable
-private fun OnDemandModuleScreen() {
-    ContentBlue(
-        title = "On Demand Module screen"
-    )
+private fun rememberNavigator(): DynamicFeatureNavigator {
+    val activity = checkNotNull(LocalActivity.current)
+    return remember(activity) {
+        EntryPointAccessors.fromActivity<DynamicFeatureEntryPoint>(activity).navigator()
+    }
+}
+
+@Composable
+private fun OnDemandModuleScreen(
+    onNavigateToDetail: (String) -> Unit,
+    onNavigateToSettings: () -> Unit,
+) {
+    ContentBlue(title = "On Demand Module screen") {
+        Column {
+            Button(onClick = dropUnlessResumed { onNavigateToDetail("A") }) {
+                Text("Go to On Demand Detail A")
+            }
+            Button(onClick = dropUnlessResumed { onNavigateToDetail("B") }) {
+                Text("Go to On Demand Detail B")
+            }
+            Button(onClick = dropUnlessResumed { onNavigateToSettings() }) {
+                Text("Go to On Demand Settings")
+            }
+        }
+    }
+}
+
+@Composable
+private fun OnDemandDetailScreen(
+    id: String,
+    onNavigateToSettings: () -> Unit,
+) {
+    ContentPurple(title = "On Demand Detail $id") {
+        Button(onClick = dropUnlessResumed { onNavigateToSettings() }) {
+            Text("Go to On Demand Settings")
+        }
+    }
+}
+
+@Composable
+private fun OnDemandSettingsScreen(
+    onBackToModuleHome: () -> Unit,
+) {
+    ContentPink(title = "On Demand Settings") {
+        Button(onClick = dropUnlessResumed { onBackToModuleHome() }) {
+            Text("Back to On Demand Module Home")
+        }
+    }
 }

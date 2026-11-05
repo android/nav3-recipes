@@ -17,6 +17,7 @@
 plugins {
     alias(libs.plugins.android.dynamic.feature)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -37,5 +38,12 @@ dependencies {
     implementation(project(":app"))
     implementation(project(":common"))
     implementation(libs.androidx.core.ktx)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.kotlinx.serialization.core)
+    implementation(libs.hilt.android)
     implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.dynamic.features)
 }

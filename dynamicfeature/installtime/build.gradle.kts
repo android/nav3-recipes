@@ -38,4 +38,5 @@ dependencies {
     implementation(project(":common"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.dynamic.features)
 }

@@ -18,61 +18,129 @@ package com.example.nav3recipes.dynamicfeature
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.dropUnlessResumed
-import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.dynamicfeatures.rememberDynamicFeatureNavEntryDecorator
+import androidx.navigation3.dynamicfeatures.rememberSplitInstallManager
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.nav3recipes.content.ContentGreen
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
+import com.google.android.play.core.splitinstall.SplitInstallSessionState
+import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.serialization.Serializable
 
+@Serializable
+internal data object Home : NavKey
+
+/** Initial nav key of install-time dynamic module. */
+@Serializable
+data object InstallTimeHome : NavKey
+
+/** Initial nav key of on-demand dynamic module. */
+@Serializable
+data object OnDemandHome : NavKey
+
+@AndroidEntryPoint
 class DynamicFeatureActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var navigator: DynamicFeatureNavigator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setEdgeToEdgeConfig()
         super.onCreate(savedInstanceState)
         setContent {
-            val backStack = rememberNavBackStack(Home)
-            val dynamicFeatureManager = retainDynamicFeatureManager()
-
-            DynamicFeatureDownloadProgressDialog(dynamicFeatureManager)
+            val splitInstallManager = rememberSplitInstallManager()
+            val dynamicFeatureDecorator = rememberDynamicFeatureNavEntryDecorator<NavKey>(
+                splitInstallManager = splitInstallManager,
+                defaultLoadingContent = { LoadingIndicator() }
+            )
 
             NavDisplay(
-                backStack = backStack,
-                onBack = { backStack.removeLastOrNull() },
+                backStack = navigator.backStack,
+                onBack = { navigator.goBack() },
                 modifier = Modifier.fillMaxSize(),
-                entryProvider = entryProvider {
-                    appEntry<Home> {
+                entryDecorators = listOf(
+                    rememberSaveableStateHolderNavEntryDecorator(),
+                    dynamicFeatureDecorator,
+                ),
+                entryProvider = dynamicFeatureDecorator.entryProvider {
+                    entry<Home> {
                         HomeScreen(
                             onNavigateToInstallTime = {
-                                dynamicFeatureManager.installModule(
-                                    moduleName = InstallTimeModule.moduleName,
-                                    onModuleInstalled = {
-                                        backStack.add(InstallTimeModule.Home)
-                                    }
-                                )
+                                navigator.goTo(InstallTimeHome)
                             },
                             onNavigateToOnDemand = {
-                                dynamicFeatureManager.installModule(
-                                    moduleName = OnDemandModule.moduleName,
-                                    onModuleInstalled = {
-                                        backStack.add(OnDemandModule.Home)
-                                    }
-                                )
+                                navigator.goTo(OnDemandHome)
                             },
                         )
                     }
 
-                    dynamicFeatureManager.installedModules
-                        .mapNotNull { ALL_DYNAMIC_MODULES_MAP[it] }
-                        .forEach { buildDynamicEntries(it) }
+                    dynamicFeatureModule(
+                        initialKey = InstallTimeHome,
+                        moduleName = "installtime",
+                        entryProviderClassName = "com.example.dynamicfeature.installtime.InstallTimeModuleEntryProvider"
+                    )
+
+                    dynamicFeatureModule(
+                        initialKey = OnDemandHome,
+                        moduleName = "ondemand",
+                        entryProviderClassName = "com.example.dynamicfeature.ondemand.OnDemandModuleEntryProvider",
+                        loadingContent = { state ->
+                            val confirmationLauncher = rememberLauncherForActivityResult(
+                                contract = ActivityResultContracts.StartIntentSenderForResult()
+                            ) { result ->
+                                if (result.resultCode == RESULT_CANCELED) {
+                                    navigator.backStack.remove(OnDemandHome)
+                                }
+                            }
+                            when (state.status()) {
+                                SplitInstallSessionStatus.REQUIRES_USER_CONFIRMATION -> {
+                                    LaunchedEffect(state.sessionId()) {
+                                        splitInstallManager.startConfirmationDialogForResult(
+                                            state,
+                                            confirmationLauncher,
+                                        )
+                                    }
+                                }
+                                SplitInstallSessionStatus.CANCELED -> {
+                                    LaunchedEffect(Unit) {
+                                        navigator.backStack.remove(OnDemandHome)
+                                    }
+                                }
+                                SplitInstallSessionStatus.FAILED -> {
+                                    InstallationFailedDialog(
+                                        errorCode = state.errorCode(),
+                                        onDismiss = { navigator.backStack.remove(OnDemandHome) },
+                                    )
+                                }
+                                else -> {
+                                    InstallingModuleDialog(
+                                        state = state,
+                                        onCancel = { navigator.backStack.remove(OnDemandHome) },
+                                    )
+                                }
+                            }
+                        }
+                    )
                 }
             )
         }
@@ -100,34 +168,47 @@ fun HomeScreen(
     }
 }
 
-@Serializable
-private data object Home : AppNavKey
-
-private val ALL_DYNAMIC_MODULES_MAP = listOf(
-    InstallTimeModule,
-    OnDemandModule
-).associateBy { it.moduleName }
-
-object InstallTimeModule : DynamicModule(
-    entryBuilderClassName = "com.example.dynamicfeature.installtime.InstallTimeEntryBuilder",
-    moduleName = "installtime",
+@Composable
+private fun InstallingModuleDialog(
+    state: SplitInstallSessionState,
+    onCancel: () -> Unit,
 ) {
-    @Serializable
-    data object Home : AppNavKey {
-        override fun toContentKey(): Any {
-            return "InstallTimeHome"
-        }
-    }
+    AlertDialog(
+        onDismissRequest = {},
+        title = { Text("Installing module...") },
+        text = {
+            val totalBytes = state.totalBytesToDownload()
+            if (state.status() == SplitInstallSessionStatus.DOWNLOADING && totalBytes > 0) {
+                LinearProgressIndicator(
+                    progress = { state.bytesDownloaded().toFloat() / totalBytes },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            } else {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onCancel) {
+                Text("Cancel")
+            }
+        },
+    )
 }
 
-object OnDemandModule : DynamicModule(
-    entryBuilderClassName = "com.example.dynamicfeature.ondemand.OnDemandEntryBuilder",
-    moduleName = "ondemand"
+@Composable
+private fun InstallationFailedDialog(
+    errorCode: Int,
+    onDismiss: () -> Unit,
 ) {
-    @Serializable
-    data object Home : AppNavKey {
-        override fun toContentKey(): Any {
-            return "OnDemandHome"
-        }
-    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Installation failed") },
+        text = { Text("Failed to install module (error code: $errorCode).") },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("OK")
+            }
+        },
+    )
 }
