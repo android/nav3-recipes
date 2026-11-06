@@ -17,17 +17,15 @@
 package com.example.dynamicfeature.installtime
 
 import androidx.compose.runtime.Composable
+import androidx.navigation3.dynamicfeatures.DynamicFeatureModuleEntryProvider
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.example.nav3recipes.content.ContentRed
-import com.example.nav3recipes.dynamicfeature.DynamicModuleEntryBuilder
-import com.example.nav3recipes.dynamicfeature.InstallTimeModule
-import com.example.nav3recipes.dynamicfeature.appEntry
+import com.example.nav3recipes.dynamicfeature.InstallTimeHome
 
-@Suppress("unused")
-class InstallTimeEntryBuilder : DynamicModuleEntryBuilder {
-    override fun EntryProviderScope<NavKey>.build() {
-        appEntry<InstallTimeModule.Home> {
+class InstallTimeModuleEntryProvider: DynamicFeatureModuleEntryProvider<NavKey> {
+    override fun EntryProviderScope<NavKey>.buildEntries() {
+        entry<InstallTimeHome>() {
             InstallTimeModuleScreen()
         }
     }

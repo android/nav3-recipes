@@ -27,7 +27,7 @@ activityCompose = "1.13.0"
 composeBom = "2026.04.00"
 fragment =  "1.8.9"
 navigation2 = "2.10.2"
-navigation3 = "1.3.0-alpha02"
+navigation3 = "1.3.0-SNAPSHOT"
 material3 = "1.4.0"
 nav3Material = "1.3.0"
 ksp = "2.3.6"
@@ -60,6 +60,7 @@ androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecy
 androidx-navigation2 = { module = "androidx.navigation:navigation-compose", version.ref = "navigation2" }
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
+androidx-navigation3-dynamic-features = { module = "androidx.navigation3:navigation3-dynamic-features", version.ref = "navigation3" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerializationCore" }
