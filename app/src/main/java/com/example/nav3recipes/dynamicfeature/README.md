@@ -73,13 +73,7 @@ private fun rememberNavigator(): DynamicFeatureNavigator {
 
 ### ProGuard rules
 
-Because `DynamicFeatureModuleEntryProvider` implementations are instantiated by class name via reflection, keep their classes and zero-argument constructors when R8 minification is enabled in `proguard-rules.pro`:
-
-```
--keep class * implements androidx.navigation3.dynamicfeatures.DynamicFeatureModuleEntryProvider {
-   public <init>();
-}
-```
+`navigation3-dynamic-features` bundles consumer keep rules that keep `DynamicFeatureModuleEntryProvider` implementations and their public zero-argument constructors when R8 minification is enabled, so no manual rules are needed in `proguard-rules.pro`.
 
 ## How to test locally
 

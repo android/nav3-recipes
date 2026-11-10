@@ -22,7 +22,11 @@ plugins {
 
 android {
     namespace = "com.example.dynamicfeature.ondemand"
-    compileSdk = 37
+    compileSdk {
+        version = release(37) {
+            minorApiLevel = 1
+        }
+    }
 
     defaultConfig {
         minSdk = 24

@@ -6,7 +6,11 @@ plugins {
 
 android {
     namespace = "com.example.nav3recipes.common"
-    compileSdk = 37
+    compileSdk {
+        version = release(37) {
+            minorApiLevel = 1
+        }
+    }
 
     defaultConfig {
         minSdk = 24

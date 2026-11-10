@@ -19,8 +19,3 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
-
-# Dynamic Feature Module recipe
--keep class * implements androidx.navigation3.dynamicfeatures.DynamicFeatureModuleEntryProvider {
-   public <init>();
-}
