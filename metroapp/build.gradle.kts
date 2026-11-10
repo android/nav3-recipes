@@ -23,7 +23,11 @@ plugins {
 
 android {
     namespace = "com.example.nav3recipes"
-    compileSdk = 37
+    compileSdk {
+        version = release(37) {
+            minorApiLevel = 1
+        }
+    }
 
     defaultConfig {
         applicationId = "com.example.nav3recipes"
