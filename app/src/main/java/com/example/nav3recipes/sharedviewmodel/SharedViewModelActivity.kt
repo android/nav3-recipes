@@ -38,6 +38,7 @@ import com.example.nav3recipes.content.ContentRed
 import com.example.nav3recipes.ui.setEdgeToEdgeConfig
 import kotlinx.serialization.Serializable
 
+private const val INITIAL_PARENT_COUNT = 10
 
 @Serializable
 private data object ParentScreen : NavKey
@@ -68,7 +69,7 @@ class SharedViewModelActivity : ComponentActivity() {
                     entry<ParentScreen>(
                         clazzContentKey = { key -> key.toContentKey() },
                     ) {
-                        val viewModel = viewModel<CounterViewModel>()
+                        val viewModel = viewModel { CounterViewModel(INITIAL_PARENT_COUNT) }
 
                         ContentRed("Parent screen") {
                             Button(onClick = { viewModel.count++ }) {
@@ -84,11 +85,11 @@ class SharedViewModelActivity : ComponentActivity() {
                             ParentScreen.toContentKey()
                         )
                     ) {
-                        val parentViewModel = viewModel<CounterViewModel>(
-                            viewModelStoreOwner = LocalSharedViewModelStoreOwner.current
-                        )
+                        val parentViewModel = viewModel(
+                            viewModelStoreOwner = LocalSharedViewModelStoreOwner.current,
+                        ) { CounterViewModel(INITIAL_PARENT_COUNT) }
 
-                        val standaloneViewModel = viewModel<CounterViewModel>()
+                        val standaloneViewModel = viewModel { CounterViewModel(0) }
 
                         ContentBlue("Child screen") {
                             Button(onClick = { parentViewModel.count++ }) {
@@ -103,7 +104,7 @@ class SharedViewModelActivity : ComponentActivity() {
                         }
                     }
                     entry<StandaloneScreen> {
-                        val viewModel = viewModel<CounterViewModel>()
+                        val viewModel = viewModel { CounterViewModel(0) }
 
                         ContentGreen("Standalone screen") {
                             Button(onClick = {
@@ -121,6 +122,6 @@ class SharedViewModelActivity : ComponentActivity() {
 
 fun NavKey.toContentKey() = this.toString()
 
-class CounterViewModel : ViewModel() {
-    var count by mutableIntStateOf(0)
+class CounterViewModel(initialCount: Int) : ViewModel() {
+    var count by mutableIntStateOf(initialCount)
 }

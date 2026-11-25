@@ -39,16 +39,18 @@ The `toContentKey()` extension function is used to standardize how the parent `N
 
 When `ChildScreen` requests a parent `CounterViewModel`:
 ```kotlin
-val parentViewModel = viewModel<CounterViewModel>(
-    viewModelStoreOwner = LocalSharedViewModelStoreOwner.current
-)
+val parentViewModel = viewModel(
+    viewModelStoreOwner = LocalSharedViewModelStoreOwner.current,
+) { CounterViewModel(INITIAL_PARENT_COUNT) }
 ```
 
 The decorator ensures it receives the **same instance** that `ParentScreen` is using, because it's using the `ParentScreen`'s `ViewModelStore`.
 
+> **Note:** Both `ParentScreen` and `ChildScreen` provide the `CounterViewModel` initializer. After process death (or a deep link) directly to `ChildScreen`, `NavDisplay` only composes `ChildScreen` while `ParentScreen`'s `ViewModelStore` is empty, so `ChildScreen` must be able to construct the shared `ViewModel` itself (for dynamic constructor parameters, pass the required arguments on `ChildScreen`'s key). Note also that `SharedViewModelStoreNavEntryDecorator` shares only the `ViewModelStore` and not a dedicated `SavedStateRegistryOwner`, so `SavedStateHandle` on a shared `ViewModel` is not supported across process death.
+
 The `ChildScreen` can still request its own `CounterViewModel` from the default `LocalViewModelStoreOwner`:
 ```kotlin
-val standaloneViewModel = viewModel<CounterViewModel>()
+val standaloneViewModel = viewModel { CounterViewModel(0) }
 ```
 In contrast, `StandaloneScreen` does not define a parent, so it only gets its own fresh `ViewModelStore` and a new instance of `CounterViewModel`.
 
