@@ -103,6 +103,8 @@ data class DialogDecoratorScene<T : Any>(
     private val onDismissAll: () -> Unit
 ) : OverlayScene<T>, Scene<T> by scene {
 
+    override val key = scene::class to scene.key
+
     override val content: @Composable () -> Unit = {
         Dialog(
             onDismissRequest = onDismissAll,
